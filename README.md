@@ -1,0 +1,1 @@
+# Dart Quill Delta Simplify
