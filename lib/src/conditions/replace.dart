@@ -38,7 +38,7 @@ class ReplaceCondition extends Condition<List<Operation>> {
     this.onlyOnce = false,
   }) : assert(
             replace is Operation ||
-                replace is List<Operation> ||
+                replace is Iterable<Operation> ||
                 replace is String ||
                 replace is Map,
             'replace of type ${replace.runtimeType}, only can be String or Map');

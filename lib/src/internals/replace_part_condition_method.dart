@@ -35,23 +35,25 @@ List<Operation> replaceCondition(
   List<int> indexToIgnore = <int>[];
   int indexToInsertSpecialReplace = -1;
   Operation? specialReplacedOperation;
-  final bool isListOperation = replace is List<Operation>;
-  final bool isEmbed = replace is Map;
+  final bool isListOperation = replace is Iterable<Operation>;
   final bool isOperation = replace is Operation;
+  final bool isEmbed = replace is Map && !isOperation && !isListOperation;
   for (int index = 0; index < operations.length; index++) {
     final Operation op = operations.elementAt(index);
     final Object? data = op.data;
     final int opLength = op.getEffectiveLength;
+    if (indexToInsertSpecialReplace == index) {
+      modifiedOps.add(specialReplacedOperation!);
+      globalOffset += opLength;
+      continue;
+    }
     if (indexToIgnore.contains(index)) {
       globalOffset += opLength;
       continue;
     }
-    if (indexToInsertSpecialReplace == index) {
-      modifiedOps.add(specialReplacedOperation!);
-      continue;
-    }
     if (addRestOfOps) {
       modifiedOps.add(op);
+      globalOffset += opLength;
       continue;
     }
     if (range != null) {
@@ -87,29 +89,31 @@ List<Operation> replaceCondition(
         // because if the cursor selection if into the operation range, then we don't need to
         // make unnecessary traversal operations
         bool isIntoRange = range.startOffset < currentGlobalOffset && range.endOffset <= currentGlobalOffset;
-        final (Operation? specialOp, int specialIndex, bool useOpLength, bool addRest, bool ignoreCondition) =
-            _mergeIfNeeded(
-          range: range,
-          isIntoRange: isIntoRange,
-          globalOffset: globalOffset,
-          opLength: opLength,
-          data: data,
-          startOffset: startOffset,
-          endOffset: endOffset,
-          index: index,
-          operations: operations,
-          indexToIgnore: indexToIgnore,
-          registerChange: registerChange,
-          onCatch: onCatch,
-        );
-        if (ignoreCondition) return operations;
-        addRestOfOps = addRest;
-        specialReplacedOperation = specialOp;
-        indexToInsertSpecialReplace = specialIndex;
+        if (!isIntoRange) {
+          final (Operation? specialOp, int specialIndex, bool useOpLength, bool addRest, bool ignoreCondition) =
+              _mergeIfNeeded(
+            range: range,
+            globalOffset: globalOffset,
+            opLength: opLength,
+            data: data,
+            startOffset: startOffset,
+            endOffset: endOffset,
+            index: index,
+            operations: operations,
+            indexToIgnore: indexToIgnore,
+            registerChange: registerChange,
+            onCatch: onCatch,
+          );
+          if (ignoreCondition) return operations;
+          addRestOfOps = addRest;
+          specialReplacedOperation = specialOp;
+          indexToInsertSpecialReplace = specialIndex;
+        }
         if (isEmbed || isOperation) {
           final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
           final Operation mainOp = isEmbed ? Operation.insert(replace) : replace as Operation;
-          final Operation righOp = op.clone(data is! String ? null : data.substring(endOffset));
+          final Operation righOp =
+              op.clone(data is! String ? null : data.substring(range.endOffset > opLength ? opLength : endOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             mainOp,
@@ -133,7 +137,8 @@ List<Operation> replaceCondition(
         } else if (isListOperation) {
           final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
           final List<Operation> mainOps = <Operation>[...replace];
-          final Operation righOp = op.clone(data is! String ? null : data.substring(endOffset));
+          final Operation righOp =
+              op.clone(data is! String ? null : data.substring(range.endOffset > opLength ? opLength : endOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             ...mainOps,
@@ -149,7 +154,8 @@ List<Operation> replaceCondition(
           );
         } else {
           final String leftPart = data is! String ? '' : data.substring(0, startOffset);
-          final String rightPart = data is! String ? '' : data.substring(useOpLength ? opLength : endOffset);
+          final String rightPart =
+              data is! String ? '' : data.substring(range.endOffset > opLength ? opLength : endOffset);
           final Operation mainOp = Operation.insert(
             '$leftPart${condition.replace}$rightPart',
             data is Map ? null : op.attributes,
@@ -164,7 +170,7 @@ List<Operation> replaceCondition(
                   'replace_by_empty_data': true,
                 },
                 startOffset: startOffset,
-                endOffset: useOpLength ? opLength : endOffset,
+                endOffset: endOffset > opLength ? currentGlobalOffset : endOffset,
                 type: ChangeType.delete,
               ),
             );
@@ -195,14 +201,20 @@ List<Operation> replaceCondition(
           globalOffset += opLength;
           continue;
         }
-        final Operation mainOp = Operation.insert(
-          condition.replace,
-          condition.replace is Map ? op.attributes : null,
-        );
-        modifiedOps.add(mainOp);
+        Object? mainOp = null;
+        if (isEmbed || replace is String) {
+          mainOp = op.clone(replace, null, false, isEmbed);
+          modifiedOps.add(mainOp as Operation);
+        } else if (isOperation) {
+          mainOp = replace;
+          modifiedOps.add(mainOp as Operation);
+        } else if (isListOperation) {
+          mainOp = replace;
+          modifiedOps.addAll(mainOp as Iterable<Operation>);
+        }
         registerChange?.call(
           DeltaChange(
-            change: <String, Operation>{
+            change: <String, dynamic>{
               'original_op': op,
               'change': mainOp,
             },
@@ -323,7 +335,6 @@ List<Operation> replaceCondition(
 
 (Operation?, int, bool, bool, bool) _mergeIfNeeded({
   required DeltaRange range,
-  required bool isIntoRange,
   required int globalOffset,
   required int opLength,
   required Object? data,
@@ -339,25 +350,22 @@ List<Operation> replaceCondition(
   Operation? specialReplacedOperation;
   bool useOpLength = false;
   bool addRestOfOps = false;
-  if (range.endOffset > opLength && !isIntoRange) {
+  if (range.endOffset > opLength) {
     int cloneGlobal = globalOffset;
-    int localPerRemoveOffset = range.startOffset != 0 ? 0 : range.endOffset - opLength;
+    int localPerRemoveOffset = range.startOffset != 0 ? 0 : (range.endOffset - opLength).nonNegativeInt;
     if (localPerRemoveOffset == 0) {
       int effectiveOffsetPerRemove = data.toString().substring(startOffset).length;
-      localPerRemoveOffset = (range.endOffset - range.startOffset) - effectiveOffsetPerRemove;
+      localPerRemoveOffset = ((range.endOffset - range.startOffset) - effectiveOffsetPerRemove).nonNegativeInt;
     }
     // in some cases, we are selecting an entire operation
     // and does not need to be replaced a special part of the ops
     bool nonNeedSpecialInsert = false;
     // buscamos hacia delante una op que satisfaga
     for (int j = index + 1; j < operations.length; j++) {
-      if (localPerRemoveOffset <= 0) break;
-      // ignore last
-      if (j + 1 >= operations.length) break;
       final Operation? nextOp = operations.elementAtOrNull(j);
       // check if the current element is the last operation
       // in [Delta]
-      if (nextOp == null && index + 1 == j || nextOp == null) break;
+      if (nextOp == null) break;
       final Object? nextData = nextOp.data;
       final int nextOpLength = nextOp.getEffectiveLength;
       if (localPerRemoveOffset > nextOpLength || localPerRemoveOffset == nextOpLength) {
@@ -383,13 +391,19 @@ List<Operation> replaceCondition(
             type: ChangeType.ignore,
           ),
         );
+        cloneGlobal += nextOpLength;
+        continue;
       } else if (localPerRemoveOffset < nextOpLength) {
-        if (localPerRemoveOffset == 0) break;
-        specialReplacedOperation =
-            Operation.insert(nextData.toString().substring(localPerRemoveOffset), nextOp.attributes);
+        if (nextData is String) {
+          specialReplacedOperation = nextOp.clone(nextData.substring(localPerRemoveOffset));
+          indexToInsertSpecialReplace = j;
+        } else {
+          indexToIgnore.add(j);
+          nonNeedSpecialInsert = true;
+        }
         registerChange?.call(
           DeltaChange(
-            change: <String, Operation>{
+            change: <String, dynamic>{
               'original_op': nextOp,
               'change': specialReplacedOperation,
             },
@@ -399,15 +413,13 @@ List<Operation> replaceCondition(
           ),
         );
         localPerRemoveOffset = 0;
-        indexToInsertSpecialReplace = j;
+        nonNeedSpecialInsert = false;
         break;
       }
       cloneGlobal += nextOpLength;
+      localPerRemoveOffset -= nextOpLength;
       indexToIgnore.add(j);
     }
-    // check if the indexToIgnore is not empty
-    // if it is, then the endOffset is out of range and
-    // cannot be accepted as a valid argument
     if (indexToInsertSpecialReplace == -1 && !nonNeedSpecialInsert) {
       final int maxLength = operations.getEffectiveLength;
       final DeltaRangeError err = DeltaRangeError.range(
@@ -415,7 +427,7 @@ List<Operation> replaceCondition(
         0,
         maxLength,
         'out',
-        'Invalid values',
+        'Invalid value: $localPerRemoveOffset. Range:',
       );
       if (onCatch != null) {
         onCatch.call(err);

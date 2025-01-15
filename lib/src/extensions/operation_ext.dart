@@ -68,7 +68,7 @@ extension OperationToPlain on Operation {
   ///
   /// - Returns `true` if the data is null, empty, or an empty map; otherwise, returns `false`.
   bool get ignoreIfEmpty {
-    return data == null || data.toString().isEmpty || (data is Map && (data as Map).isEmpty);
+    return data == null || data is String && (data.toString().isEmpty) || (data is Map && (data as Map).isEmpty);
   }
 }
 
