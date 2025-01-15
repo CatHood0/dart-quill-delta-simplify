@@ -401,7 +401,6 @@ List<Operation> formatCondition(
   // and does not need to be replaced a special part of the ops
   bool nonNeedSpecialInsert = false;
   // we use this to avoid make a mutation when the index is already processed
-  // buscamos hacia delante una op que satisfaga
   for (int nextIndex = index + 1; nextIndex < operations.length; nextIndex++) {
     // avoid make a mutation to the last op
     Operation? nextOp = operations.elementAtOrNull(nextIndex);
@@ -555,7 +554,7 @@ List<Operation> formatCondition(
       0,
       maxLength,
       'out',
-      'Not in inclusive range 0..$maxLength: $endOffset',
+      'Invalid values',
     );
     if (onCatch != null) {
       onCatch.call(err);
