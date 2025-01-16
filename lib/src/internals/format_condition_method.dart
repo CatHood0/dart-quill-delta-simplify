@@ -109,7 +109,7 @@ List<Operation> formatCondition(
       int currentGlobalOffset = globalOffset + opLength;
       int localStartOffset = (conditionOffset - globalOffset).nonNegativeInt;
       int localEndOffset = ((conditionOffset + conditionLen) - globalOffset).nonNegativeInt;
-      if ((currentGlobalOffset >= conditionOffset || conditionOffset == 0) && !onlyAddRest) {
+      if ((currentGlobalOffset > conditionOffset || conditionOffset == 0) && !onlyAddRest) {
         onlyAddRest = true;
         if (partsToIgnore.ignoreOverlap(DeltaRange(startOffset: startOffset, endOffset: endOffset))) {
           modifiedOps.add(op);
@@ -120,10 +120,6 @@ List<Operation> formatCondition(
         // we need to add traversal part
         final bool useOpLength = localEndOffset > opLength;
         final bool willNeedTraverse = localEndOffset > opLength;
-        final Operation leftOp = op.clone(data.toString().substring(0, localStartOffset));
-        final Operation? rightOp = willNeedTraverse || (localStartOffset == 0 && localEndOffset == 0)
-            ? null
-            : op.clone(data.toString().substring(localEndOffset));
         var (int indexToBlockAttributes, List<Operation> opsAfterCurrentOne, _) = searchForBlockAttributes(
           index + 1,
           operations,
@@ -131,22 +127,26 @@ List<Operation> formatCondition(
           true,
         );
         if (data is String) {
+          final Operation leftOp = op.clone(data.substring(0, localStartOffset));
+          final Operation? rightOp = willNeedTraverse || localStartOffset == 0 && localEndOffset == 0
+              ? null
+              : op.clone(data.substring(localEndOffset > opLength ? localStartOffset : localEndOffset));
           final String textPart = localStartOffset == 0 && localEndOffset == 0
               ? data
               : data.substring(localStartOffset, useOpLength ? opLength : localEndOffset);
           // when is block, we don't need to calculate the other part that need to be removed
           // because we with block attrs, only need to be applied to the new lines into the range (offset + len)
-          int charactersPerChange = endOffset > opLength
+          int charactersPerChange = rightOp == null && endOffset > opLength
               ? isBlock
                   ? endOffset
                   : (endOffset - textPart.length).nonNegativeInt
               : 0;
           mainPartOp = <Operation>[
             // left
-            if (leftOp.data.toString().isNotEmpty) leftOp,
-            op.clone(textPart, isInline ? attr : null),
+            if (!leftOp.ignoreIfEmpty && localStartOffset > 0) leftOp,
+            if (textPart.isNotEmpty) op.clone(textPart, isInline ? attr : null),
             // right
-            if (rightOp != null && rightOp.data.toString().isNotEmpty) rightOp,
+            if (rightOp != null && !rightOp.ignoreIfEmpty) rightOp,
           ];
           modifiedOps.addAll(mainPartOp as List<Operation>);
           if (willNeedTraverse && charactersPerChange > 0) {
@@ -226,6 +226,12 @@ List<Operation> formatCondition(
               onlyAddRest = true;
             }
           }
+          if (data is Map) {
+            // means that this is a embed part and we don't need to insert block attrs
+            mainPartOp = op.clone(null, attr, true);
+            modifiedOps.add(mainPartOp as Operation);
+            onlyAddRest = true;
+          }
           globalOffset += opLength;
           continue;
         } else if (data is Map && isIgnore) {
@@ -246,8 +252,8 @@ List<Operation> formatCondition(
       Iterable<RegExpMatch> matches = pattern.allMatches('$data');
       // ignores any exact part match and apply to the entire op
       if (isBlock) {
-        int startOffset = globalOffset;
-        int endOffset = globalOffset + opLength;
+        final int startOffset = globalOffset;
+        final int endOffset = globalOffset + opLength;
         var (int indexToBlockAttributes, List<Operation> opsAfterCurrentOne, _) = searchForBlockAttributes(
           index + 1,
           operations,
@@ -754,17 +760,18 @@ void _isNotEntireSelectionChangePattern({
           operations,
         );
   List<Operation> mainPartOp = <Operation>[
-    Operation.insert(mainPart, <String, dynamic>{
-      ...?op.attributes,
-      if (isInlineAttr) attr.key: attr.value,
-    }),
+    if (mainPart.trim().isNotEmpty)
+      Operation.insert(mainPart, <String, dynamic>{
+        ...?op.attributes,
+        if (isInlineAttr) attr.key: attr.value,
+      }),
   ];
   Operation rightPartOp = Operation.insert(data.toString().substring(match.end), op.attributes);
   // add divided parts
   modifiedOps.addAll(<Operation>[
-    leftPartOp,
+    if (!leftPartOp.ignoreIfEmpty) leftPartOp,
     ...mainPartOp,
-    rightPartOp,
+    if (!rightPartOp.ignoreIfEmpty) rightPartOp,
     if (isBlockAttr && indexToBlockAttributes == -1)
       Operation.insert('\n', <String, dynamic>{attr.key: attr.value}),
   ]);
