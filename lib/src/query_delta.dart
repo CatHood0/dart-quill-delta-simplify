@@ -5,7 +5,6 @@ import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/normalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
-import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import '../delta_changes.dart';
@@ -104,16 +103,6 @@ class QueryDelta {
   BuildResult build({List<Operation> Function(Object)? unknownObjectTypeBuilder}) {
     if (params['conditions'] == null || params['conditions'].isEmpty) {
       throw Exception('Cannot make build because there\'s no conditions to apply');
-    }
-    // check if there's no changes
-    if (params['result'] != null) {
-      // check if nothing changes between both Deltas and return if it return true
-      if (listEquals(
-        (params['result'] as BuildResult).delta.operations,
-        _input.operations,
-      )) {
-        return params['result'];
-      }
     }
     // clone the current input version since something can fail and we do not need
     // partial modifications
