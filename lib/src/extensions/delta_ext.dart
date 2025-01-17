@@ -147,11 +147,15 @@ extension EasyDelta on Delta {
     required Object? target,
     required int len,
     required int startPointOffset,
+    bool onlyOnce = true,
+    bool caseSensitive = false,
   }) {
     return QueryDelta(delta: this)
         .delete(
-          possibleTarget: target,
+          target: target,
           lengthOfDeletion: len,
+          onlyOnce: onlyOnce,
+          caseSensitive: caseSensitive,
           startPoint: startPointOffset,
         )
         .build()
