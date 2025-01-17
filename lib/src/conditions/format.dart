@@ -40,6 +40,7 @@ class FormatCondition extends Condition<List<Operation>> {
     required super.target,
     required this.attribute,
     super.caseSensitive = false,
+    super.key,
     this.offset,
     this.len,
   });
@@ -64,7 +65,28 @@ class FormatCondition extends Condition<List<Operation>> {
   String toString() {
     return 'FormatCondition(Attribute: $attribute, target: $target, caseSensitive: $caseSensitive, offset: $offset, len: $len)';
   }
+
+  @override
+  bool operator ==(covariant FormatCondition other) {
+    if (identical(other, this)) return true;
+    return other.key == key &&
+        other.target == target &&
+        other.caseSensitive == caseSensitive &&
+        attribute == other.attribute &&
+        len == other.len &&
+        offset == other.offset;
+  }
+
+  @override
+  int get hashCode =>
+      target.hashCode ^
+      key.hashCode ^
+      caseSensitive.hashCode ^
+      len.hashCode ^
+      attribute.hashCode ^
+      offset.hashCode;
 }
+
 /// A condition that removes formatting from a specified range within a [Delta].
 ///
 /// The [RemoveFormattingCondition] class extends [Condition] and is used to remove all
@@ -76,6 +98,7 @@ class RemoveFormattingCondition extends Condition<List<Operation>> {
 
   RemoveFormattingCondition({
     required this.range,
+    super.key,
   }) : super(target: null, caseSensitive: false);
 
   @override
@@ -92,4 +115,16 @@ class RemoveFormattingCondition extends Condition<List<Operation>> {
   String toString() {
     return 'RemoveFormattingCondition()';
   }
+
+  @override
+  bool operator ==(covariant RemoveFormattingCondition other) {
+    if (identical(other, this)) return true;
+    return other.key == key &&
+        other.target == target &&
+        other.caseSensitive == caseSensitive &&
+        range == other.range;
+  }
+
+  @override
+  int get hashCode => target.hashCode ^ key.hashCode ^ caseSensitive.hashCode ^ range.hashCode;
 }

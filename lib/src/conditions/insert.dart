@@ -51,14 +51,15 @@ class InsertCondition extends Condition<List<Operation>> {
   final bool insertAtLastOperation;
 
   InsertCondition({
-    required super.target,
     required this.insertion,
-    super.caseSensitive = false,
     this.range,
     this.left = true,
     this.onlyOnce = false,
     this.asDifferentOp = false,
     this.insertAtLastOperation = false,
+    required super.target,
+    super.caseSensitive = false,
+    super.key,
   })  : assert(range == null || range.startOffset >= 0, 'startOffset cannot be less than zero'),
         assert(
           insertion is String || insertion is Map || insertion is Operation || insertion is List<Operation>,
@@ -86,4 +87,31 @@ class InsertCondition extends Condition<List<Operation>> {
   String toString() {
     return 'InsertCondition(target: $target, DeltaRange: $range, insertion: $insertion)';
   }
+
+  @override
+  bool operator ==(covariant InsertCondition other) {
+    if (identical(other, this)) return true;
+    return other.key == key &&
+        other.target == target &&
+        other.caseSensitive == caseSensitive &&
+        insertion == other.insertion &&
+        onlyOnce == other.onlyOnce &&
+        range == other.range &&
+        left == other.left &&
+        asDifferentOp == other.asDifferentOp &&
+        insertAtLastOperation == other.insertAtLastOperation;
+  }
+
+  @override
+  int get hashCode =>
+      target.hashCode ^
+      key.hashCode ^
+      caseSensitive.hashCode ^
+      onlyOnce.hashCode ^
+      insertion.hashCode ^
+      onlyOnce.hashCode ^
+      range.hashCode ^
+      left.hashCode ^
+      asDifferentOp.hashCode ^
+      insertAtLastOperation.hashCode;
 }

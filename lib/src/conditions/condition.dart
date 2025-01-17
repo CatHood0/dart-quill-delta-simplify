@@ -1,5 +1,9 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+import 'package:meta/meta.dart';
+import 'package:uuid/v6.dart';
+
+const UuidV6 generator = UuidV6();
 
 /// An abstract class representing a condition that can be applied to a `Delta` object.
 ///
@@ -10,6 +14,9 @@ import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 /// The `Condition` class is intended to be subclassed, as it contains an abstract `build` method that must
 /// be implemented by subclasses to define the behavior of the condition.
 abstract class Condition<T extends Object?> {
+  // This is the key of the condition that need to be unique
+  final String key;
+
   /// The target value that the condition is based on.
   ///
   /// The target can either be a `String` or a `Map`. This value is required when constructing
@@ -26,12 +33,16 @@ abstract class Condition<T extends Object?> {
   ///
   /// - `target`: The value on which the condition is based. It must be either a `String` or a `Map`.
   /// - `caseSensitive`: A boolean indicating if comparisons should be case sensitive.
-  /// 
+  /// - `key`: A exclusive id for the condition.
+  ///
   /// Throws an assertion error if `target` is neither a `String` nor a `Map`.
   Condition({
     required this.target,
     required this.caseSensitive,
-  }) : assert(
+    String? key,
+  })  : assert(key == null || key.trim().isNotEmpty, 'key cannot be empty'),
+        key = key ?? generator.generate(),
+        assert(
           target == null || target is String || target is Map,
           'Condition class only accepts "String" and "Map" types to be assigned for "target" param',
         );
@@ -55,7 +66,7 @@ abstract class Condition<T extends Object?> {
   /// as a pattern for matching. It returns `true` if the `target` is a valid pattern.
   bool get checkIfTargetIsValidToBePattern => target != null && target is String && '$target'.isNotEmpty;
 
-  /// This method is responsible for building the result based on the `Delta` object 
+  /// This method is responsible for building the result based on the `Delta` object
   ///
   /// - [`delta`]: The `Delta` object to evaluate against.
   /// - [`partsToIgnore`]: An optional list of `DeltaRange` objects that represent parts to be ignored
@@ -68,4 +79,15 @@ abstract class Condition<T extends Object?> {
     void Function(DeltaChange)? registerChange,
     void Function(Exception err)? onCatch,
   ]);
+
+  @override
+  @mustBeOverridden
+  bool operator ==(covariant Condition other) {
+    if (identical(other, this)) return true;
+    return other.key == key && other.target == target && other.caseSensitive == caseSensitive;
+  }
+
+  @override
+  @mustBeOverridden
+  int get hashCode => target.hashCode ^ key.hashCode ^ caseSensitive.hashCode;
 }

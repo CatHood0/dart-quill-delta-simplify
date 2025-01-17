@@ -9,6 +9,7 @@ abstract class PointerCondition<T extends num, R extends Object?> extends Condit
     required this.offset,
     required super.target,
     required super.caseSensitive,
+    super.key,
   });
 
   @override
