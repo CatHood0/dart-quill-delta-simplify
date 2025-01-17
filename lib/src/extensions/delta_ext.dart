@@ -52,6 +52,8 @@ extension DeltaToPlainText on Delta {
 //TODO: improve docs
 /// Provides an extension on [Delta] for easy formatting, insertion, replacement, and deletion.
 extension EasyDelta on Delta {
+  int get getTextLength => operations.getEffectiveLength;
+
   /// Applies a simple format to the [Delta] with the specified parameters.
   ///
   /// - [offset]: The starting offset for the format.
@@ -60,13 +62,13 @@ extension EasyDelta on Delta {
   /// - [attribute]: The attribute to apply.
   ///
   /// Returns a new [Delta] with the applied format.
-  Delta simpleFormat({
+  void simpleFormat({
     required int? offset,
     int? len,
     Object? target,
     required Attribute attribute,
   }) {
-    return QueryDelta(delta: this)
+    final Delta delta = QueryDelta(delta: this)
         .format(
           offset: offset,
           len: len,
@@ -75,6 +77,8 @@ extension EasyDelta on Delta {
         )
         .build()
         .delta;
+    _clear();
+    operations.addAll(delta.operations);
   }
 
   /// Inserts text into the [Delta] with the specified parameters.
@@ -88,7 +92,7 @@ extension EasyDelta on Delta {
   /// - [insertAtLastOperation]: Whether to insert at the last operation.
   ///
   /// Returns a new [Delta] with the inserted text.
-  Delta simpleInsert({
+  void simpleInsert({
     required Object insert,
     required Object? target,
     required int? startPoint,
@@ -98,7 +102,7 @@ extension EasyDelta on Delta {
     bool insertAtLastOperation = false,
     bool caseSensitive = false,
   }) {
-    return QueryDelta(delta: this)
+    final Delta delta = QueryDelta(delta: this)
         .insert(
           insert: insert,
           startPoint: startPoint,
@@ -111,6 +115,8 @@ extension EasyDelta on Delta {
         )
         .build()
         .delta;
+    _clear();
+    operations.addAll(delta.operations);
   }
 
   /// Replaces a range of text in the [Delta] with the specified insertion.
@@ -121,13 +127,13 @@ extension EasyDelta on Delta {
   /// - [onlyOnce]: Whether to replace only once.
   ///
   /// Returns a new [Delta] with the replaced text.
-  Delta simpleReplace({
+  void simpleReplace({
     required Object insertion,
     required DeltaRange? range,
     required Object? target,
     bool onlyOnce = true,
   }) {
-    return QueryDelta(delta: this)
+    final delta = QueryDelta(delta: this)
         .replace(
           replace: insertion,
           target: target,
@@ -136,6 +142,8 @@ extension EasyDelta on Delta {
         )
         .build()
         .delta;
+    _clear();
+    operations.addAll(delta.operations);
   }
 
   /// Deletes a range of text in the [Delta] with the specified length and starting offset.
@@ -145,14 +153,14 @@ extension EasyDelta on Delta {
   /// - [startPointOffset]: The starting offset for the deletion.
   ///
   /// Returns a new [Delta] with the deleted text.
-  Delta simpleDelete({
+  void simpleDelete({
     required Object? target,
-    required int len,
-    required int startPointOffset,
+    required int? len,
+    required int? startPointOffset,
     bool onlyOnce = true,
     bool caseSensitive = false,
   }) {
-    return QueryDelta(delta: this)
+    final Delta delta = QueryDelta(delta: this)
         .delete(
           target: target,
           lengthOfDeletion: len,
@@ -162,5 +170,11 @@ extension EasyDelta on Delta {
         )
         .build()
         .delta;
+    _clear();
+    operations.addAll(delta.operations);
+  }
+
+  void _clear() {
+    operations.clear();
   }
 }
