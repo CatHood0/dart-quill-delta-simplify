@@ -1,0 +1,1 @@
+# Delete Operations Simplification
