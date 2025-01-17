@@ -53,7 +53,7 @@ List<Operation> insertCondition(
       modifiedOps.add(op);
       globalOffset += opLength;
       continue;
-    }     
+    }
     if (target is Map<String, dynamic> && ofData is Map<String, dynamic>) {
       if (mapEquals(target, ofData)) {
         _insertAtMap(
@@ -271,22 +271,24 @@ List<Operation> insertCondition(
           final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
           if (insertion is String) {
             if (i == 0) {
-              buffer.write(ofData.substring(0, partToMerge.startOffset));
-              buffer.write(insertion);
-              buffer.write(
-                ofData.substring(
-                  partToMerge.endOffset,
-                  nextPartToMerge?.startOffset,
-                ),
-              );
+              buffer
+                ..write(ofData.substring(0, partToMerge.startOffset))
+                ..write(insertion)
+                ..write(
+                  ofData.substring(
+                    partToMerge.endOffset,
+                    nextPartToMerge?.startOffset,
+                  ),
+                );
             } else {
-              buffer.write(insertion);
-              buffer.write(
-                ofData.substring(
-                  partToMerge.endOffset,
-                  nextPartToMerge?.startOffset,
-                ),
-              );
+              buffer
+                ..write(insertion)
+                ..write(
+                  ofData.substring(
+                    partToMerge.endOffset,
+                    nextPartToMerge?.startOffset,
+                  ),
+                );
             }
           } else if (i == 0) {
             dividedOps.add(op.clone(ofData.substring(0, partToMerge.startOffset)));
@@ -344,7 +346,6 @@ void _insertAtLast({
   void Function(DeltaChange)? registerChange,
 }) {
   modifiedOps.addAll(<Operation>[...operations]);
-  final Operation lastOpToAdd = modifiedOps.removeLast();
   if (operations.isNotEmpty) globalOffset += operations.getEffectiveLength;
   int startOffset = globalOffset;
   int endOffset = globalOffset;
@@ -359,7 +360,13 @@ void _insertAtLast({
         type: ChangeType.insert,
       ),
     );
-    modifiedOps.add(mainOp);
+    final lastOp = modifiedOps.last;
+    if (lastOp.isEmbed || !lastOp.isNewLine) {
+      modifiedOps.removeLast();
+    }
+    modifiedOps
+      ..add(mainOp)
+      ..add(Operation.insert('\n'));
   } else if (isOperation) {
     final Operation mainOp = condition.insertion as Operation;
     endOffset += mainOp.getEffectiveLength;
@@ -371,12 +378,16 @@ void _insertAtLast({
         type: ChangeType.insert,
       ),
     );
+    if (mainOp.isEmbed) {
+      modifiedOps.removeLast();
+    }
     modifiedOps.add(mainOp);
+    if (mainOp.isEmbed || !mainOp.data.toString().contains('\n')) {
+      modifiedOps.add(Operation.insert('\n'));
+    }
   } else if (isListOperation) {
     final List<Operation> mainOp = condition.insertion as List<Operation>;
-    int accumulateLength = mainOp.map((Operation e) => e.getEffectiveLength).reduce(
-          (int a, int b) => a + b,
-        );
+    int accumulateLength = mainOp.getEffectiveLength;
     endOffset += accumulateLength;
     registerChange?.call(
       DeltaChange(
@@ -386,7 +397,11 @@ void _insertAtLast({
         type: ChangeType.insert,
       ),
     );
+    final Operation lastOp = mainOp.last;
     modifiedOps.addAll(<Operation>[...mainOp]);
+    if (!lastOp.isNewLineOrBlockInsertion) {
+      modifiedOps.add(Operation.insert('\n'));
+    }
   } else {
     final Operation mainOp = Operation.insert(condition.insertion);
     endOffset += mainOp.getEffectiveLength;
@@ -399,8 +414,10 @@ void _insertAtLast({
       ),
     );
     modifiedOps.add(mainOp);
+    if (!condition.insertion.toString().contains('\n')) {
+      modifiedOps.add(Operation.insert('\n'));
+    }
   }
-  modifiedOps.add(lastOpToAdd);
 }
 
 void _insertAtMap({
