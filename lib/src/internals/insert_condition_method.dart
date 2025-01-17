@@ -360,8 +360,8 @@ void _insertAtLast({
         type: ChangeType.insert,
       ),
     );
-    final lastOp = modifiedOps.last;
-    if (lastOp.isEmbed || !lastOp.isNewLine) {
+    final Operation lastOp = modifiedOps.last;
+    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion) {
       modifiedOps.removeLast();
     }
     modifiedOps
@@ -378,7 +378,8 @@ void _insertAtLast({
         type: ChangeType.insert,
       ),
     );
-    if (mainOp.isEmbed) {
+    final Operation lastOp = modifiedOps.last;
+    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion && mainOp.isEmbed) {
       modifiedOps.removeLast();
     }
     modifiedOps.add(mainOp);
