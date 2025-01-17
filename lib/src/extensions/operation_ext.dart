@@ -34,7 +34,7 @@ extension OffsetOperationLength on Operation {
 /// ```dart
 /// final totalLength = myOperations.getEffectiveLength;
 /// ```
-extension ListOperationLength on List<Operation> {
+extension ListOperationLength on Iterable<Operation> {
   /// Gets the total effective length of the list of operations.
   ///
   /// - Returns the sum of the effective lengths of all operations in the list.
