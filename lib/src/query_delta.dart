@@ -1,6 +1,7 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/conditions.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/illegal_condition_build_result.dart';
+import 'package:dart_quill_delta_simplify/src/exceptions/no_conditions_created_while_build_execution_exception.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/normalizer_ext.dart';
@@ -94,10 +95,13 @@ class QueryDelta {
   ///   },
   ///);
   /// ```
-  BuildResult build(
-      {List<Operation> Function(Object)? unknownObjectTypeBuilder, bool preventReuseConditions = true}) {
+  BuildResult build({
+    List<Operation> Function(Object)? unknownObjectTypeBuilder,
+    bool preventReuseConditions = true,
+    bool maintainIgnoresConditions = true,
+  }) {
     if (params['conditions'] == null || params['conditions'].isEmpty) {
-      throw Exception('Cannot make build because there\'s no conditions to apply');
+      throw const NoConditionsCreatedWhileBuildExecutionException();
     }
     // clone the current input version since something can fail and we do not need
     // partial modifications
@@ -114,7 +118,7 @@ class QueryDelta {
       final bool wasUsedAlready = params['used-conditions'].contains(condition.key);
       if (preventReuseConditions && wasUsedAlready) continue;
       if (condition is IgnoreCondition) {
-        if (!wasUsedAlready) params['used-conditions'].add(condition.key);
+        if (!wasUsedAlready && !maintainIgnoresConditions) params['used-conditions'].add(condition.key);
         final len = condition.len ?? -1;
         partsToIgnore.add(
           DeltaRange(
