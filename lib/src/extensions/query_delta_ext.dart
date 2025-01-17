@@ -1,7 +1,7 @@
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
-import 'package:dart_quill_delta_simplify/src/util/delta/normalizer_ext.dart';
+import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/list_attrs_ext.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -86,7 +86,7 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// - [pattern]: The string pattern to search for.
   /// - [rawObject]: The object to search for within the operations.
-  /// - [operationOffset]: The starting offset in the operations to begin the search.
+  /// - [operationIndex]: The index of the operation.
   /// - [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
   /// Throws [IllegalParamsValuesException] if the provided [operationOffset] is out of bounds.
@@ -95,19 +95,19 @@ extension EssentialsQueryExt on QueryDelta {
   List<DeltaRangeResult> firstMatch(
     RegExp? pattern,
     Object? rawObject, {
-    int? operationOffset,
+    int? operationIndex,
   }) {
     // check if the index of the operation passed, is illegal
-    if (operationOffset != null && (operationOffset < 0 || operationOffset >= getDelta().length)) {
+    if (operationIndex != null && (operationIndex < 0 || operationIndex >= getDelta().length)) {
       throw IllegalParamsValuesException(
-        illegal: operationOffset,
+        illegal: operationIndex,
         expected: {'start': 0, 'end': getDelta().length},
       );
     }
     return _matches(
       pattern: pattern,
       rawObject: rawObject,
-      operationOffset: operationOffset,
+      operationOffset: operationIndex,
       onlyOnce: true,
     );
   }
@@ -118,19 +118,19 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// - [pattern]: The string pattern to search for.
   /// - [rawObject]: The object to search for within the operations.
-  /// - [operationOffset]: The starting offset in the operations to begin the search.
+  /// - [operationIndex]: The index of the operation.
   /// - [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
   /// Returns a list of all matching [DeltaRangeResult]s.
   List<DeltaRangeResult> allMatches(
     RegExp? pattern,
     Object? rawObject, {
-    int? operationOffset,
+    int? operationIndex,
   }) {
     return _matches(
       pattern: pattern,
       rawObject: rawObject,
-      operationOffset: operationOffset,
+      operationOffset: operationIndex,
       onlyOnce: false,
     );
   }
@@ -155,7 +155,7 @@ extension EssentialsQueryExt on QueryDelta {
     bool strictKeysCheck = true,
     bool onlyOnce = false,
   }) {
-    final inputClone = getDelta().normalize();
+    final inputClone = getDelta().denormalize();
     List<DeltaRangeResult> parts = [];
     int globalOffset = 0;
     for (int index = 0; index < inputClone.length; index++) {
@@ -183,15 +183,15 @@ extension EssentialsQueryExt on QueryDelta {
         continue;
       }
       if (blockAttrKeys != null) {
-        if (opData is String && opData.hasOnlyNewLines && op.attributes != null) {
+        if (op.isBlockLevelInsertion) {
           if (op.containsAttrs(blockAttrKeys, strictKeysCheck)) {
             int startOffset = globalOffset;
             int endOffset = globalOffset + opLength;
             List<Operation> operationsWithAttrsApplied = [];
-            for (int index2 = index - 1; index2 > 0; index2--) {
+            for (int index2 = index - 1; index2 >= 0; index2--) {
               final beforeOp = inputClone.elementAt(index2);
               final opData = beforeOp.data;
-              if (opData is Map) break;
+              if (op.isEmbed) break;
               if (opData is String) {
                 if (opData.contains('\n')) break;
                 operationsWithAttrsApplied.insert(0, beforeOp);
@@ -288,7 +288,7 @@ extension EssentialsQueryExt on QueryDelta {
     int? operationOffset,
     bool onlyOnce = false,
   }) {
-    final inputClone = getDelta().normalize();
+    final inputClone = getDelta().denormalize();
     if (operationOffset != null && (operationOffset < 0 || operationOffset >= inputClone.length)) {
       throw StateError('Invalid offset operation passed [$operationOffset] | available [${inputClone.length}]');
     }
@@ -300,6 +300,10 @@ extension EssentialsQueryExt on QueryDelta {
         return [...parts];
       }
       if (pattern != null) {
+        assert(
+          pattern.pattern.trim().isNotEmpty && !pattern.pattern.contains('\n'),
+          'the pattern passed cannot be empty or contain new lines',
+        );
         final RegExp expression = pattern;
         if (expression.hasMatch(op.data.toString())) {
           final matches = expression.allMatches(op.data.toString());
@@ -343,6 +347,10 @@ extension EssentialsQueryExt on QueryDelta {
             continue;
           }
         } else {
+          assert(
+           rawObject.toString().trim().isNotEmpty && !rawObject.toString().contains('\n'),
+            'rawObject passed cannot be empty or contain new lines',
+          );
           final RegExp expression = RegExp(rawObject.toString());
           if (expression.hasMatch(op.data.toString())) {
             final matches = expression.allMatches(op.data.toString());
