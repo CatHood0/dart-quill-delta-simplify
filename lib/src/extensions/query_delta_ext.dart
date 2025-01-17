@@ -428,7 +428,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// at the place that we expect or specify
   ///
   /// - [insert] is the object that gonna be inserted into the [Delta]
-  /// - [possibleTarget] is an object that could be a [String] or a [Map<String, dynamic>] that is used to match a part of the data of a [Operation] or directly match with all [Operation]
+  /// - [target] is an object that could be a [String] or a [Map<String, dynamic>] that is used to match a part of the data of a [Operation] or directly match with all [Operation]
   /// - [startPoint] decides where starts the execution of the insert method
   /// - [asDifferentOp] decides if the object to be inserted will be part of its own Operation or will be joined with the matched target
   /// - [left] decides if the insertion will be do it at the left or the right of the [possibleTarget] match
@@ -501,13 +501,12 @@ extension EssentialsQueryExt on QueryDelta {
   }
 
   QueryDelta delete({
-    required Object? possibleTarget,
+    required Object? target,
     required int? startPoint,
     required int? lengthOfDeletion,
     bool onlyOnce = true,
     bool caseSensitive = false,
   }) {
-    final target = possibleTarget ?? '';
     assert(startPoint == null || startPoint >= 0, 'startPoint cannot be less of zero');
     assert(lengthOfDeletion == null || lengthOfDeletion > 0, 'lengthOfDeletion cannot be less of zero');
     assert(target != '\n' && target != '\\n', 'target cannot be "\\n"');
