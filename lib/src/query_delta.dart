@@ -30,6 +30,7 @@ class QueryDelta {
     params['original_version'] = delta;
     params['errors'] = <String>[];
     params['conditions'] = <Condition>[];
+    params['used-conditions'] = <String>[];
   }
 
   /// Adds a single [Condition] to the list of conditions to be applied to the [Delta].
@@ -79,13 +80,6 @@ class QueryDelta {
   ///
   /// The method checks if the final [Delta] has been modified since the last build. If no changes are detected (because, we can make a build, then after that, we can also add more conditions a do again a build), the previously stored result is returned to avoid redundant processing.
   ///
-  /// Throws:
-  /// - [Exception]: If no conditions are provided in the `params['conditions']` list.
-  /// - [IllegalConditionBuildResult]: If an invalid result type is returned from a condition.
-  ///
-  /// Returns:
-  /// - [BuildResult]: The final [Delta] after applying all conditions, containing the resulting operations and changes.
-  ///
   /// Example usage:
   /// ```dart
   ///final QueryDelta queryDelta = QueryDelta(delta: delta)
@@ -100,7 +94,8 @@ class QueryDelta {
   ///   },
   ///);
   /// ```
-  BuildResult build({List<Operation> Function(Object)? unknownObjectTypeBuilder}) {
+  BuildResult build(
+      {List<Operation> Function(Object)? unknownObjectTypeBuilder, bool preventReuseConditions = true}) {
     if (params['conditions'] == null || params['conditions'].isEmpty) {
       throw Exception('Cannot make build because there\'s no conditions to apply');
     }
@@ -116,7 +111,10 @@ class QueryDelta {
       changes[executedBuildDate] = [];
     }
     for (Condition condition in conditions) {
+      final bool wasUsedAlready = params['used-conditions'].contains(condition.key);
+      if (preventReuseConditions && wasUsedAlready) continue;
       if (condition is IgnoreCondition) {
+        if (!wasUsedAlready) params['used-conditions'].add(condition.key);
         final len = condition.len ?? -1;
         partsToIgnore.add(
           DeltaRange(
@@ -154,6 +152,7 @@ class QueryDelta {
         },
         onCatch,
       );
+      if (!wasUsedAlready) params['used-conditions'].add(condition.key);
       if (result is Iterable<Operation>) {
         inputClone = Delta.fromOperations([...result]);
       } else if (result is Operation) {
