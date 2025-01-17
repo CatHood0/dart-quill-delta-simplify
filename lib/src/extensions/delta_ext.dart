@@ -96,11 +96,13 @@ extension EasyDelta on Delta {
     bool onlyOnce = true,
     bool asDifferentOp = false,
     bool insertAtLastOperation = false,
+    bool caseSensitive = false,
   }) {
     return QueryDelta(delta: this)
         .insert(
           insert: insert,
           startPoint: startPoint,
+          caseSensitive: caseSensitive,
           target: target,
           left: left,
           onlyOnce: startPoint != null ? true : onlyOnce,
