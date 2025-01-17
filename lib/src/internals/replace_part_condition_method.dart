@@ -72,7 +72,7 @@ List<Operation> replaceCondition(
       // check if we only need to add these operations since the
       // offsets could be less that we expect
       if (partsToIgnore.ignoreOverlap(
-        DeltaRange(startOffset: startOffset, endOffset: endOffset),
+        DeltaRange(startOffset: range.startOffset, endOffset: range.endOffset),
       )) {
         addRestOfOps = true;
         modifiedOps.add(op);
@@ -113,7 +113,7 @@ List<Operation> replaceCondition(
           final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
           final Operation mainOp = isEmbed ? Operation.insert(replace) : replace as Operation;
           final Operation righOp =
-              op.clone(data is! String ? null : data.substring(range.endOffset > opLength ? opLength : endOffset));
+              op.clone(data is! String ? null : data.substring(endOffset > opLength ? opLength : endOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             mainOp,
@@ -138,7 +138,7 @@ List<Operation> replaceCondition(
           final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
           final List<Operation> mainOps = <Operation>[...replace];
           final Operation righOp =
-              op.clone(data is! String ? null : data.substring(range.endOffset > opLength ? opLength : endOffset));
+              op.clone(data is! String ? null : data.substring(endOffset > opLength ? opLength : endOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             ...mainOps,
@@ -155,9 +155,9 @@ List<Operation> replaceCondition(
         } else {
           final String leftPart = data is! String ? '' : data.substring(0, startOffset);
           final String rightPart =
-              data is! String ? '' : data.substring(range.endOffset > opLength ? opLength : endOffset);
+              data is! String ? '' : data.substring(endOffset > opLength ? opLength : endOffset);
           final Operation mainOp = Operation.insert(
-            '$leftPart${condition.replace}$rightPart',
+            '$leftPart$replace$rightPart',
             data is Map ? null : op.attributes,
           );
           if (mainOp.ignoreIfEmpty) {
@@ -238,16 +238,16 @@ List<Operation> replaceCondition(
         continue;
       }
       // this is for different matches in a same line
-      final List<DeltaRange> deltaPartsToMerge = <DeltaRange>[];
+      final Set<DeltaRange> deltaPartsToMerge = <DeltaRange>{};
       final Iterable<RegExpMatch> matches = pattern.allMatches(data);
       for (RegExpMatch match in matches) {
-        final startOffset = match.start;
-        final endOffset = match.end;
+        final localStartOffset = match.start;
+        final localEndOffset = match.end;
         if (partsToIgnore.ignoreOverlap(
-            DeltaRange(startOffset: startOffset + globalOffset, endOffset: endOffset + globalOffset))) {
+            DeltaRange(startOffset: localStartOffset + globalOffset, endOffset: localEndOffset + globalOffset))) {
           continue;
         }
-        deltaPartsToMerge.add(DeltaRange(startOffset: startOffset, endOffset: endOffset));
+        deltaPartsToMerge.add(DeltaRange(startOffset: localStartOffset, endOffset: localEndOffset));
       }
       if (deltaPartsToMerge.isEmpty) {
         modifiedOps.add(op);
@@ -283,7 +283,7 @@ List<Operation> replaceCondition(
               );
           }
         } else if (i == 0) {
-          dividedOps.add(Operation.insert(data.substring(0, partToMerge.startOffset), op.attributes));
+          dividedOps.add(op.clone(data.substring(0, partToMerge.startOffset)));
           if (isEmbed) {
             dividedOps.add(Operation.insert(replace));
           } else if (isListOperation) {
@@ -309,16 +309,13 @@ List<Operation> replaceCondition(
             dividedOps.add(replace as Operation);
           }
           dividedOps.add(
-            Operation.insert(
-              data.substring(partToMerge.endOffset, nextPartToMerge?.startOffset),
-              op.attributes,
-            ),
+            op.clone(data.substring(partToMerge.endOffset, nextPartToMerge?.startOffset)),
           );
         }
         //end of match loop
       }
       if (buffer.isNotEmpty) {
-        final Operation mainOp = Operation.insert(buffer.toString(), op.attributes);
+        final Operation mainOp = op.clone(buffer.toString());
         modifiedOps.add(mainOp);
       }
       modifiedOps.addAll(dividedOps);
