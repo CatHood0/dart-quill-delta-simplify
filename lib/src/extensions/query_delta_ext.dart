@@ -122,7 +122,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// - [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
   /// Returns a list of all matching [DeltaRangeResult]s.
-  List<DeltaRangeResult> allMatch(
+  List<DeltaRangeResult> allMatches(
     RegExp? pattern,
     Object? rawObject, {
     int? operationOffset,
