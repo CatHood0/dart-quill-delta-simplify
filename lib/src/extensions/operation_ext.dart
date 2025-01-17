@@ -83,7 +83,7 @@ extension CheckOperation on Operation {
   bool get isNewLine => data is String && ('$data'.hasOnlyNewLines || '$data' == '\n');
 
   /// Checks if the operation contains embedded data.
-  bool get isEmbed => data is! String;
+  bool get isEmbed => data is Map;
 
   /// Checks if the operation contains a new line.
   bool containsNewLine() => !isEmbed && (data as String).contains('\n');
