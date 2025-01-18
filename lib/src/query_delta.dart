@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/conditions.dart';
 import 'package:dart_quill_delta_simplify/extensions.dart';
@@ -28,12 +30,26 @@ class QueryDelta {
   QueryDelta({
     required Delta delta,
   })  : assert(delta.isNotEmpty, 'cannot be passed an empty Delta'),
-        assert(delta.last.isNewLineOrBlockInsertion || delta.last.containsNewLine(), 'last operation must contain a new line') {
+        assert(delta.last.isNewLineOrBlockInsertion || delta.last.containsNewLine(),
+            'last operation must contain a new line') {
     _input = Delta.fromOperations(delta.operations);
     params['original_version'] = Delta.fromOperations(delta.operations);
     params['errors'] = <String>[];
     params['conditions'] = <Condition>[];
     params['used-conditions'] = <String>[];
+  }
+
+  factory QueryDelta.fromJson(String json, [List<Condition>? conditions]) {
+    return QueryDelta(delta: Delta.fromJson(jsonDecode(json) as List<dynamic>))
+      ..params['conditions'].addAll(conditions);
+  }
+
+  factory QueryDelta.fromOperations(List<Operation> ops, [List<Condition>? conditions]) {
+    return QueryDelta(delta: Delta.fromOperations(ops))..params['conditions'].addAll(conditions);
+  }
+
+  factory QueryDelta.withConditions(Delta delta, List<Condition> conditions) {
+    return QueryDelta(delta: delta)..params['conditions'].addAll(conditions);
   }
 
   /// Adds a single [Condition] to the list of conditions to be applied to the [Delta].
