@@ -455,16 +455,14 @@ void main() {
   // match parts
   group('matches', () {
     test('should get portion of the Delta with match pattern', () {
-      final List<DeltaRangeResult> result = delta.toQuery.allMatches(
+      final DeltaRangeResult result = delta.toQuery.firstMatch(
         RegExp('Experimental', caseSensitive: false),
         null,
         operationIndex: 0,
       );
       expect(
         result,
-        [
-          DeltaRangeResult(delta: Delta()..insert('Experimental'), startOffset: 0, endOffset: 12),
-        ],
+        DeltaRangeResult(delta: Delta()..insert('Experimental'), startOffset: 0, endOffset: 12),
       );
     });
     test('should get portion of the Delta with a raw object matching', () {
