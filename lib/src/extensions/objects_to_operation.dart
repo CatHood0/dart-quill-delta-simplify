@@ -57,6 +57,7 @@ extension ObjectToOperation on Object {
         inlineAttributes != null && inlineAttributes.isNotEmpty ? {...inlineAttributes} : null,
       );
     }
+    if (this is Map && (this as Map).containsKey('insert')) return (this as Map).toOperation();
     return [
       Operation.insert(
         this,
@@ -77,11 +78,11 @@ extension MapToOperation on Map {
   /// Converts the current map into an [Operation.insert].
   ///
   /// This method creates an [Operation.insert] for the map and applies any
-  /// `mapAttributes` (if provided) to the operation.
+  /// `inlineAttributes` (if provided) to the operation.
   ///
   /// ### Parameters:
   ///
-  /// - `mapAttributes`: Optional map of attributes that are applied to the operation.
+  /// - `inlineAttributes`: Optional inline attributes that are applied to the operation.
   ///
   /// ### Returns:
   ///
@@ -92,14 +93,22 @@ extension MapToOperation on Map {
   /// ```dart
   /// final map = {'image': 'path/to/image/file.jpg'};
   /// final operation = map.toOperation({'style': 'width:200px;height:px;'});
-  /// // Returns an Operation.insert for the map {'key': 'value'} with the 'style' attribute.
+  /// ```
+  /// or 
+  /// ```dart
+  /// final insertJson = {'insert': 'This is an example'};
+  /// final operation = insertJson.toOperation();
   /// ```
   Operation toOperation([
-    Attributes? mapAttributes,
+    Attributes? inlineAttributes,
   ]) {
+    if (containsKey('insert')) {
+      final attrs = this['attributes'] as Map<String, dynamic>?;
+      return Operation.insert(this['insert'], attrs);
+    }
     return Operation.insert(
       this,
-      mapAttributes != null && mapAttributes.isNotEmpty ? {...mapAttributes} : null,
+      inlineAttributes != null && inlineAttributes.isNotEmpty ? {...inlineAttributes} : null,
     );
   }
 }
