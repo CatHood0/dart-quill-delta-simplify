@@ -211,7 +211,7 @@ extension EssentialsQueryExt on QueryDelta {
       if (inlineAttrs != null) {
         if (mapEquals(inlineAttrs, op.attributes)) {
           parts.add(
-            DeltaMatch(
+            DeltaRangeResult(
               delta: Delta.fromOperations(
                 <Operation>[op],
               ),
@@ -244,11 +244,10 @@ extension EssentialsQueryExt on QueryDelta {
             }
             operationsWithAttrsApplied = <Operation>[...operationsWithAttrsApplied, op];
             parts.add(
-              DeltaMatch(
+              DeltaRangeResult(
                 delta: Delta.fromOperations(operationsWithAttrsApplied),
                 startOffset: startOffset.nonNegativeInt,
                 endOffset: endOffset.nonNegativeInt,
-                input: op.attributes,
               ),
             );
           }
@@ -302,7 +301,7 @@ extension EssentialsQueryExt on QueryDelta {
           final Iterable<RegExpMatch> matches = expression.allMatches(op.data.toString());
           for (RegExpMatch match in matches) {
             final Delta delta = Delta();
-            parts.add(DeltaMatch(
+            parts.add(DeltaRangeResult(
               delta: delta
                 ..insert(
                   op.data.toString().substring(match.start, match.end),
@@ -310,7 +309,6 @@ extension EssentialsQueryExt on QueryDelta {
                 ),
               startOffset: globalOffset + match.start,
               endOffset: globalOffset + match.end,
-              input: match.input,
             ));
             if (parts.isNotEmpty && onlyOnce) {
               return [...parts];
@@ -325,7 +323,7 @@ extension EssentialsQueryExt on QueryDelta {
             final Delta delta = Delta();
             final startOffset = globalOffset;
             final endOffset = op.data is String ? globalOffset + op.data.toString().length : globalOffset + 1;
-            parts.add(DeltaMatch(
+            parts.add(DeltaRangeResult(
               delta: delta
                 ..insert(
                   op.data,
@@ -333,7 +331,6 @@ extension EssentialsQueryExt on QueryDelta {
                 ),
               startOffset: startOffset,
               endOffset: endOffset,
-              input: op.data,
             ));
             if (parts.isNotEmpty && onlyOnce) {
               return [...parts];
@@ -351,7 +348,7 @@ extension EssentialsQueryExt on QueryDelta {
             final Iterable<RegExpMatch> matches = expression.allMatches(op.data.toString());
             for (RegExpMatch match in matches) {
               final Delta delta = Delta();
-              parts.add(DeltaMatch(
+              parts.add(DeltaRangeResult(
                 delta: delta
                   ..insert(
                     op.data.toString().substring(match.start, match.end),
@@ -359,7 +356,6 @@ extension EssentialsQueryExt on QueryDelta {
                   ),
                 startOffset: globalOffset + match.start,
                 endOffset: globalOffset + match.end,
-                input: match.input,
               ));
               if (parts.isNotEmpty && onlyOnce) {
                 return <DeltaRangeResult>[...parts];
