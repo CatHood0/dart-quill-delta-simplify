@@ -1,5 +1,6 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 //TODO: improve docs
@@ -45,7 +46,12 @@ extension DeltaToPlainText on Delta {
   ///
   /// Throws an [UnimplementedError] as this method is not yet implemented.
   String toPlainBuilder(String Function(Operation op) opToPlainBuilder) {
-    throw UnimplementedError('toPlainBuilder is not implemented yet');
+    StringBuffer buffer = StringBuffer();
+    for (Operation op in operations) {
+      if (!op.isInsert) throw IllegalOperationPassedException(illegal: op, expected: op.clone(''));
+      buffer.write(opToPlainBuilder(op));
+    }
+    return buffer.toString();
   }
 }
 
