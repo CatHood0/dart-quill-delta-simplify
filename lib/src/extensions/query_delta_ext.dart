@@ -17,12 +17,12 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// ## Parameters:
   ///
-  /// - [inlineAttrs]: A map of inline attributes to match against the operations.
-  /// - [blockAttrs]: A map of block attributes to match against the operations.
-  /// - [blockAttrKeys]: A list of block attribute keys to match against the operations.
-  /// - [inlineAttrKeys]: A list of inline attribute keys to match against the operations.
-  /// - [strictKeysCheck]: If `true`, only matches operations where all specified keys are present.
-  /// - [onlyOnce]: If `true`, stops searching after the first match.
+  /// * [inlineAttrs]: A map of inline attributes to match against the operations.
+  /// * [blockAttrs]: A map of block attributes to match against the operations.
+  /// * [blockAttrKeys]: A list of block attribute keys to match against the operations.
+  /// * [inlineAttrKeys]: A list of inline attribute keys to match against the operations.
+  /// * [strictKeysCheck]: If `true`, only matches operations where all specified keys are present.
+  /// * [onlyOnce]: If `true`, stops searching after the first match.
   ///
   /// ## Usage:
   ///
@@ -51,12 +51,8 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// ## Assertions:
   ///
-  /// - Ensures that if attributes or keys are provided, they are not empty.
-  /// - Throws an [IllegalParamsValuesException] if no matching criteria are provided.
-  ///
-  /// ## Returns:
-  ///
-  /// A list of [DeltaRangeResult] objects, each representing a range in the Delta that matches the specified criteria.
+  /// * Ensures that if attributes or keys are provided, they are not empty.
+  /// * Throws an [IllegalParamsValuesException] if no matching criteria are provided.
   List<DeltaRangeResult> matchAttributes({
     required Attributes? inlineAttrs,
     required Attributes? blockAttrs,
@@ -86,14 +82,12 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// This method searches the operations for a pattern or object match and returns the first occurrence wrapped in a [DeltaRangeResult].
   ///
-  /// - [pattern]: The string pattern to search for.
-  /// - [rawObject]: The object to search for within the operations.
-  /// - [operationIndex]: The index of the operation.
-  /// - [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
+  /// * [pattern]: The string pattern to search for.
+  /// * [rawObject]: The object to search for within the operations.
+  /// * [operationIndex]: The index of the operation.
+  /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
   /// Throws [IllegalParamsValuesException] if the provided [operationOffset] is out of bounds.
-  ///
-  /// Returns a list containing the first matching [DeltaRangeResult].
   List<DeltaRangeResult> firstMatch(
     RegExp? pattern,
     Object? rawObject, {
@@ -118,10 +112,10 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// This method searches the operations for all occurrences of the pattern or object match and returns each occurrence wrapped in a [DeltaRangeResult].
   ///
-  /// - [pattern]: The string pattern to search for.
-  /// - [rawObject]: The object to search for within the operations.
-  /// - [operationIndex]: The index of the operation.
-  /// - [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
+  /// * [pattern]: The string pattern to search for.
+  /// * [rawObject]: The object to search for within the operations.
+  /// * [operationIndex]: The index of the operation.
+  /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
   /// Returns a list of all matching [DeltaRangeResult]s.
   List<DeltaRangeResult> allMatches(
@@ -141,12 +135,12 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// This method checks for operations that match either inline or block attributes and returns them wrapped in [DeltaRangeResult].
   ///
-  /// - [inlineAttrs]: The inline attributes to match.
-  /// - [blockAttrs]: The block attributes to match.
-  /// - [blockAttrKeys]: The keys of block attributes to match.
-  /// - [inlineAttrKeys]: The keys of inline attributes to match.
-  /// - [strictKeysCheck]: Whether to strictly check for the presence of all keys. Defaults to `true`.
-  /// - [onlyOnce]: Whether to stop after the first match is found. Defaults to `false`.
+  /// * [inlineAttrs]: The inline attributes to match.
+  /// * [blockAttrs]: The block attributes to match.
+  /// * [blockAttrKeys]: The keys of block attributes to match.
+  /// * [inlineAttrKeys]: The keys of inline attributes to match.
+  /// * [strictKeysCheck]: Whether to strictly check for the presence of all keys. Defaults to `true`.
+  /// * [onlyOnce]: Whether to stop after the first match is found. Defaults to `false`.
   ///
   /// Returns a list of matching [DeltaRangeResult]s.
   List<DeltaRangeResult> _attrMatches({
@@ -277,11 +271,11 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// This method performs the core logic for matching operations based on the specified criteria.
   ///
-  /// - [pattern]: The string pattern to search for.
-  /// - [rawObject]: The object to search for within the operations.
-  /// - [operationOffset]: The starting offset in the operations to begin the search.
-  /// - [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive.
-  /// - [onlyOnce]: Whether to stop after the first match is found.
+  /// * [pattern]: The string pattern to search for.
+  /// * [rawObject]: The object to search for within the operations.
+  /// * [operationOffset]: The starting offset in the operations to begin the search.
+  /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive.
+  /// * [onlyOnce]: Whether to stop after the first match is found.
   ///
   /// Returns a list of matching [DeltaRangeResult]s.
   List<DeltaRangeResult> _matches({
@@ -385,7 +379,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [len] is used to know what the len in characters of how many characters will apply the new Attribute
   /// * [attribute] the Attribute that will be applied to the matched text or embed, or the selected text into the range of the [offset] and [len]
   /// * [target] is an alternative to match a portion of the Delta where we need to make the change (can be String or a Map)
-  /// * [onlyOnce] decides if the format should be applied once more time 
+  /// * [onlyOnce] decides if the format should be applied once more time
   ///
   /// # Notes
   /// 1. If the offset and the len match into a same Operation and the Attribute is block scope, the len will be ignored and only apply the Attribute to the entire Operation
@@ -424,27 +418,27 @@ extension EssentialsQueryExt on QueryDelta {
   /// Creates a condition where will be inserted the object
   /// at the place that we expect or specify
   ///
-  /// - [insert] is the object that gonna be inserted into the [Delta]
-  /// - [target] is an object that could be a [String] or a [Map<String, dynamic>] that is used to match a part of the data of a [Operation] or directly match with all [Operation]
-  /// - [startPoint] decides where starts the execution of the insert method
-  /// - [asDifferentOp] decides if the object to be inserted will be part of its own Operation or will be joined with the matched target
-  /// - [left] decides if the insertion will be do it at the left or the right of the [possibleTarget] match
-  /// - [onlyOnce] decides if the insert will be do it one or more times (only apply when [startPoint] is null)
+  /// * [insert] is the object that gonna be inserted into the [Delta]
+  /// * [target] is an object that could be a [String] or a [Map<String, dynamic>] that is used to match a part of the data of a [Operation] or directly match with all [Operation]
+  /// * [startPoint] decides where starts the execution of the insert method
+  /// * [asDifferentOp] decides if the object to be inserted will be part of its own Operation or will be joined with the matched target
+  /// * [left] decides if the insertion will be do it at the left or the right of the [possibleTarget] match
+  /// * [onlyOnce] decides if the insert will be do it one or more times (only apply when [startPoint] is null)
   ///
   /// # Types for insert
   ///
   /// [InsertCondition] only accepts these types of values:
   ///
-  ///   - [Map]
-  ///   - [String]
-  ///   - [Operation] or [List<Operation>]
+  ///   * [Map]
+  ///   * [String]
+  ///   * [Operation] or [List<Operation>]
   ///
   /// # Types for possibleTarget
   ///
   /// [InsertCondition] only accepts these types of values:
   ///
-  ///   - [Map<String, dynamic>]
-  ///   - [String]
+  ///   * [Map<String, dynamic>]
+  ///   * [String]
   ///
   /// # Note
   /// if [startPoint] is not null, then the object will be inserted at that point
@@ -497,6 +491,18 @@ extension EssentialsQueryExt on QueryDelta {
     );
   }
 
+  /// Deletes a portion of text based on specified conditions.
+  ///
+  /// * [target]: The object representing the target to delete. It cannot be `'\n'` or `'\\n'`.
+  /// * [startPoint]: The starting position of the deletion in the text. It must be a non-negative integer.
+  /// * [lengthOfDeletion]: The length of text to delete, which must be greater than 0.
+  /// * [onlyOnce]: A boolean indicating whether the deletion should happen only once. Default is `true`.
+  /// * [caseSensitive]: A boolean indicating whether the deletion should be case-sensitive. Default is `false`.
+  ///
+  /// Throws an [AssertionError] if any of the following conditions are violated:
+  /// * [startPoint] is less than 0.
+  /// * [lengthOfDeletion] is less than or equal to 0.
+  /// * [target] is either `'\n'` or `'\\n'`.
   QueryDelta delete({
     required Object? target,
     required int? startPoint,
@@ -518,6 +524,15 @@ extension EssentialsQueryExt on QueryDelta {
     );
   }
 
+  /// Replaces a portion of text with a new value based on the provided conditions.
+  ///
+  /// * [replace]: The object representing the value to replace the target with.
+  /// * [target]: The object representing the target to be replaced. It cannot be `null` if `range` is also `null`.
+  /// * [range]: The range specifying the portion of text to replace. It cannot be `null` if `target` is `null`.
+  /// * [onlyOnce]: A boolean indicating whether the replacement should occur only once. Default is `false`.
+  /// * [caseSensitive]: A boolean indicating whether the replacement should be case-sensitive. Default is `false`.
+  ///
+  /// Throws an [Exception] if both `target` and `range` are `null` or invalid.
   QueryDelta replace({
     required Object replace,
     required Object? target,
