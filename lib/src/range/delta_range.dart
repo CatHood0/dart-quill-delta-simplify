@@ -11,10 +11,6 @@ class DeltaRange {
   /// A value of `-1` indicates an undefined end.
   final int endOffset;
 
-  /// Creates an instance of `DeltaRange` with the specified start and end offsets.
-  ///
-  /// The [startOffset] must be non-negative, and [endOffset] must be either `-1`
-  /// or greater than or equal to [startOffset].
   const DeltaRange({
     required this.startOffset,
     required this.endOffset,
