@@ -54,23 +54,15 @@ class QueryDelta {
 
   /// Adds a single [Condition] to the list of conditions to be applied to the [Delta].
   ///
-  /// - [`condition`]: The condition to apply.
-  ///
-  /// Returns a new [QueryDelta] instance with the added condition.
+  /// * [condition]: The condition to apply.
   QueryDelta push(Condition condition) => this..params['conditions'].add(condition);
 
   /// Adds a list of [Condition] objects to the conditions to be applied to the [Delta].
   ///
-  /// - [`condition`]: A list of conditions to apply.
-  ///
-  /// Returns a new [QueryDelta] instance with the added conditions.
+  /// * [condition]: A list of conditions to apply.
   QueryDelta pushAll(List<Condition> condition) => this..params['conditions'].addAll(condition);
 
   /// If a exception is catched, this will be called.
-  ///
-  /// - [`onCatchError`]: A function called when an exception is catched. If return `true`, ignores the error and the condition, if return `false`, throw the exception
-  ///
-  /// Returns a new [QueryDelta] instance with the added catch.
   QueryDelta catchErr(OnCatchCallback onCatchError) => this..params['catch'] = onCatchError;
 
   /// Retrieves the cached changes made during the build process, grouped by
@@ -80,8 +72,6 @@ class QueryDelta {
   /// Converts the built [QueryDelta] into a [Delta]. If the build has not been
   /// executed, an exception will be thrown.
   ///
-  /// Returns the final [Delta] after all conditions have been applied.
-  ///
   /// Throws [Exception] if [build()] has not been called before.
   Delta toDelta() => params['result'] == null
       ? throw Exception('first run build() before use toDelta() method')
@@ -89,8 +79,6 @@ class QueryDelta {
 
   /// Attempts to convert the built [QueryDelta] into a [Delta]. If the build has
   /// not been executed or has failed, `null` is returned.
-  ///
-  /// Returns the resulting [Delta], or `null` if the build is incomplete.
   Delta? tryToDelta() => params['result']?.delta;
 
   /// Builds a final [Delta] based on the conditions applied so far.
@@ -252,9 +240,7 @@ class QueryDelta {
   /// Clones the current [QueryDelta] instance, allowing for an alternative [Delta]
   /// to be passed as the input. The clone retains all conditions, errors, and cached changes.
   ///
-  /// - [`alternativeDelta`]: An optional [Delta] to use as the input for the clone.
-  ///
-  /// Returns a new [QueryDelta] instance that is a copy of the current one.
+  /// * [alternativeDelta]: An optional [Delta] to use as the input for the clone.
   QueryDelta clone([Delta? alternativeDelta]) {
     return QueryDelta(delta: alternativeDelta ?? _input)
       ..params['original_version'] = params['original_version']
@@ -264,7 +250,7 @@ class QueryDelta {
       ..params['cached_changes'] = params['cached_changes'];
   }
 
-  // used only by internal resources
+  /// used only by internal resources
   @internal
   Delta getDelta() {
     return _input;
