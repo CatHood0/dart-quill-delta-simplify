@@ -3,6 +3,7 @@ import 'package:dart_quill_delta_simplify/src/exceptions/illegal_operation_passe
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/combine_two_numbers.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:meta/meta.dart';
 
 /// Extension that adds a getter to the [Operation] class to retrieve the effective length
 /// of the operation. The length is only valid for insert operations and throws an exception
@@ -29,44 +30,24 @@ extension OffsetOperationLength on Operation {
 
 /// Extension that calculates the total effective length of a list of [Operation]s.
 /// It accumulates the length of each operation in the list to return the total length.
-///
-/// Example usage:
-/// ```dart
-/// final totalLength = myOperations.getEffectiveLength;
-/// ```
 extension ListOperationLength on Iterable<Operation> {
   /// Gets the total effective length of the list of operations.
-  ///
-  /// - Returns the sum of the effective lengths of all operations in the list.
   int get getEffectiveLength => map((e) => e.getEffectiveLength).reduce(
         combineTwoNumbers,
       );
 }
 
 /// Extension that converts an [Operation] to its plain text representation.
-/// If the operation contains embedded data, a custom builder can be used to generate
-/// the plain text for the embedded data. If no custom builder is provided, a replacement
-/// character (`\uFFFC`) is used for the embedded data.
-///
-/// Example usage:
-/// ```dart
-/// final plainText = myOperation.toPlain();
-/// ```
 extension OperationToPlain on Operation {
   static const String _kObjectReplacementCharacter = '\uFFFC';
 
   /// Converts the operation to its plain text representation.
-  ///
-  /// - `embedBuilder`: An optional function to build plain text for embedded data.
-  /// - Returns a string representation of the operation's data.
   String toPlain({String Function(Object embedData)? embedBuilder}) {
     if (isRetain || isDelete || isEmpty || data == null) return '';
     return data is String ? '$data' : embedBuilder?.call(data!) ?? _kObjectReplacementCharacter;
   }
 
   /// Checks if the operation's data is empty.
-  ///
-  /// - Returns `true` if the data is null, empty, or an empty map; otherwise, returns `false`.
   bool get ignoreIfEmpty {
     return data == null || data is String && (data.toString().trim().isEmpty) || (data is Map && (data as Map).isEmpty);
   }
@@ -98,14 +79,13 @@ extension CheckOperation on Operation {
 /// Extension that adds a `clone` method to the [Operation] class for cloning an operation
 /// with potentially new data and attributes. The method allows for replacing the current
 /// attributes with new ones, or adding/clearing attributes as necessary.
+@internal
 extension CloneOperation on Operation {
   /// Creates a new clone of the operation with the specified new data and optional attributes.
   ///
-  /// - [`newData`]: The new data to replace the current data. If null, the current data is used.
-  /// - [`attribute`]: An optional attribute to replace or add to the operation.
-  /// - [`replaceCurrentByNewAttr`]: If true, the existing attributes are replaced by the new attribute.
-  ///
-  /// Returns a new [Operation] with the modified data and attributes.
+  /// * [newData]: The new data to replace the current data. If null, the current data is used.
+  /// * [attribute]: An optional attribute to replace or add to the operation.
+  /// * [replaceCurrentByNewAttr]: If true, the existing attributes are replaced by the new attribute.
   Operation clone(Object? newData,
       [Attribute? attribute, bool replaceCurrentByNewAttr = false, bool withoutAttrs = false]) {
     final Map<String, dynamic> attrs = <String, dynamic>{...?attributes};
