@@ -28,7 +28,7 @@ class QueryDelta {
     required Delta delta,
   }) {
     _input = delta;
-    params['original_version'] = delta;
+    params['original_version'] = Delta.fromOperations(delta.operations);
     params['errors'] = <String>[];
     params['conditions'] = <Condition>[];
     params['used-conditions'] = <String>[];
