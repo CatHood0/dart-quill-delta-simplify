@@ -85,10 +85,9 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
-  /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
   /// Throws [IllegalParamsValuesException] if the provided [operationOffset] is out of bounds.
-  List<DeltaRangeResult> firstMatch(
+  DeltaRangeResult firstMatch(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
@@ -105,7 +104,7 @@ extension EssentialsQueryExt on QueryDelta {
       rawObject: rawObject,
       operationOffset: operationIndex,
       onlyOnce: true,
-    );
+    ).single;
   }
 
   /// Finds all matches of the given [pattern] or [rawObject] in the [Delta] operations list.
@@ -169,12 +168,12 @@ extension EssentialsQueryExt on QueryDelta {
               endOffset: globalOffset + opLength,
             ),
           );
+          if (parts.isNotEmpty && onlyOnce) {
+            return <DeltaRangeResult>[...parts];
+          }
+          globalOffset += opLength;
+          continue;
         }
-        if (parts.isNotEmpty && onlyOnce) {
-          return <DeltaRangeResult>[...parts];
-        }
-        globalOffset += opLength;
-        continue;
       }
       if (blockAttrKeys != null) {
         if (op.isBlockLevelInsertion) {
@@ -200,13 +199,13 @@ extension EssentialsQueryExt on QueryDelta {
                 endOffset: endOffset.nonNegativeInt,
               ),
             );
+            if (parts.isNotEmpty && onlyOnce) {
+              return <DeltaRangeResult>[...parts];
+            }
+            globalOffset += opLength;
+            continue;
           }
         }
-        if (parts.isNotEmpty && onlyOnce) {
-          return <DeltaRangeResult>[...parts];
-        }
-        globalOffset += opLength;
-        continue;
       }
       if (inlineAttrs != null) {
         if (mapEquals(inlineAttrs, op.attributes)) {
@@ -219,12 +218,12 @@ extension EssentialsQueryExt on QueryDelta {
               endOffset: globalOffset + opLength,
             ),
           );
+          if (parts.isNotEmpty && onlyOnce) {
+            return <DeltaRangeResult>[...parts];
+          }
+          globalOffset += opLength;
+          continue;
         }
-        if (parts.isNotEmpty && onlyOnce) {
-          return <DeltaRangeResult>[...parts];
-        }
-        globalOffset += opLength;
-        continue;
       }
       if (blockAttrs != null) {
         if (opData is String && opData.hasOnlyNewLines && op.attributes != null) {
@@ -250,13 +249,13 @@ extension EssentialsQueryExt on QueryDelta {
                 endOffset: endOffset.nonNegativeInt,
               ),
             );
+            if (parts.isNotEmpty && onlyOnce) {
+              return <DeltaRangeResult>[...parts];
+            }
+            globalOffset += opLength;
+            continue;
           }
         }
-        if (parts.isNotEmpty && onlyOnce) {
-          return <DeltaRangeResult>[...parts];
-        }
-        globalOffset += opLength;
-        continue;
       }
       globalOffset += opLength;
     }
@@ -317,7 +316,8 @@ extension EssentialsQueryExt on QueryDelta {
           globalOffset += op.data is String ? op.data!.toString().length : 1;
           continue;
         }
-      } else if (rawObject != null) {
+      }
+      if (rawObject != null) {
         if (op.data is Map && rawObject is Map) {
           if (mapEquals(op.data! as Map, rawObject)) {
             final Delta delta = Delta();
@@ -364,7 +364,7 @@ extension EssentialsQueryExt on QueryDelta {
           }
         }
       }
-      globalOffset += op.data is String ? op.data!.toString().length : 1;
+      globalOffset += op.getEffectiveLength;
     }
     return <DeltaRangeResult>[...parts];
   }
