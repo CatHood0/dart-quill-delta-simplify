@@ -3,6 +3,7 @@ import '../../delta_ranges.dart';
 
 /// Extension on `List<DeltaRange>` that provides additional functionality
 /// for managing and checking overlapping ranges.
+@internal
 extension OverlapDeltaRangeListExtension on List<DeltaRange> {
   /// Checks if the provided [range] overlaps with any `DeltaRange` in the list.
   ///
