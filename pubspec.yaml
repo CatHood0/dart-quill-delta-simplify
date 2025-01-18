@@ -18,8 +18,7 @@ dependencies:
   diff_match_patch: ^0.4.1
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  test: ^1.25.14
   flutter_lints: ^4.0.0
 
 flutter:
