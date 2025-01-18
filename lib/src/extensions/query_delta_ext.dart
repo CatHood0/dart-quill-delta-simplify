@@ -3,6 +3,8 @@ import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/list_attrs_ext.dart';
+import 'package:diff_match_patch/diff_match_patch.dart' as dmp;
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
@@ -348,7 +350,7 @@ extension EssentialsQueryExt on QueryDelta {
           }
         } else {
           assert(
-           rawObject.toString().trim().isNotEmpty && !rawObject.toString().contains('\n'),
+            rawObject.toString().trim().isNotEmpty && !rawObject.toString().contains('\n'),
             'rawObject passed cannot be empty or contain new lines',
           );
           final RegExp expression = RegExp(rawObject.toString());
@@ -552,106 +554,94 @@ extension EssentialsQueryExt on QueryDelta {
 }
 
 extension DiffDelta on QueryDelta {
-  // Get the diff between the changes applied to the Delta
-  // and the original version passed before run the build method
-  DeltaCompareDiffResult compareDiff() {
-    final diffParts = <DeltaDiffPart>[];
-    final original = params['original_version'] as Delta;
-    final modified = getDelta();
+  /// Get the diff between the changes applied to the Delta
+  /// and the original version passed before run the build method
+  ///
+  /// _This method is inspired on the original diff method from Delta class [Here](https://github.com/FlutterQuill/dart-quill-delta/blob/141f86aff1a65c14a25a6b59d76a4a23781c5d91/lib/src/delta/delta.dart#L310-L323)_
+  DeltaCompareDiffResult compareDiff({bool cleanupSemantic = true}) {
+    final Delta originalDelta = params['original_version'] as Delta;
+    final Delta newDelta = getDelta();
+    if (listEquals(newDelta.operations, originalDelta.operations)) return DeltaCompareDiffResult(diffParts: []);
 
-    int originalIndex = 0;
-    int modifiedIndex = 0;
-    int currentPosition = 0;
+    final String stringThis = newDelta.toPlainBuilder(
+      (op) => op.toPlain(
+        embedBuilder: (Object e) => String.fromCharCode(0),
+      ),
+    );
+    final String stringOther = originalDelta.toPlainBuilder(
+      (op) => op.toPlain(
+        embedBuilder: (Object e) => String.fromCharCode(0),
+      ),
+    );
 
-    while (originalIndex < original.length || modifiedIndex < modified.length) {
-      final originalOp = originalIndex < original.length ? original.elementAt(originalIndex) : null;
-      final modifiedOp = modifiedIndex < modified.length ? modified.elementAt(modifiedIndex) : null;
+    // we need to know the diff between the original and the modified Deltas
+    final List<dmp.Diff> diffResult = dmp.diff(stringOther, stringThis);
+    // removes duplicated ops
+    if (cleanupSemantic) dmp.DiffMatchPatch().diffCleanupSemantic(diffResult);
 
-      if (originalOp == null) {
-        // Add remaining parts from modified (added parts)
-        final int addedLength = modifiedOp!.getEffectiveLength;
-        diffParts.add(DeltaDiffPart(
-          before: 'no-before-state',
-          after: modifiedOp.data,
-          start: currentPosition,
-          end: currentPosition + addedLength,
-          args: {
-            'isAddedPart': true,
-            'originalOp': 'no-original-op',
-            'modifiedOp': modifiedOp,
-          },
-        ));
-        currentPosition += addedLength;
-        modifiedIndex++;
-      } else if (modifiedOp == null) {
-        // Add remaining parts from original (removed parts)
-        final int removedLength = originalOp.getEffectiveLength;
-        diffParts.add(DeltaDiffPart(
-          before: originalOp.data!,
-          after: null,
-          start: currentPosition,
-          end: currentPosition + removedLength,
-          args: {
-            'isRemovedPart': true,
-            'originalOp': originalOp,
-            'modifiedOp': 'no-modified-op',
-          },
-        ));
-        currentPosition += removedLength;
-        originalIndex++;
-      } else if (originalOp.data == modifiedOp.data) {
-        // No change
-        currentPosition += originalOp.getEffectiveLength;
-        originalIndex++;
-        modifiedIndex++;
-      } else if (originalOp.data != modifiedOp.data) {
-        final String originalText = originalOp.data.toString();
-        final String modifiedText = modifiedOp.data.toString();
-        final int commonLength =
-            originalText.length < modifiedText.length ? originalText.length : modifiedText.length;
+    final DeltaIterator thisIter = DeltaIterator(newDelta);
+    final DeltaIterator otherIter = DeltaIterator(originalDelta);
 
-        String accumulatedBefore = '';
-        String accumulatedAfter = '';
+    final List<DeltaDiffPart> diffParts = [];
+    int globalOffset = 0;
 
-        for (int i = 0; i < commonLength; i++) {
-          if (originalText[i] != modifiedText[i]) {
-            accumulatedBefore += originalText[i];
-            accumulatedAfter += modifiedText[i];
-          } else {
-            if (accumulatedBefore.isNotEmpty || accumulatedAfter.isNotEmpty) {
-              diffParts.add(DeltaDiffPart(
-                before: accumulatedBefore,
-                after: accumulatedAfter,
-                start: currentPosition,
-                end: currentPosition + accumulatedBefore.length,
-                args: {
-                  'isUpdatedPart': true,
-                  'originalOp': originalOp,
-                  'modifiedOp': modifiedOp,
-                },
-              ));
-              // Limpiar el acumulador para futuras diferencias
-              accumulatedBefore = '';
-              accumulatedAfter = '';
+    for (final dmp.Diff component in diffResult) {
+      int compTextLength = component.text.length;
+      while (compTextLength > 0) {
+        int opLength = 0;
+        Object? before = null;
+        Object? after = null;
+        Map<String, dynamic> args = {};
+
+        switch (component.operation) {
+          case dmp.DIFF_INSERT:
+            opLength = math.min(thisIter.peekLength(), compTextLength);
+            after = thisIter.next(opLength).data;
+            args = {'isAddedPart': true};
+            break;
+          case dmp.DIFF_DELETE:
+            opLength = math.min(compTextLength, otherIter.peekLength());
+            before = otherIter.next(opLength).data;
+            args = {'isRemovedPart': true};
+            break;
+          case dmp.DIFF_EQUAL:
+            opLength = math.min(math.min(otherIter.peekLength(), thisIter.peekLength()), compTextLength);
+            final Operation thisOp = thisIter.next(opLength);
+            final Operation otherOp = otherIter.next(opLength);
+            if (!thisOp.hasSameAttributes(otherOp)) {
+              args['diff_attributes'] = {
+                'new': thisOp.attributes,
+                'old': otherOp.attributes,
+              };
+              args['isUpdatedPart'] = true;
             }
-          }
+            if (thisOp.data != otherOp.data) {
+              before = thisOp.data;
+              after = otherOp.data;
+              args['isUpdatedPart'] = true;
+            } else {
+              if (!args.containsKey('diff_attributes')) args['isEquals'] = true;
+              diffParts.add(DeltaDiffPart(
+                before: thisOp.data,
+                after: otherOp.data,
+                start: globalOffset,
+                end: globalOffset + opLength,
+                args: args.isEmpty ? null : args,
+              ));
+            }
+            break;
         }
-        if (accumulatedBefore.isNotEmpty || accumulatedAfter.isNotEmpty) {
+        if (before != null || after != null) {
           diffParts.add(DeltaDiffPart(
-            before: accumulatedBefore,
-            after: accumulatedAfter,
-            start: currentPosition,
-            end: currentPosition + accumulatedBefore.length,
-            args: {
-              'isUpdatedPart': true,
-              'originalOp': originalOp,
-              'modifiedOp': modifiedOp,
-            },
+            before: before,
+            after: after,
+            start: globalOffset,
+            end: globalOffset + opLength,
+            args: args..removeWhere((k, v) => k == 'diff_attributes'),
           ));
         }
-        currentPosition += commonLength;
-        originalIndex++;
-        modifiedIndex++;
+        globalOffset += opLength;
+        compTextLength -= opLength;
       }
     }
     return DeltaCompareDiffResult(diffParts: diffParts);
