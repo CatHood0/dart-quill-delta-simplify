@@ -151,21 +151,19 @@ extension EssentialsQueryExt on QueryDelta {
     bool strictKeysCheck = true,
     bool onlyOnce = false,
   }) {
-    final inputClone = getDelta().denormalize();
+    final Delta inputClone = getDelta().denormalize();
     List<DeltaRangeResult> parts = [];
     int globalOffset = 0;
     for (int index = 0; index < inputClone.length; index++) {
-      final op = inputClone.elementAt(index);
-      final opData = op.data;
-      final opLength = op.getEffectiveLength;
+      final Operation op = inputClone.elementAt(index);
+      final Object? opData = op.data;
+      final int opLength = op.getEffectiveLength;
       if (inlineAttrKeys != null) {
         if (op.containsAttrs(inlineAttrKeys, strictKeysCheck)) {
           parts.add(
             DeltaRangeResult(
               delta: Delta.fromOperations(
-                [
-                  op,
-                ],
+                <Operation>[op],
               ),
               startOffset: globalOffset,
               endOffset: globalOffset + opLength,
@@ -173,7 +171,7 @@ extension EssentialsQueryExt on QueryDelta {
           );
         }
         if (parts.isNotEmpty && onlyOnce) {
-          return [...parts];
+          return <DeltaRangeResult>[...parts];
         }
         globalOffset += opLength;
         continue;
@@ -183,10 +181,10 @@ extension EssentialsQueryExt on QueryDelta {
           if (op.containsAttrs(blockAttrKeys, strictKeysCheck)) {
             int startOffset = globalOffset;
             int endOffset = globalOffset + opLength;
-            List<Operation> operationsWithAttrsApplied = [];
+            List<Operation> operationsWithAttrsApplied = <Operation>[];
             for (int index2 = index - 1; index2 >= 0; index2--) {
-              final beforeOp = inputClone.elementAt(index2);
-              final opData = beforeOp.data;
+              final Operation beforeOp = inputClone.elementAt(index2);
+              final Object? opData = beforeOp.data;
               if (op.isEmbed) break;
               if (opData is String) {
                 if (opData.contains('\n')) break;
@@ -194,7 +192,7 @@ extension EssentialsQueryExt on QueryDelta {
               }
               startOffset -= beforeOp.getEffectiveLength;
             }
-            operationsWithAttrsApplied = [...operationsWithAttrsApplied, op];
+            operationsWithAttrsApplied = <Operation>[...operationsWithAttrsApplied, op];
             parts.add(
               DeltaRangeResult(
                 delta: Delta.fromOperations(operationsWithAttrsApplied),
@@ -205,7 +203,7 @@ extension EssentialsQueryExt on QueryDelta {
           }
         }
         if (parts.isNotEmpty && onlyOnce) {
-          return [...parts];
+          return <DeltaRangeResult>[...parts];
         }
         globalOffset += opLength;
         continue;
@@ -213,11 +211,9 @@ extension EssentialsQueryExt on QueryDelta {
       if (inlineAttrs != null) {
         if (mapEquals(inlineAttrs, op.attributes)) {
           parts.add(
-            DeltaRangeResult(
+            DeltaMatch(
               delta: Delta.fromOperations(
-                [
-                  op,
-                ],
+                <Operation>[op],
               ),
               startOffset: globalOffset,
               endOffset: globalOffset + opLength,
@@ -225,7 +221,7 @@ extension EssentialsQueryExt on QueryDelta {
           );
         }
         if (parts.isNotEmpty && onlyOnce) {
-          return [...parts];
+          return <DeltaRangeResult>[...parts];
         }
         globalOffset += opLength;
         continue;
@@ -246,25 +242,26 @@ extension EssentialsQueryExt on QueryDelta {
               }
               startOffset -= beforeOp.getEffectiveLength;
             }
-            operationsWithAttrsApplied = [...operationsWithAttrsApplied, op];
+            operationsWithAttrsApplied = <Operation>[...operationsWithAttrsApplied, op];
             parts.add(
-              DeltaRangeResult(
+              DeltaMatch(
                 delta: Delta.fromOperations(operationsWithAttrsApplied),
                 startOffset: startOffset.nonNegativeInt,
                 endOffset: endOffset.nonNegativeInt,
+                input: op.attributes,
               ),
             );
           }
         }
         if (parts.isNotEmpty && onlyOnce) {
-          return [...parts];
+          return <DeltaRangeResult>[...parts];
         }
         globalOffset += opLength;
         continue;
       }
       globalOffset += opLength;
     }
-    return [...parts];
+    return <DeltaRangeResult>[...parts];
   }
 
   /// Internal method to find matches based on a [pattern] or [rawObject] in the [Delta] operations.
@@ -284,28 +281,28 @@ extension EssentialsQueryExt on QueryDelta {
     int? operationOffset,
     bool onlyOnce = false,
   }) {
-    final inputClone = getDelta().denormalize();
+    final Delta inputClone = getDelta().denormalize();
     if (operationOffset != null && (operationOffset < 0 || operationOffset >= inputClone.length)) {
       throw StateError('Invalid offset operation passed [$operationOffset] | available [${inputClone.length}]');
     }
-    List<DeltaRangeResult> parts = [];
+    List<DeltaRangeResult> parts = <DeltaRangeResult>[];
     int globalOffset = globalOpIndexToGlobalCharIndex(operationOffset ?? 0, inputClone.operations);
     for (int offset = operationOffset ?? 0; offset < inputClone.length; offset++) {
       final op = inputClone.elementAt(offset);
       if (parts.isNotEmpty && onlyOnce) {
         return [...parts];
       }
-      if (pattern != null) {
+      if (pattern != null && op.data is String) {
         assert(
           pattern.pattern.trim().isNotEmpty && !pattern.pattern.contains('\n'),
           'the pattern passed cannot be empty or contain new lines',
         );
         final RegExp expression = pattern;
         if (expression.hasMatch(op.data.toString())) {
-          final matches = expression.allMatches(op.data.toString());
-          for (var match in matches) {
+          final Iterable<RegExpMatch> matches = expression.allMatches(op.data.toString());
+          for (RegExpMatch match in matches) {
             final Delta delta = Delta();
-            parts.add(DeltaRangeResult(
+            parts.add(DeltaMatch(
               delta: delta
                 ..insert(
                   op.data.toString().substring(match.start, match.end),
@@ -313,6 +310,7 @@ extension EssentialsQueryExt on QueryDelta {
                 ),
               startOffset: globalOffset + match.start,
               endOffset: globalOffset + match.end,
+              input: match.input,
             ));
             if (parts.isNotEmpty && onlyOnce) {
               return [...parts];
@@ -327,7 +325,7 @@ extension EssentialsQueryExt on QueryDelta {
             final Delta delta = Delta();
             final startOffset = globalOffset;
             final endOffset = op.data is String ? globalOffset + op.data.toString().length : globalOffset + 1;
-            parts.add(DeltaRangeResult(
+            parts.add(DeltaMatch(
               delta: delta
                 ..insert(
                   op.data,
@@ -335,6 +333,7 @@ extension EssentialsQueryExt on QueryDelta {
                 ),
               startOffset: startOffset,
               endOffset: endOffset,
+              input: op.data,
             ));
             if (parts.isNotEmpty && onlyOnce) {
               return [...parts];
@@ -349,10 +348,10 @@ extension EssentialsQueryExt on QueryDelta {
           );
           final RegExp expression = RegExp(rawObject.toString());
           if (expression.hasMatch(op.data.toString())) {
-            final matches = expression.allMatches(op.data.toString());
-            for (var match in matches) {
+            final Iterable<RegExpMatch> matches = expression.allMatches(op.data.toString());
+            for (RegExpMatch match in matches) {
               final Delta delta = Delta();
-              parts.add(DeltaRangeResult(
+              parts.add(DeltaMatch(
                 delta: delta
                   ..insert(
                     op.data.toString().substring(match.start, match.end),
@@ -360,9 +359,10 @@ extension EssentialsQueryExt on QueryDelta {
                   ),
                 startOffset: globalOffset + match.start,
                 endOffset: globalOffset + match.end,
+                input: match.input,
               ));
               if (parts.isNotEmpty && onlyOnce) {
-                return [...parts];
+                return <DeltaRangeResult>[...parts];
               }
             }
           }
@@ -370,7 +370,7 @@ extension EssentialsQueryExt on QueryDelta {
       }
       globalOffset += op.data is String ? op.data!.toString().length : 1;
     }
-    return [...parts];
+    return <DeltaRangeResult>[...parts];
   }
 
   /// Apply any type of Attribute in any part of you text
