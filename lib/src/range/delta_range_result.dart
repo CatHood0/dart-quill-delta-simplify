@@ -13,11 +13,6 @@ class DeltaRangeResult {
   /// The ending position of the range within the [Delta].
   final int endOffset;
 
-  /// Creates an instance of `DeltaRangeResult` with the given [delta], [startOffset], and [endOffset].
-  ///
-  /// - [delta]: The [Delta] object representing the changes.
-  /// - [startOffset]: The starting global offset of the range.
-  /// - [endOffset]: The ending global offset of the range.
   DeltaRangeResult({
     required this.delta,
     required this.startOffset,
