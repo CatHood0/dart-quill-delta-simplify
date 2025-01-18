@@ -421,22 +421,6 @@ extension EssentialsQueryExt on QueryDelta {
     );
   }
 
-  // will remove the block attributes, and, if the len is major than zero
-  // it removes too the inline attrs in range
-  QueryDelta removeFormat({
-    required int offset,
-    required int len,
-  }) {
-    return push(
-      RemoveFormattingCondition(
-        range: DeltaRange(
-          startOffset: offset,
-          endOffset: len <= 0 ? offset : len + offset,
-        ),
-      ),
-    );
-  }
-
   /// Creates a condition where will be inserted the object
   /// at the place that we expect or specify
   ///
