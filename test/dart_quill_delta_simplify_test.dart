@@ -208,6 +208,7 @@ void main() {
       final QueryDelta query = QueryDelta(delta: delta)
         ..format(
           target: 'experimental ',
+          len: null,
           offset: null,
           attribute: Attribute.italic,
           caseSensitive: false,
@@ -427,6 +428,7 @@ void main() {
         ..ignorePart(0, len: 50)
         ..format(
           offset: null,
+          len: null,
           attribute: Attribute.subscript,
           target: 'experimental',
           caseSensitive: false,
@@ -440,6 +442,7 @@ void main() {
         ..ignorePart(55, len: 20)
         ..format(
           offset: null,
+          len: null,
           attribute: Attribute.script,
           target: 'experimental',
           caseSensitive: false,
