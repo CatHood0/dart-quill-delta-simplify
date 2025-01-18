@@ -1,5 +1,6 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/conditions.dart';
+import 'package:dart_quill_delta_simplify/extensions.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/illegal_condition_build_result.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/no_conditions_created_while_build_execution_exception.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
@@ -26,7 +27,8 @@ class QueryDelta {
 
   QueryDelta({
     required Delta delta,
-  }) {
+  })  : assert(delta.isNotEmpty, 'cannot be passed an empty Delta'),
+        assert(delta.last.isNewLineOrBlockInsertion || delta.last.containsNewLine(), 'last operation must contain a new line') {
     _input = Delta.fromOperations(delta.operations);
     params['original_version'] = Delta.fromOperations(delta.operations);
     params['errors'] = <String>[];
