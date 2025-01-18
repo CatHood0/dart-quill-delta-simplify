@@ -1,7 +1,7 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   late Delta delta;
