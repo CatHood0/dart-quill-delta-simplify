@@ -15,12 +15,11 @@ extension DeltaToQuery on Delta {
 extension DeltaDiff on Delta {
   /// Compares the current [Delta] instance with another [Delta] to find differences.
   ///
-  /// - [otherDelta]: The [Delta] instance to compare against.
-  ///
-  /// Returns a [DeltaCompareDiffResult] containing the differences between the two deltas.
+  /// * [otherDelta]: The [Delta] instance to compare against.
   DeltaCompareDiffResult compareDiff(Delta otherDelta) {
-    final QueryDelta query = QueryDelta(delta: this)..params['original_version'] = otherDelta;
-    return query.compareDiff();
+    otherDelta.check();
+    check();
+    return (QueryDelta(delta: this)..params['original_version'] = otherDelta).compareDiff();
   }
 }
 
@@ -28,9 +27,7 @@ extension DeltaDiff on Delta {
 extension DeltaToPlainText on Delta {
   /// Converts the [Delta] into a plain text string.
   ///
-  /// - [embedBuilder]: Optional function to handle embedded objects during conversion.
-  ///
-  /// Returns a [String] representing the plain text.
+  /// * [embedBuilder]: Optional function to handle embedded objects during conversion.
   String toPlain([String Function(Object)? embedBuilder]) => operations
       .map(
         (e) => e.toPlain(
@@ -40,8 +37,6 @@ extension DeltaToPlainText on Delta {
       .join('');
 
   /// Converts the [Delta] into plain text using a custom operation builder.
-  ///
-  /// - [opToPlainBuilder]: A function that defines how to convert each operation to plain text.
   ///
   /// Throws an [UnimplementedError] as this method is not yet implemented.
   String toPlainBuilder(String Function(Operation op) opToPlainBuilder) {
@@ -54,20 +49,22 @@ extension DeltaToPlainText on Delta {
   }
 }
 
-//TODO: improve docs
 /// Provides an extension on [Delta] for easy formatting, insertion, replacement, and deletion.
 extension EasyDelta on Delta {
+  void check() {
+    assert(isNotEmpty, 'operations cannot be empty');
+    assert(last.isNewLineOrBlockInsertion || last.containsNewLine(), 'last operation must be a new line');
+  }
+
   int get getTextLength => operations.getEffectiveLength;
 
   /// Applies a simple format to the [Delta] with the specified parameters.
   ///
-  /// - [offset]: The starting offset for the format.
-  /// - [len]: The length of the text to format.
-  /// - [target]: The target object for the format.
-  /// - [attribute]: The attribute to apply.
-  /// - [onlyOnce]: Whether to format only once.
-  ///
-  /// Returns a new [Delta] with the applied format.
+  /// * [offset]: The starting offset for the format.
+  /// * [len]: The length of the text to format.
+  /// * [target]: The target object for the format.
+  /// * [attribute]: The attribute to apply.
+  /// * [onlyOnce]: Whether to format only once.
   void simpleFormat({
     required int? offset,
     required Attribute attribute,
@@ -93,15 +90,13 @@ extension EasyDelta on Delta {
 
   /// Inserts text into the [Delta] with the specified parameters.
   ///
-  /// - [insert]: The text or object to insert.
-  /// - [target]: The target object for the insertion.
-  /// - [startPoint]: The starting point for the insertion.
-  /// - [left]: Whether to insert to the left of the target.
-  /// - [onlyOnce]: Whether to insert only once.
-  /// - [asDifferentOp]: Whether to treat the insertion as a different operation.
-  /// - [insertAtLastOperation]: Whether to insert at the last operation.
-  ///
-  /// Returns a new [Delta] with the inserted text.
+  /// * [insert]: The text or object to insert.
+  /// * [target]: The target object for the insertion.
+  /// * [startPoint]: The starting point for the insertion.
+  /// * [left]: Whether to insert to the left of the target.
+  /// * [onlyOnce]: Whether to insert only once.
+  /// * [asDifferentOp]: Whether to treat the insertion as a different operation.
+  /// * [insertAtLastOperation]: Whether to insert at the last operation.
   void simpleInsert({
     required Object insert,
     required Object? target,
@@ -131,12 +126,10 @@ extension EasyDelta on Delta {
 
   /// Replaces a range of text in the [Delta] with the specified insertion.
   ///
-  /// - [insertion]: The text or object to insert as a replacement.
-  /// - [range]: The range to replace.
-  /// - [target]: The target object for the replacement.
-  /// - [onlyOnce]: Whether to replace only once.
-  ///
-  /// Returns a new [Delta] with the replaced text.
+  /// * [insertion]: The text or object to insert as a replacement.
+  /// * [range]: The range to replace.
+  /// * [target]: The target object for the replacement.
+  /// * [onlyOnce]: Whether to replace only once.
   void simpleReplace({
     required Object insertion,
     required DeltaRange? range,
@@ -158,11 +151,9 @@ extension EasyDelta on Delta {
 
   /// Deletes a range of text in the [Delta] with the specified length and starting offset.
   ///
-  /// - [target]: The target object for the deletion.
-  /// - [len]: The length of text to delete.
-  /// - [startPointOffset]: The starting offset for the deletion.
-  ///
-  /// Returns a new [Delta] with the deleted text.
+  /// * [target]: The target object for the deletion.
+  /// * [len]: The length of text to delete.
+  /// * [startPointOffset]: The starting offset for the deletion.
   void simpleDelete({
     required Object? target,
     required int? len,
