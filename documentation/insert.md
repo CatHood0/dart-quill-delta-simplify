@@ -30,7 +30,6 @@ QueryDelta insert({
 ```dart
 final Delta delta = Delta()..insert('Hello\n');
 final BuildResult result = QueryDelta(delta: delta).insert(insert: ', world!', startPoint: 5, target: null).build();
-// you can use too: delta.simpleInsert(insert: ', world!', startPoint: 5, target: null);
 print(result.delta); // should print: [{"insert": "Hello, world!⏎"}]
 ```
 
@@ -39,7 +38,6 @@ print(result.delta); // should print: [{"insert": "Hello, world!⏎"}]
 ```dart
 final Delta delta = Delta()..insert('Hello, world!\n');
 final BuildResult result = QueryDelta(delta: delta).insert(insert: {'insert': ' and hello again'}, target: 'world!', left: false, target: null).build();
-// you can use too: delta.simpleInsert(insert: {'insert': ' and hello again'}, target: 'world!', left: false, target: null, startPoint: null);
 print(result.delta); // should print: [{"insert": "Hello, world! and hello again⏎"}]
 ```
 
@@ -48,7 +46,6 @@ print(result.delta); // should print: [{"insert": "Hello, world! and hello again
 final Delta delta = Delta()..insert('Hello, world! \n');
 final Operation operation = Operation.insert('New content', {'bold': true});
 final BuildResult result = QueryDelta(delta: delta).insert(insert: operation, insertAtLastOperation: true, target: null).build();
-// you can use too: delta.simpleInsert(insert: operation, insertAtLastOperation: true, target: null, startPoint: null);
 print(result.delta); // should print: [{"insert": "Hello, world! "}, {"insert": "New content⏎", "attributes": {"bold": true}}]
 ```
 
@@ -64,7 +61,6 @@ final BuildResult result = QueryDelta(delta: delta)
        left: false, 
        caseSensitive: false, // if caseSensitive is true, the last "Marker" word wont be matched 
     ).build();
-// you can use too: delta.simpleInsert(insert: ' Repeated', target: 'marker', startPoint: null, onlyOnce: false, left: false, caseSensitive: false);
 print(result.delta); // should print: [{"insert": "marker Repeated content Marker Repeated⏎"}]
 ```
 
@@ -79,6 +75,5 @@ final BuildResult result = QueryDelta(delta: delta)
        left: false, 
        caseSensitive: true, 
     ).build();
-// you can use too: delta.simpleInsert(insert: 's', target: 'Target', left: false, caseSensitive: true, startPoint: null);
 print(result.delta); // should print: [{"insert": "target is here⏎"}] -- no changes
 ```
