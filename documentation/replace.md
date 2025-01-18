@@ -50,7 +50,7 @@ final BuildResult result = QueryDelta(delta: delta)
       range: const DeltaRange(startOffset: 6, endOffset: 20),
     )
     .build();
-print(result.delta); // [{"insert": "Hello beautiful world!⏎"}] 
+print(result.delta); // [{"insert": "Hello Dart!⏎"}] 
 ```
 
 ### Replace Only Once
