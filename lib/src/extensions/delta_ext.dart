@@ -66,13 +66,16 @@ extension EasyDelta on Delta {
   /// - [len]: The length of the text to format.
   /// - [target]: The target object for the format.
   /// - [attribute]: The attribute to apply.
+  /// - [onlyOnce]: Whether to format only once.
   ///
   /// Returns a new [Delta] with the applied format.
   void simpleFormat({
     required int? offset,
+    required Attribute attribute,
     int? len,
     Object? target,
-    required Attribute attribute,
+    bool onlyOnce = false,
+    bool caseSensitive = false,
   }) {
     final Delta delta = QueryDelta(delta: this)
         .format(
@@ -80,6 +83,8 @@ extension EasyDelta on Delta {
           len: len,
           attribute: attribute,
           target: target,
+          caseSensitive: caseSensitive,
+          onlyOnce: onlyOnce,
         )
         .build()
         .delta;

@@ -231,12 +231,7 @@ List<Operation> replaceCondition(
       globalOffset += opLength;
       continue;
     }
-    if (pattern != null && pattern.hasMatch('$data')) {
-      if (data is! String) {
-        modifiedOps.add(op);
-        globalOffset += opLength;
-        continue;
-      }
+    if (data is String && pattern != null && pattern.hasMatch('$data')) {
       // this is for different matches in a same line
       final Set<DeltaRange> deltaPartsToMerge = <DeltaRange>{};
       final Iterable<RegExpMatch> matches = pattern.allMatches(data);

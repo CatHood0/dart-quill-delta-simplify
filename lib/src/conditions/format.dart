@@ -36,11 +36,18 @@ class FormatCondition extends Condition<List<Operation>> {
   /// of the [Delta] if an offset is specified.
   final int? len;
 
+  /// Specifies whether the format should occur only once.
+  ///
+  /// If `true`, the content will be formatted only once at the specified position or range, even if
+  /// multiple matches are found.
+  final bool onlyOnce;
+
   FormatCondition({
     required super.target,
     required this.attribute,
     super.caseSensitive = false,
     super.key,
+    this.onlyOnce = false,
     this.offset,
     this.len,
   });

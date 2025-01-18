@@ -385,17 +385,19 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [len] is used to know what the len in characters of how many characters will apply the new Attribute
   /// * [attribute] the Attribute that will be applied to the matched text or embed, or the selected text into the range of the [offset] and [len]
   /// * [target] is an alternative to match a portion of the Delta where we need to make the change (can be String or a Map)
+  /// * [onlyOnce] decides if the format should be applied once more time 
   ///
   /// # Notes
   /// 1. If the offset and the len match into a same Operation and the Attribute is block scope, the len will be ignored and only apply the Attribute to the entire Operation
   /// 2. The target by now can only match with text or an Map into a same Operation. This means that you put all document text as a the target, this will never make a match as we expect, since is limited to the object into the Operation
   /// 3. If the Attribute is inline and the len is not passed will throw an assert error
   QueryDelta format({
-    required int? offset,
-    int? len,
     required Attribute attribute,
+    required int? offset,
+    required int? len,
     Object? target,
     bool caseSensitive = false,
+    bool onlyOnce = false,
   }) {
     assert(target == null || (target is String && target.isNotEmpty) || (target is Map && target.isNotEmpty),
         'target can be only String or Map');
@@ -414,6 +416,7 @@ extension EssentialsQueryExt on QueryDelta {
         offset: offset,
         len: len,
         caseSensitive: caseSensitive,
+        onlyOnce: onlyOnce,
       ),
     );
   }

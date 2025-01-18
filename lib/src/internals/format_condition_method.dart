@@ -24,7 +24,7 @@ List<Operation> formatCondition(
 ]) {
   final List<Operation> modifiedOps = <Operation>[];
   final Object? target = condition.target;
-  final RegExp? pattern = target == null || target is Map<String, dynamic> || (target as String? ?? '').isEmpty
+  final RegExp? pattern = !condition.checkIfTargetIsValidToBePattern
       ? null
       : RegExp(
           target as String,
@@ -46,18 +46,21 @@ List<Operation> formatCondition(
   Operation? specialInsertionOp;
   for (int index = 0; index < operations.length; index++) {
     final Operation op = operations.elementAt(index);
-    final Object? data = op.data;
+    final Object data = op.data!;
     final int opLength = op.getEffectiveLength;
+
     if (indexsToIgnore.contains(index)) {
       globalOffset += opLength;
       continue;
     }
+
     // ignore last
     if (indexOfSpecialInsert == index) {
       modifiedOps.add(specialInsertionOp!);
       globalOffset += opLength;
       continue;
     }
+
     if (index + 1 >= operations.length) {
       modifiedOps.add(op);
       globalOffset += opLength;
@@ -70,6 +73,7 @@ List<Operation> formatCondition(
       globalOffset += opLength;
       continue;
     }
+
     if (attr.key == Attribute.style.key) {
       if (target is Map && data is Map) {
         if (mapEquals(target, data)) {
@@ -105,7 +109,7 @@ List<Operation> formatCondition(
       continue;
     }
 
-    if (!conditionOffset.isNegative) {
+    if (conditionOffset >= 0) {
       int currentGlobalOffset = globalOffset + opLength;
       int localStartOffset = (conditionOffset - globalOffset).nonNegativeInt;
       int localEndOffset = ((conditionOffset + conditionLen) - globalOffset).nonNegativeInt;
@@ -248,8 +252,8 @@ List<Operation> formatCondition(
       continue;
     }
     // here start pattern matching
-    if (pattern != null && pattern.hasMatch('$data')) {
-      Iterable<RegExpMatch> matches = pattern.allMatches('$data');
+    if (data is String && pattern != null && pattern.hasMatch(data)) {
+      Iterable<RegExpMatch> matches = pattern.allMatches(data);
       // ignores any exact part match and apply to the entire op
       if (isBlock) {
         final int startOffset = globalOffset;
@@ -320,53 +324,53 @@ List<Operation> formatCondition(
           continue;
         }
       } else {
+        // this is for different matches in a same line
+        final Set<DeltaRange> deltaPartsToMerge = <DeltaRange>{};
+
         for (RegExpMatch match in matches) {
-          int startGlobalOffset = match.start + globalOffset;
-          int endGlobalOffset = match.end + globalOffset;
-          if (partsToIgnore
-              .ignoreOverlap(DeltaRange(startOffset: startGlobalOffset, endOffset: endGlobalOffset))) {
-            modifiedOps.add(op);
-            break;
+          final int localStartOffset = match.start;
+          final int localEndOffset = match.end;
+          if (partsToIgnore.ignoreOverlap(DeltaRange(
+              startOffset: localStartOffset + globalOffset, endOffset: localEndOffset + globalOffset))) {
+            continue;
           }
-          bool wasMatchedAllOperation = match.start == 0 && match.end == data.toString().length || isBlock;
-          int startOffset = match.start + globalOffset;
-          int endOffset = match.end + globalOffset;
-          if (wasMatchedAllOperation) {
-            _isEntireSelectionChangePattern(
-              match: match,
-              globalOffset: globalOffset,
-              attr: attr,
-              indexsToIgnore: indexsToIgnore,
-              data: data,
-              condition: condition,
-              op: op,
-              index: index,
-              modifiedOps: modifiedOps,
-              operations: operations,
-              registerChange: registerChange,
-              noInsertThisOperation: noInsertThisOperation,
-              startOffset: startOffset,
-              endOffset: endOffset,
-            );
-            break;
-          } else {
-            _isNotEntireSelectionChangePattern(
-              match: match,
-              globalOffset: globalOffset,
-              attr: attr,
-              data: data,
-              condition: condition,
-              op: op,
-              index: index,
-              modifiedOps: modifiedOps,
-              operations: operations,
-              registerChange: registerChange,
-              noInsertThisOperation: noInsertThisOperation,
-            );
-            break;
-          }
-          //heres end match for loop
+          deltaPartsToMerge.add(DeltaRange(startOffset: localStartOffset, endOffset: localEndOffset));
         }
+
+        if (deltaPartsToMerge.isEmpty) {
+          modifiedOps.add(op);
+          globalOffset += opLength;
+          continue;
+        }
+
+        final List<Operation> dividedOps = <Operation>[];
+
+        ///TODO: use the parts to merge to create DeltaChanges
+        for (int i = 0; i < deltaPartsToMerge.length; i++) {
+          final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
+          final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
+          if (i == 0) {
+            dividedOps
+              ..add(op.clone(data.substring(0, partToMerge.startOffset)))
+              ..add(op.clone(data.substring(partToMerge.startOffset, partToMerge.endOffset), attr))
+              ..add(
+                op.clone(
+                  data.substring(
+                    partToMerge.endOffset,
+                    nextPartToMerge?.startOffset,
+                  ),
+                ),
+              );
+          } else {
+            dividedOps
+              ..add(op.clone(data.substring(partToMerge.startOffset, partToMerge.endOffset), attr))
+              ..add(
+                op.clone(data.substring(partToMerge.endOffset, nextPartToMerge?.startOffset)),
+              );
+          }
+        }
+        modifiedOps.addAll(dividedOps);
+        if (condition.onlyOnce) onlyAddRest = true;
       }
       globalOffset += opLength;
       continue;
@@ -656,146 +660,4 @@ void _applyInsertingNewOpBlockLevelAttributes({
       type: ChangeType.format,
     ),
   );
-}
-
-void _isEntireSelectionChangePattern({
-  required RegExpMatch match,
-  required int globalOffset,
-  required Object? data,
-  required FormatCondition condition,
-  required Attribute attr,
-  required Operation op,
-  required int index,
-  required List<Operation> modifiedOps,
-  required List<Operation> operations,
-  required Set<int> indexsToIgnore,
-  required void Function(DeltaChange)? registerChange,
-  required Operation? noInsertThisOperation,
-  required int startOffset,
-  required int endOffset,
-}) {
-  // apply the inline attrs
-  Operation mainPartOp = attr.scope == AttributeScope.block ? op : op.clone(null, attr);
-  modifiedOps.add(mainPartOp);
-  // apply block attrs
-  if (attr.scope == AttributeScope.block) {
-    var (int indexToBlockAttributes, List<Operation> ops, _) = searchForBlockAttributes(index + 1, operations);
-    if (indexToBlockAttributes != -1) {
-      Operation nextOp = operations.elementAt(indexToBlockAttributes);
-      Operation blockChangedOp = nextOp.clone(null, attr);
-      if (ops.isNotEmpty) {
-        modifiedOps.addAll(ops);
-        int lastPartIndex = indexToBlockAttributes;
-        while (true) {
-          lastPartIndex -= 1;
-          if (lastPartIndex == index) break;
-          indexsToIgnore.add(lastPartIndex);
-        }
-      }
-      modifiedOps.add(blockChangedOp);
-      registerChange?.call(
-        DeltaChange(
-          change: <String, Object>{
-            'attribute': attr,
-            'changed_op': mainPartOp,
-            'block_level': <String, Object>{
-              'op': blockChangedOp,
-              'removed_attribute': attr.value == null,
-              'index_of_op_before_change': index + 1,
-            },
-          },
-          startOffset: startOffset,
-          endOffset: endOffset + 1,
-          type: ChangeType.format,
-        ),
-      );
-    } else {
-      Operation blockAddedOp = Operation.insert(
-        '\n',
-        attr.toJson(),
-      );
-      modifiedOps.add(blockAddedOp);
-      registerChange?.call(
-        DeltaChange(
-          change: <String, Object>{
-            'attribute': attr,
-            'changed_op': mainPartOp,
-            'block_level': <String, Object>{
-              'op': blockAddedOp,
-              'index_of_op_before_change': index + 1,
-            },
-          },
-          startOffset: startOffset,
-          endOffset: endOffset + 1,
-          type: ChangeType.format,
-        ),
-      );
-    }
-  }
-}
-
-void _isNotEntireSelectionChangePattern({
-  required RegExpMatch match,
-  required int globalOffset,
-  required Object? data,
-  required FormatCondition condition,
-  required Attribute attr,
-  required Operation op,
-  required int index,
-  required List<Operation> modifiedOps,
-  required List<Operation> operations,
-  required void Function(DeltaChange)? registerChange,
-  required Operation? noInsertThisOperation,
-}) {
-  bool isBlockAttr = attr.scope == AttributeScope.block;
-  bool isInlineAttr = attr.scope == AttributeScope.inline;
-  int startOffset = match.start + globalOffset;
-  int endOffset = match.end + globalOffset;
-  String mainPart = data.toString().substring(match.start, match.end);
-  Operation leftPartOp = Operation.insert(data.toString().substring(0, match.start), op.attributes);
-  var (int indexToBlockAttributes, List<Operation> opsAfterCurrentOne, _) = isInlineAttr
-      ? (-1, <Operation>[], -1)
-      : searchForBlockAttributes(
-          index + 1,
-          operations,
-        );
-  List<Operation> mainPartOp = <Operation>[
-    if (mainPart.trim().isNotEmpty)
-      Operation.insert(mainPart, <String, dynamic>{
-        ...?op.attributes,
-        if (isInlineAttr) attr.key: attr.value,
-      }),
-  ];
-  Operation rightPartOp = Operation.insert(data.toString().substring(match.end), op.attributes);
-  // add divided parts
-  modifiedOps.addAll(<Operation>[
-    if (!leftPartOp.ignoreIfEmpty) leftPartOp,
-    ...mainPartOp,
-    if (!rightPartOp.ignoreIfEmpty) rightPartOp,
-    if (isBlockAttr && indexToBlockAttributes == -1)
-      Operation.insert('\n', <String, dynamic>{attr.key: attr.value}),
-  ]);
-  if (indexToBlockAttributes != -1) {
-    modifiedOps.addAll(opsAfterCurrentOne);
-    Operation blockAttrsOp = operations.elementAt(indexToBlockAttributes);
-    Operation blockChangedOp = blockAttrsOp.clone(null, attr);
-    modifiedOps.add(blockChangedOp);
-    registerChange?.call(
-      DeltaChange(
-        change: <String, Object>{
-          'attribute': attr,
-          'changed_op': mainPartOp,
-          'block_level': <String, Object>{
-            'op': blockChangedOp,
-            'removed_attribute': attr.value == null,
-            'index_of_op_before_change': indexToBlockAttributes,
-          },
-        },
-        startOffset: startOffset,
-        endOffset: endOffset + 1,
-        type: ChangeType.format,
-      ),
-    );
-    noInsertThisOperation = blockAttrsOp;
-  }
 }
