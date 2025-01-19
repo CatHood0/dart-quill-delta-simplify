@@ -1,0 +1,40 @@
+name: 🧪 Run Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  tests:
+    name: Check lints and tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Set up Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: 🔍 Verify Dart installation
+        run: dart --version
+
+      - name: 📥 Install dependencies
+        run: dart pub get
+
+      - name: 🔍 Run Dart analysis
+        run: dart analyze
+
+      - name: 🧹 Check Dart code formatting
+        run: dart format --output=none --set-exit-if-changed .
+      
+      - name: 🔍 Preview Dart proposed changes
+        run: dart fix --dry-run
+
+      - name: 📦 Check if package is ready for publishing
+        run: dart pub publish --dry-run
+
+      - name: 🧪 Run dart tests
+        run: dart test
