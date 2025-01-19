@@ -8,16 +8,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:meta/meta.dart';
 
-import '../../delta_changes.dart';
 import '../../delta_ranges.dart';
-import '../util/enums.dart';
 
 @internal
 List<Operation> deleteCondition(
   List<Operation> operations,
   DeleteCondition condition, [
   List<DeltaRange> partsToIgnore = const <DeltaRange>[],
-  void Function(DeltaChange)? registerChange,
   OnCatchCallback? onCatch,
 ]) {
   final List<Operation> modifiedOps = <Operation>[];
@@ -318,7 +315,6 @@ void _pattern({
   required List<Operation> modifiedOps,
   required List<DeltaRange> partsToIgnore,
   required Set<int> indexToIgnore,
-  void Function(DeltaChange)? registerChange,
 }) {
   int indexToInsertSpecialReplace = -1;
   Operation? specialReplacedOperation;
@@ -361,40 +357,13 @@ void _pattern({
         indexToIgnore.add(j);
         localPerRemoveOffset -= nextOpLength;
         if (localPerRemoveOffset <= 0) {
-          registerChange?.call(
-            DeltaChange(
-              change: nextOp,
-              startOffset: cloneGlobal,
-              endOffset: cloneGlobal + nextOpLength,
-              type: ChangeType.delete,
-            ),
-          );
           nonNeedSpecialInsert = true;
           break;
         }
-        registerChange?.call(
-          DeltaChange(
-            change: nextOp,
-            startOffset: cloneGlobal,
-            endOffset: cloneGlobal + nextOpLength,
-            type: ChangeType.delete,
-          ),
-        );
         cloneGlobal += nextOpLength;
         continue;
       } else if (localPerRemoveOffset < nextOpLength) {
         specialReplacedOperation = nextOp.clone(nextData.toString().substring(localPerRemoveOffset));
-        registerChange?.call(
-          DeltaChange(
-            change: <String, Operation>{
-              'original_op': nextOp,
-              'change': specialReplacedOperation,
-            },
-            startOffset: cloneGlobal,
-            endOffset: cloneGlobal + localPerRemoveOffset,
-            type: ChangeType.delete,
-          ),
-        );
         localPerRemoveOffset = 0;
         indexToInsertSpecialReplace = j;
         break;

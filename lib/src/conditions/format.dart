@@ -5,7 +5,6 @@ import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
 import 'package:flutter_quill/flutter_quill.dart' show Attribute;
 
 import '../../conditions.dart';
-import '../change/delta_change.dart';
 import '../range/delta_range.dart';
 
 /// A condition that applies formatting attributes to a [Delta].
@@ -62,14 +61,12 @@ class FormatCondition extends Condition<List<Operation>> {
   List<Operation> build(
     Delta delta, [
     List<DeltaRange> partsToIgnore = const [],
-    void Function(DeltaChange)? registerChange,
     OnCatchCallback? onCatch,
   ]) {
     return formatCondition(
       delta.toList(),
       this,
       partsToIgnore,
-      registerChange,
       onCatch,
     );
   }

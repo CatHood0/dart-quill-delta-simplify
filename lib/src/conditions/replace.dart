@@ -1,5 +1,4 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
-import 'package:dart_quill_delta_simplify/delta_changes.dart';
 import 'package:dart_quill_delta_simplify/delta_ranges.dart';
 import 'package:dart_quill_delta_simplify/src/internals/replace_part_condition_method.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
@@ -43,14 +42,12 @@ class ReplaceCondition extends Condition<List<Operation>> {
   List<Operation> build(
     Delta delta, [
     List<DeltaRange> partsToIgnore = const [],
-    void Function(DeltaChange)? registerChange,
     OnCatchCallback? onCatch,
   ]) {
     return replaceCondition(
       delta.toList(),
       this,
       partsToIgnore,
-      registerChange,
       onCatch,
     );
   }

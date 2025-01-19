@@ -11,10 +11,8 @@ import 'package:dart_quill_delta_simplify/src/util/delta/normalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
 import 'package:meta/meta.dart';
 
-import '../delta_changes.dart';
 import '../delta_ranges.dart';
 import 'build_result.dart';
-import 'util/enums.dart';
 
 /// Represents a query builder for a [Delta] object, allowing modifications and
 /// conditions to be applied to it. The `QueryDelta` class facilitates the creation
@@ -34,7 +32,6 @@ class QueryDelta {
             'last operation must contain a new line') {
     _input = Delta.fromOperations(delta.operations);
     params['original_version'] = Delta.fromOperations(delta.operations);
-    params['errors'] = <String>[];
     params['conditions'] = <Condition>[];
     params['used-conditions'] = <String>[];
   }
@@ -64,10 +61,6 @@ class QueryDelta {
 
   /// If a exception is catched, this will be called.
   QueryDelta catchErr(OnCatchCallback onCatchError) => this..params['catch'] = onCatchError;
-
-  /// Retrieves the cached changes made during the build process, grouped by
-  /// timestamp.
-  Map<String, List<DeltaChange>> get changes => {...?params['cached_changes']};
 
   /// Converts the built [QueryDelta] into a [Delta]. If the build has not been
   /// executed, an exception will be thrown.
@@ -114,12 +107,7 @@ class QueryDelta {
     Delta inputClone = _input.denormalize();
     final List<Condition> conditions = params['conditions'] as List<Condition>;
     final List<DeltaRange> partsToIgnore = <DeltaRange>[];
-    final Map<String, List<DeltaChange>> changes = Map.of(params['cached_changes'] ?? {});
-    final String executedBuildDate = DateTime.now().toIso8601String();
     final OnCatchCallback? onCatch = params['catch'] as OnCatchCallback?;
-    if (changes.isEmpty) {
-      changes[executedBuildDate] = [];
-    }
     for (Condition condition in conditions) {
       final bool wasUsedAlready = params['used-conditions'].contains(condition.key);
       if (preventReuseConditions && wasUsedAlready) continue;
@@ -132,34 +120,12 @@ class QueryDelta {
             endOffset: len == -1 ? len : condition.offset + len,
           ),
         );
-        final DeltaChange change = DeltaChange(
-          change: null,
-          startOffset: condition.offset,
-          endOffset: condition.offset + (condition.len ?? 0),
-          type: ChangeType.ignore,
-        );
-        if (changes.containsKey(executedBuildDate)) {
-          changes[executedBuildDate]?.add(change);
-        } else {
-          changes.addAll({
-            executedBuildDate: [change]
-          });
-        }
         continue;
       }
       if (condition is ReplaceCondition && partsToIgnore.ignoreOverlap(condition.range)) continue;
       final Object? result = condition.build(
         inputClone,
         partsToIgnore,
-        (DeltaChange change) {
-          if (changes.containsKey(executedBuildDate)) {
-            changes[executedBuildDate]?.add(change);
-          } else {
-            changes.addAll({
-              executedBuildDate: [change]
-            });
-          }
-        },
         onCatch,
       );
       if (!wasUsedAlready) params['used-conditions'].add(condition.key);
@@ -233,7 +199,6 @@ class QueryDelta {
     _input = inputClone.normalize();
     final BuildResult result = BuildResult(delta: _input);
     params['result'] = result;
-    params['cached_changes'] = {...changes};
     return result;
   }
 
@@ -246,8 +211,7 @@ class QueryDelta {
       ..params['original_version'] = params['original_version']
       ..params['errors'] = params['errors']
       ..params['conditions'] = params['conditions']
-      ..params['result'] = params['result']
-      ..params['cached_changes'] = params['cached_changes'];
+      ..params['result'] = params['result'];
   }
 
   /// used only by internal resources

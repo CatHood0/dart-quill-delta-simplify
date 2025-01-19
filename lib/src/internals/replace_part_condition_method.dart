@@ -7,8 +7,6 @@ import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import '../../conditions.dart';
-import '../util/enums.dart';
-import '../change/delta_change.dart';
 import '../range/delta_range.dart';
 
 @internal
@@ -16,7 +14,6 @@ List<Operation> replaceCondition(
   List<Operation> operations,
   ReplaceCondition condition, [
   List<DeltaRange> partsToIgnore = const <DeltaRange>[],
-  void Function(DeltaChange)? registerChange,
   OnCatchCallback? onCatch,
 ]) {
   final List<Operation> modifiedOps = <Operation>[];
@@ -101,7 +98,6 @@ List<Operation> replaceCondition(
             index: index,
             operations: operations,
             indexToIgnore: indexToIgnore,
-            registerChange: registerChange,
             onCatch: onCatch,
           );
           if (ignoreCondition) return operations;
@@ -119,21 +115,6 @@ List<Operation> replaceCondition(
             mainOp,
             righOp,
           ]);
-          registerChange?.call(
-            DeltaChange(
-              change: <String, Object>{
-                'original_op': op,
-                'new_ops': <Operation>[
-                  leftOp,
-                  mainOp,
-                  righOp,
-                ],
-              },
-              startOffset: range.startOffset,
-              endOffset: range.startOffset + opLength,
-              type: ChangeType.replace,
-            ),
-          );
         } else if (isListOperation) {
           final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
           final List<Operation> mainOps = <Operation>[...replace];
@@ -144,14 +125,6 @@ List<Operation> replaceCondition(
             ...mainOps,
             righOp,
           ]);
-          registerChange?.call(
-            DeltaChange(
-              change: mainOps,
-              startOffset: range.startOffset,
-              endOffset: range.startOffset + mainOps.getEffectiveLength,
-              type: ChangeType.replace,
-            ),
-          );
         } else {
           final String leftPart = data is! String ? '' : data.substring(0, startOffset);
           final String rightPart =
@@ -161,31 +134,10 @@ List<Operation> replaceCondition(
             data is Map ? null : op.attributes,
           );
           if (mainOp.ignoreIfEmpty) {
-            registerChange?.call(
-              DeltaChange(
-                change: <String, Object>{
-                  'is_selected_op': true,
-                  'len_op': opLength,
-                  'original_op': op,
-                  'replace_by_empty_data': true,
-                },
-                startOffset: startOffset,
-                endOffset: endOffset > opLength ? currentGlobalOffset : endOffset,
-                type: ChangeType.delete,
-              ),
-            );
             globalOffset += opLength;
             continue;
           }
           modifiedOps.add(mainOp);
-          registerChange?.call(
-            DeltaChange(
-              change: mainOp,
-              startOffset: startOffset,
-              endOffset: endOffset,
-              type: ChangeType.replace,
-            ),
-          );
         }
       }
       addRestOfOps = true;
@@ -212,17 +164,6 @@ List<Operation> replaceCondition(
           mainOp = replace;
           modifiedOps.addAll(mainOp as Iterable<Operation>);
         }
-        registerChange?.call(
-          DeltaChange(
-            change: <String, dynamic>{
-              'original_op': op,
-              'change': mainOp,
-            },
-            startOffset: startAndEndOffset,
-            endOffset: startAndEndOffset,
-            type: ChangeType.replace,
-          ),
-        );
         if (condition.onlyOnce) addRestOfOps = true;
         globalOffset += opLength;
         continue;
@@ -231,7 +172,7 @@ List<Operation> replaceCondition(
       globalOffset += opLength;
       continue;
     }
-    if (data is String && pattern != null && pattern.hasMatch('$data')) {
+    if (data is String && pattern != null && pattern.hasMatch(data)) {
       // this is for different matches in a same line
       final Set<DeltaRange> deltaPartsToMerge = <DeltaRange>{};
       final Iterable<RegExpMatch> matches = pattern.allMatches(data);
@@ -252,7 +193,6 @@ List<Operation> replaceCondition(
       StringBuffer buffer = StringBuffer();
       List<Operation> dividedOps = <Operation>[];
 
-      ///TODO: use the parts to merge to create DeltaChanges
       for (int i = 0; i < deltaPartsToMerge.length; i++) {
         final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
         final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
@@ -335,7 +275,6 @@ List<Operation> replaceCondition(
   required int index,
   required List<Operation> operations,
   required List<int> indexToIgnore,
-  void Function(DeltaChange)? registerChange,
   OnCatchCallback? onCatch,
 }) {
   int indexToInsertSpecialReplace = -1;
@@ -343,7 +282,6 @@ List<Operation> replaceCondition(
   bool useOpLength = false;
   bool addRestOfOps = false;
   if (range.endOffset > opLength) {
-    int cloneGlobal = globalOffset;
     int localPerRemoveOffset = range.startOffset != 0 ? 0 : (range.endOffset - opLength).nonNegativeInt;
     if (localPerRemoveOffset == 0) {
       int effectiveOffsetPerRemove = data.toString().substring(startOffset).length;
@@ -364,26 +302,9 @@ List<Operation> replaceCondition(
         localPerRemoveOffset -= nextOpLength;
         indexToIgnore.add(j);
         if (localPerRemoveOffset <= 0) {
-          registerChange?.call(
-            DeltaChange(
-              change: nextOp,
-              startOffset: cloneGlobal,
-              endOffset: cloneGlobal + nextOpLength,
-              type: ChangeType.delete,
-            ),
-          );
           nonNeedSpecialInsert = true;
           break;
         }
-        registerChange?.call(
-          DeltaChange(
-            change: nextOp,
-            startOffset: cloneGlobal,
-            endOffset: cloneGlobal + nextOpLength,
-            type: ChangeType.ignore,
-          ),
-        );
-        cloneGlobal += nextOpLength;
         continue;
       } else if (localPerRemoveOffset < nextOpLength) {
         if (nextData is String) {
@@ -393,22 +314,10 @@ List<Operation> replaceCondition(
           indexToIgnore.add(j);
           nonNeedSpecialInsert = true;
         }
-        registerChange?.call(
-          DeltaChange(
-            change: <String, dynamic>{
-              'original_op': nextOp,
-              'change': specialReplacedOperation,
-            },
-            startOffset: cloneGlobal,
-            endOffset: cloneGlobal + localPerRemoveOffset,
-            type: ChangeType.replace,
-          ),
-        );
         localPerRemoveOffset = 0;
         nonNeedSpecialInsert = false;
         break;
       }
-      cloneGlobal += nextOpLength;
       localPerRemoveOffset -= nextOpLength;
       indexToIgnore.add(j);
     }

@@ -11,7 +11,6 @@ List<Operation> insertCondition(
   List<Operation> operations,
   InsertCondition condition, [
   List<DeltaRange> partsToIgnore = const <DeltaRange>[],
-  void Function(DeltaChange)? registerChange,
   OnCatchCallback? onCatch,
 ]) {
   final DeltaRange? range = condition.range;
@@ -95,21 +94,6 @@ List<Operation> insertCondition(
             mainOp,
             righOp,
           ]);
-          registerChange?.call(
-            DeltaChange(
-              change: <String, Object>{
-                'original_op': op,
-                'new_ops': <Operation>[
-                  leftOp,
-                  mainOp,
-                  righOp,
-                ],
-              },
-              startOffset: range.startOffset,
-              endOffset: range.startOffset + opLength,
-              type: ChangeType.insert,
-            ),
-          );
         } else if (isListOperation) {
           final Operation leftOp = op.clone(ofData is! String ? null : ofData.substring(0, startOffset));
           final List<Operation> mainOp = condition.insertion as List<Operation>;
@@ -119,26 +103,10 @@ List<Operation> insertCondition(
             ...mainOp,
             righOp,
           ]);
-          registerChange?.call(
-            DeltaChange(
-              change: mainOp,
-              startOffset: range.startOffset,
-              endOffset: range.startOffset + mainOp.getEffectiveLength,
-              type: ChangeType.insert,
-            ),
-          );
         } else {
           final String leftPart = ofData is! String ? '' : ofData.substring(0, startOffset);
           final String rightPart = ofData is! String ? '' : ofData.substring(startOffset);
           final Operation mainOp = Operation.insert('$leftPart${condition.insertion}$rightPart', op.attributes);
-          registerChange?.call(
-            DeltaChange(
-              change: mainOp,
-              startOffset: range.startOffset,
-              endOffset: range.startOffset + opLength,
-              type: ChangeType.insert,
-            ),
-          );
           modifiedOps.add(mainOp);
         }
         globalOffset += opLength;
@@ -175,14 +143,6 @@ List<Operation> insertCondition(
             mainOp,
             righOp,
           ]);
-          registerChange?.call(
-            DeltaChange(
-              change: mainOp,
-              startOffset: startGlobalOffset,
-              endOffset: endGlobalOffset,
-              type: ChangeType.insert,
-            ),
-          );
         } else if (isListOperation) {
           final Operation leftOp = Operation.insert(
             ofData.substring(0, condition.left ? startOffset : endOffset),
@@ -198,14 +158,6 @@ List<Operation> insertCondition(
             ...mainOp,
             righOp,
           ]);
-          registerChange?.call(
-            DeltaChange(
-              change: mainOp,
-              startOffset: startGlobalOffset,
-              endOffset: endGlobalOffset,
-              type: ChangeType.insert,
-            ),
-          );
         } else {
           if (condition.asDifferentOp) {
             final Operation leftOp = op.clone(ofData.substring(0, condition.left ? startOffset : endOffset));
@@ -216,26 +168,10 @@ List<Operation> insertCondition(
               mainOp,
               righOp,
             ]);
-            registerChange?.call(
-              DeltaChange(
-                change: mainOp,
-                startOffset: startGlobalOffset,
-                endOffset: endGlobalOffset,
-                type: ChangeType.insert,
-              ),
-            );
           } else {
             final String leftPart = ofData.substring(0, condition.left ? startOffset : endOffset);
             final String rightPart = ofData.substring(condition.left ? startOffset : endOffset);
             final Operation mainOp = op.clone('$leftPart${condition.insertion}$rightPart');
-            registerChange?.call(
-              DeltaChange(
-                change: mainOp,
-                startOffset: startGlobalOffset,
-                endOffset: endGlobalOffset,
-                type: ChangeType.insert,
-              ),
-            );
             modifiedOps.add(mainOp);
           }
         }
@@ -265,7 +201,6 @@ List<Operation> insertCondition(
         StringBuffer buffer = StringBuffer();
         List<Operation> dividedOps = <Operation>[];
 
-        ///TODO: use the parts to merge to create DeltaChanges
         for (int i = 0; i < deltaPartsToMerge.length; i++) {
           final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
           final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
@@ -343,23 +278,11 @@ void _insertAtLast({
   required bool isEmbed,
   required bool isOperation,
   required bool isListOperation,
-  void Function(DeltaChange)? registerChange,
 }) {
   modifiedOps.addAll(<Operation>[...operations]);
   if (operations.isNotEmpty) globalOffset += operations.getEffectiveLength;
-  int startOffset = globalOffset;
-  int endOffset = globalOffset;
   if (isEmbed) {
-    endOffset++;
     final Operation mainOp = Operation.insert(condition.insertion, null);
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     final Operation lastOp = modifiedOps.last;
     if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion) {
       modifiedOps.removeLast();
@@ -369,15 +292,6 @@ void _insertAtLast({
       ..add(Operation.insert('\n'));
   } else if (isOperation) {
     final Operation mainOp = condition.insertion as Operation;
-    endOffset += mainOp.getEffectiveLength;
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     final Operation lastOp = modifiedOps.last;
     if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion && mainOp.isEmbed) {
       modifiedOps.removeLast();
@@ -388,16 +302,6 @@ void _insertAtLast({
     }
   } else if (isListOperation) {
     final List<Operation> mainOp = condition.insertion as List<Operation>;
-    int accumulateLength = mainOp.getEffectiveLength;
-    endOffset += accumulateLength;
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     final Operation lastOp = mainOp.last;
     modifiedOps.addAll(<Operation>[...mainOp]);
     if (!lastOp.isNewLineOrBlockInsertion) {
@@ -405,15 +309,6 @@ void _insertAtLast({
     }
   } else {
     final Operation mainOp = Operation.insert(condition.insertion);
-    endOffset += mainOp.getEffectiveLength;
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     modifiedOps.add(mainOp);
     if (!condition.insertion.toString().contains('\n')) {
       modifiedOps.add(Operation.insert('\n'));
@@ -431,62 +326,22 @@ void _insertAtMap({
   required bool isListOperation,
   required Operation op,
   required int opLength,
-  void Function(DeltaChange)? registerChange,
 }) {
   // here the change starts
-  int startOffset = globalOffset;
-  int endOffset = globalOffset;
   if (!condition.left) {
-    endOffset++;
     modifiedOps.add(op);
   }
   if (isEmbed) {
-    endOffset++;
     final Operation mainOp = Operation.insert(condition.insertion, null);
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     modifiedOps.add(mainOp);
   } else if (isOperation) {
-    endOffset += opLength;
     final Operation mainOp = condition.insertion as Operation;
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     modifiedOps.add(mainOp);
   } else if (isListOperation) {
     final List<Operation> mainOp = condition.insertion as List<Operation>;
-    endOffset += mainOp.getEffectiveLength;
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     modifiedOps.addAll(<Operation>[...mainOp]);
   } else {
-    endOffset += opLength;
     final Operation mainOp = Operation.insert(condition.insertion);
-    registerChange?.call(
-      DeltaChange(
-        change: mainOp,
-        startOffset: startOffset,
-        endOffset: endOffset,
-        type: ChangeType.insert,
-      ),
-    );
     modifiedOps.add(mainOp);
   }
   if (condition.left) {

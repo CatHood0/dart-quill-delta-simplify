@@ -40,14 +40,12 @@ class DeleteCondition extends PointerCondition<int, List<Operation>> {
   List<Operation> build(
     Delta delta, [
     List<DeltaRange> partsToIgnore = const [],
-    void Function(DeltaChange)? registerChange,
     OnCatchCallback? onCatch,
   ]) {
     return deleteCondition(
       delta.toList(),
       this,
       partsToIgnore,
-      registerChange,
       onCatch,
     );
   }

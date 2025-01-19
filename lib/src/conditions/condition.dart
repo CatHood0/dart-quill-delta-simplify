@@ -64,12 +64,10 @@ abstract class Condition<T extends Object?> {
   /// * [delta]: The `Delta` object to evaluate against.
   /// * [partsToIgnore]: An optional list of `DeltaRange` objects that represent parts to be ignored
   ///   during evaluation. Default is an empty list.
-  /// * [registerChange]: An optional callback function to register changes that occur during the evaluation.
   /// * [onCatch]: An optional callback function to catch any exception that occur during the evaluation.
   T build(
     Delta delta, [
     List<DeltaRange> partsToIgnore = const [],
-    void Function(DeltaChange)? registerChange,
     void Function(Exception err)? onCatch,
   ]);
 

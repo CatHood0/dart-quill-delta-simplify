@@ -9,9 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:meta/meta.dart';
-import '../../delta_changes.dart';
 import '../../delta_ranges.dart';
-import '../util/enums.dart';
 import '../util/search_block_attribute.dart';
 
 @internal
@@ -19,7 +17,6 @@ List<Operation> formatCondition(
   List<Operation> operations,
   FormatCondition condition, [
   List<DeltaRange> partsToIgnore = const <DeltaRange>[],
-  void Function(DeltaChange)? registerChange,
   OnCatchCallback? onCatch,
 ]) {
   final List<Operation> modifiedOps = <Operation>[];
@@ -87,18 +84,6 @@ List<Operation> formatCondition(
           }
           Operation changedOp = op.clone(null, attr, true);
           modifiedOps.add(changedOp);
-          registerChange?.call(
-            DeltaChange(
-              change: <String, Object>{
-                'original_op': op,
-                'change': changedOp,
-                'attr_applied': attr,
-              },
-              startOffset: startAndEndOffset,
-              endOffset: startAndEndOffset,
-              type: ChangeType.format,
-            ),
-          );
           globalOffset += opLength;
           continue;
         }
@@ -175,7 +160,6 @@ List<Operation> formatCondition(
               indexsToIgnore: indexsToIgnore,
               modifiedOps: modifiedOps,
               operations: <Operation>[...operations],
-              registerChange: registerChange,
               onCatch: onCatch,
             );
             if (ignoreCondition) return operations;
@@ -204,7 +188,6 @@ List<Operation> formatCondition(
                 opsAfterCurrentOne: opsAfterCurrentOne,
                 modifiedOps: modifiedOps,
                 operations: operations,
-                registerChange: registerChange,
                 noInsertThisOperation: noInsertThisOperation,
                 startOffset: startOffset,
                 endOffset: endOffset,
@@ -221,7 +204,6 @@ List<Operation> formatCondition(
                 index: index,
                 modifiedOps: modifiedOps,
                 operations: operations,
-                registerChange: registerChange,
                 noInsertThisOperation: noInsertThisOperation,
                 startOffset: startOffset,
                 endOffset: endOffset,
@@ -256,8 +238,6 @@ List<Operation> formatCondition(
       Iterable<RegExpMatch> matches = pattern.allMatches(data);
       // ignores any exact part match and apply to the entire op
       if (isBlock) {
-        final int startOffset = globalOffset;
-        final int endOffset = globalOffset + opLength;
         var (int indexToBlockAttributes, List<Operation> opsAfterCurrentOne, _) = searchForBlockAttributes(
           index + 1,
           operations,
@@ -279,22 +259,6 @@ List<Operation> formatCondition(
           Operation blockChangedOp = blockAttrsOp.clone(null, attr);
           modifiedOps.add(blockChangedOp);
           indexsToIgnore.add(indexToBlockAttributes);
-          registerChange?.call(
-            DeltaChange(
-              change: <String, Object>{
-                'attribute': attr,
-                'applied_to': op,
-                'block_level': <String, Object?>{
-                  'op': blockChangedOp,
-                  'removed': attr.value == null,
-                  'index_of_op_before_change': indexToBlockAttributes,
-                },
-              },
-              startOffset: startOffset,
-              endOffset: endOffset + 1,
-              type: ChangeType.format,
-            ),
-          );
           globalOffset += opLength;
           continue;
         } else if (indexToBlockAttributes == -1 && attr.value != null) {
@@ -303,21 +267,6 @@ List<Operation> formatCondition(
             attr.toJson(),
           );
           modifiedOps.add(blockAddedOp);
-          registerChange?.call(
-            DeltaChange(
-              change: <String, Object>{
-                'attribute': attr,
-                'applied_to': op,
-                'block_level': <String, Object>{
-                  'op': blockAddedOp,
-                  'index_of_op_before_change': index + 1,
-                },
-              },
-              startOffset: startOffset,
-              endOffset: endOffset + 1,
-              type: ChangeType.format,
-            ),
-          );
         } else if (attr.value == null) {
           noInsertThisOperation = op;
           globalOffset += opLength;
@@ -345,7 +294,6 @@ List<Operation> formatCondition(
 
         final List<Operation> dividedOps = <Operation>[];
 
-        ///TODO: use the parts to merge to create DeltaChanges
         for (int i = 0; i < deltaPartsToMerge.length; i++) {
           final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
           final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
@@ -397,7 +345,6 @@ List<Operation> formatCondition(
   required List<Operation> modifiedOps,
   required int endOffset,
   required List<Operation> operations,
-  required void Function(DeltaChange)? registerChange,
   required OnCatchCallback? onCatch,
 }) {
   final bool isBlock = attr.scope == AttributeScope.block;
@@ -497,25 +444,9 @@ List<Operation> formatCondition(
         charactersPerChange -= nextOpLength;
         if (charactersPerChange <= 0) {
           indexsToIgnore.add(nextIndex);
-          registerChange?.call(
-            DeltaChange(
-              change: nextOp,
-              startOffset: cloneGlobal,
-              endOffset: cloneGlobal + nextOpLength,
-              type: ChangeType.delete,
-            ),
-          );
           nonNeedSpecialInsert = true;
           break;
         }
-        registerChange?.call(
-          DeltaChange(
-            change: nextOp,
-            startOffset: cloneGlobal,
-            endOffset: cloneGlobal + nextOpLength,
-            type: ChangeType.ignore,
-          ),
-        );
         cloneGlobal += nextOpLength;
         indexsToIgnore.add(nextIndex);
         continue;
@@ -538,17 +469,6 @@ List<Operation> formatCondition(
           modifiedOps.add(nextOp);
         }
         indexsToIgnore.add(nextIndex);
-        registerChange?.call(
-          DeltaChange(
-            change: <String, dynamic>{
-              'original_op': nextOp,
-              'change': specialInsertionOp,
-            },
-            startOffset: cloneGlobal,
-            endOffset: cloneGlobal + charactersPerChange,
-            type: ChangeType.replace,
-          ),
-        );
         charactersPerChange = 0;
         break;
       }
@@ -587,7 +507,6 @@ void _applyBlockLevelAttributesMergingWithExistOp({
   required List<Operation> modifiedOps,
   required List<Operation> operations,
   required Set<int> indexsToIgnore,
-  required void Function(DeltaChange)? registerChange,
   required Operation? noInsertThisOperation,
   required int startOffset,
   required int endOffset,
@@ -606,22 +525,6 @@ void _applyBlockLevelAttributesMergingWithExistOp({
   Operation blockChangedOp = blockAttrsOp.clone(null, attr);
   indexsToIgnore.add(indexToBlockAttributes);
   modifiedOps.add(blockChangedOp);
-  registerChange?.call(
-    DeltaChange(
-      change: <String, Object>{
-        'attribute': attr,
-        'changed_op': op,
-        'block_level': <String, Object>{
-          'op': blockChangedOp,
-          'removed_attribute': attr.value == null,
-          'index_of_op_before_change': indexToBlockAttributes,
-        },
-      },
-      startOffset: startOffset,
-      endOffset: endOffset,
-      type: ChangeType.format,
-    ),
-  );
   noInsertThisOperation = blockAttrsOp;
 }
 
@@ -634,7 +537,6 @@ void _applyInsertingNewOpBlockLevelAttributes({
   required int index,
   required List<Operation> modifiedOps,
   required List<Operation> operations,
-  required void Function(DeltaChange)? registerChange,
   required Operation? noInsertThisOperation,
   required int startOffset,
   required int endOffset,
@@ -645,19 +547,4 @@ void _applyInsertingNewOpBlockLevelAttributes({
     attr.toJson(),
   );
   modifiedOps.add(blockAddedOp);
-  registerChange?.call(
-    DeltaChange(
-      change: <String, Object?>{
-        'attribute': attr,
-        'changed_op': mainPartOp,
-        'block_level_added': <String, Object>{
-          'op': blockAddedOp,
-          'index_of_op_before_change': index + 1,
-        },
-      },
-      startOffset: startOffset,
-      endOffset: endOffset,
-      type: ChangeType.format,
-    ),
-  );
 }
