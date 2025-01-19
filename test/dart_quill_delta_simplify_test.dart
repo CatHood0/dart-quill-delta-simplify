@@ -308,9 +308,102 @@ void main() {
         ..build(preventReuseConditions: true);
       expect(query.toDelta(), expected);
     });
-    test('should ignore delete into defined range', () {});
-    test('should ignore insert into defined range', () {});
-    test('should ignore format into defined range', () {});
+    test('should ignore delete into defined range', () {
+      delta
+        ..insert('Where we can test our different experimental type changes\n')
+        ..insert('And we can also match some parts\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta\n')
+        ..insert('Where we can test our different type changes\n')
+        ..insert('And we can also match some parts\n');
+      final QueryDelta query = QueryDelta(delta: delta)
+        ..ignorePart(0, len: 50)
+        ..delete(
+          target: null,
+          startPoint: 58,
+          lengthOfDeletion: 13,
+        )
+        ..build();
+      expect(query.toDelta(), expected);
+      // add a new ignore that wrap the part "type"
+      // and now the delete shouldn't be do it since that part now
+      // need to be ignored
+      query
+        ..ignorePart(60, len: 20)
+        ..delete(
+          target: null,
+          startPoint: 63,
+          lengthOfDeletion: 4,
+        )
+        ..build(preventReuseConditions: true);
+      expect(query.toDelta(), expected);
+    });
+    test('should ignore insert into defined range', () {
+      delta
+        ..insert('Where we can test our different experimental type changes\n')
+        ..insert('And we can also match some parts\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta\n')
+        ..insert('Where we can test our different Non experimental type changes\n')
+        ..insert('And we can also match some parts\n');
+      final QueryDelta query = QueryDelta(delta: delta)
+        ..ignorePart(0, len: 50)
+        ..insert(
+          insert: 'Non ',
+          target: 0,
+          startPoint: 59,
+          left: true,
+        )
+        ..build();
+      expect(query.toDelta(), expected);
+      // add a new ignore that wrap the part "type"
+      // and now the insert shouldn't be do it since that part now
+      // need to be ignored
+      query
+        ..ignorePart(60, len: 20)
+        ..insert(
+          insert: 's',
+          target: 0,
+          startPoint: 74,
+          left: true,
+        )
+        ..build(preventReuseConditions: true);
+      expect(query.toDelta(), expected);
+    });
+    test('should ignore format into defined range', () {
+      delta
+        ..insert('Where we can test our different experimental type changes\n')
+        ..insert('And we can also match some parts\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta\n')
+        ..insert('Where we can test our different ')
+        ..insert('experimental', {'color': 'red'})
+        ..insert(' type changes\n')
+        ..insert('And we can also match some parts\n');
+      final QueryDelta query = QueryDelta(delta: delta)
+        ..ignorePart(0, len: 50)
+        ..format(
+          target: null,
+          attribute: const ColorAttribute('red'),
+          offset: 59,
+          len: 12,
+        )
+        ..build();
+      expect(query.toDelta(), expected);
+      // add a new ignore that wrap the part "type"
+      // and now the format shouldn't be do it since that part now
+      // need to be ignored
+      query
+        ..ignorePart(60, len: 20)
+        ..format(
+          target: null,
+          attribute: const ColorAttribute('blue'),
+          offset: 77,
+          len: 3,
+        )
+        ..build(preventReuseConditions: true);
+      expect(query.toDelta(), expected);
+    });
     // match
     test('should ignore replace into matched range', () {
       delta
@@ -543,7 +636,6 @@ void main() {
         ],
       );
     });
-    test('should get all operations with underline and align parts', () {});
   });
 
   // using delta only
