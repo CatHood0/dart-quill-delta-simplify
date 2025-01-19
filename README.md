@@ -4,7 +4,7 @@ This is a package designed to facilitate the manipulation of documents in the **
 
 ## ❓ Why use it?
 
-Manipulating content in a `Delta` format can be complex, especially when dealing with advanced operations such as searching, modifying, or filtering text based on specific attributes or patterns. `**Dart Quill Delta Simplify**` addresses this complexity by providing a user-friendly and powerful API that allows developers to perform these operations with ease and precision.
+Manipulating content in a `Delta` format can be complex, especially when dealing with advanced operations such as searching, modifying, or filtering text based on specific attributes or patterns. `Dart Quill Delta Simplify` addresses this complexity by providing a user-friendly and powerful API that allows developers to perform these operations with ease and precision.
 
 ## 📚 Documentation
 
