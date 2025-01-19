@@ -3,15 +3,7 @@
 First, we would like to thank you for your time and efforts on this project, we appreciate it.
 
 > [!IMPORTANT]
-> At this time, we prioritize bug fixes and code quality improvements over new features. 
-> Please refrain from submitting large changes to add new features, as they might
-> not be merged, and exceptions may made.
-> We encourage you to create an issue or reach out beforehand, 
-> explaining your proposed changes and their rationale for a higher chance of acceptance. Thank you!
-
-> [!NOTE]
 > The package version in `pubspec.yaml` **should not be modified**; this will be handled by a maintainer or CI.
-> Add updates to `Unreleased` in `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
 ## 📋 Development Prerequisites
 
