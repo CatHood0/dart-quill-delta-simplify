@@ -73,17 +73,20 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
 void main() {
-  final Delta delta = Delta()..insert('Hello World!');
+  final Delta delta = Delta()
+    ..insert('Hello', {'bold': true})
+    ..insert(' World');
   final QueryDelta queryDelta = QueryDelta(delta: delta);
 
-  // Delete 'World' from the text
-  final BuildResult newDelta = queryDelta.delete(
-    target: 'World',
-    startPoint: 6,
-    lengthOfDeletion: 5,
-  );
+  // Format the second part 'World' to be italic
+  final BuildResult updatedDelta = queryDelta.format(
+    attribute: Attribute.italic,
+    offset: 6,
+    len: 5,
+  ).build();
 
-  print(newDelta.delta); // Should print 'Hello!'
+  // Should print [{"insert": "Hello"}, {"insert": " World", "attributes": {"italic": true}}] 
+  print(updatedDelta.delta); 
 }
 ```
 
