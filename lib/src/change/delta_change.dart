@@ -19,22 +19,6 @@ class DeltaChange {
   /// such as insertions, deletions, or formatting changes.
   final ChangeType type;
 
-  /// Creates a [DeltaChange] instance with the given parameters.
-  ///
-  /// - `change`: The content of the change, which can be of any type.
-  /// - `startOffset`: The position where the change starts.
-  /// - `endOffset`: The position where the change ends.
-  /// - `type`: The type of the change (e.g., insert, delete, format).
-  ///
-  /// Example usage:
-  /// ```dart
-  /// final deltaChange = DeltaChange(
-  ///   change: 'Hello, world!',
-  ///   startOffset: 0,
-  ///   endOffset: 13,
-  ///   type: ChangeType.insert,
-  /// );
-  /// ```
   DeltaChange({
     required this.change,
     required this.startOffset,
