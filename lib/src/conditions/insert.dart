@@ -1,7 +1,6 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/src/internals/insert_condition_method.dart';
 
-import 'package:dart_quill_delta_simplify/delta_changes.dart';
 import 'package:dart_quill_delta_simplify/delta_ranges.dart';
 import '../util/typedef.dart';
 import 'condition.dart';
