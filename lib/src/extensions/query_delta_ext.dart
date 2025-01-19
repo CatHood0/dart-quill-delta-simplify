@@ -13,10 +13,6 @@ import '../util/op_offset_to_char_offset.dart';
 extension EssentialsQueryExt on QueryDelta {
   /// Matches operations in a [Delta] based on specific [Attributes].
   ///
-  /// This extension method allows for matching operations that have specific inline or block attributes, or that contain specific attribute keys.
-  ///
-  /// ## Parameters:
-  ///
   /// * [inlineAttrs]: A map of inline attributes to match against the operations.
   /// * [blockAttrs]: A map of block attributes to match against the operations.
   /// * [blockAttrKeys]: A list of block attribute keys to match against the operations.
@@ -24,35 +20,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [strictKeysCheck]: If `true`, only matches operations where all specified keys are present.
   /// * [onlyOnce]: If `true`, stops searching after the first match.
   ///
-  /// ## Usage:
-  ///
-  /// ### Matching Attributes
-  ///
-  /// This method can be used to match operations that have specific attributes. For instance, you might want to find all headers within the Delta that have a specific attribute:
-  ///
-  /// ```dart
-  /// final results = QueryDelta(delta: <your-delta>).matchAttributes(
-  ///   inlineAttrs: {'bold': true},
-  ///   blockAttrs: {'header': 1},
-  /// );
-  /// ```
-  ///
-  /// ### Matching Attribute Keys
-  ///
-  /// Alternatively, you can match operations based on the presence of specific attribute keys, without considering their values:
-  ///
-  /// ```dart
-  /// final results = QueryDelta(delta: <your-delta>).matchAttributes(
-  ///   blockAttrKeys: ['header'],
-  ///   inlineAttrKeys: ['bold', 'italic'],
-  ///   strictKeysCheck: false,
-  /// );
-  /// ```
-  ///
-  /// ## Assertions:
-  ///
-  /// * Ensures that if attributes or keys are provided, they are not empty.
-  /// * Throws an [IllegalParamsValuesException] if no matching criteria are provided.
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#matching-attributes)
   List<DeltaRangeResult> matchAttributes({
     required Attributes? inlineAttrs,
     required Attributes? blockAttrs,
@@ -80,13 +48,11 @@ extension EssentialsQueryExt on QueryDelta {
 
   /// Finds the first match of the given [pattern] or [rawObject] in the [Delta] operations list.
   ///
-  /// This method searches the operations for a pattern or object match and returns the first occurrence wrapped in a [DeltaRangeResult].
-  ///
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
   ///
-  /// Throws [IllegalParamsValuesException] if the provided [operationOffset] is out of bounds.
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#first-match)
   DeltaRangeResult firstMatch(
     RegExp? pattern,
     Object? rawObject, {
@@ -109,14 +75,12 @@ extension EssentialsQueryExt on QueryDelta {
 
   /// Finds all matches of the given [pattern] or [rawObject] in the [Delta] operations list.
   ///
-  /// This method searches the operations for all occurrences of the pattern or object match and returns each occurrence wrapped in a [DeltaRangeResult].
-  ///
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
   /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
   ///
-  /// Returns a list of all matching [DeltaRangeResult]s.
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#multiple-occurrence-matches)
   List<DeltaRangeResult> allMatches(
     RegExp? pattern,
     Object? rawObject, {
@@ -132,16 +96,12 @@ extension EssentialsQueryExt on QueryDelta {
 
   /// Matches operations in the [Delta] based on specified attributes.
   ///
-  /// This method checks for operations that match either inline or block attributes and returns them wrapped in [DeltaRangeResult].
-  ///
   /// * [inlineAttrs]: The inline attributes to match.
   /// * [blockAttrs]: The block attributes to match.
   /// * [blockAttrKeys]: The keys of block attributes to match.
   /// * [inlineAttrKeys]: The keys of inline attributes to match.
   /// * [strictKeysCheck]: Whether to strictly check for the presence of all keys. Defaults to `true`.
   /// * [onlyOnce]: Whether to stop after the first match is found. Defaults to `false`.
-  ///
-  /// Returns a list of matching [DeltaRangeResult]s.
   List<DeltaRangeResult> _attrMatches({
     Attributes? inlineAttrs,
     Attributes? blockAttrs,
@@ -264,15 +224,11 @@ extension EssentialsQueryExt on QueryDelta {
 
   /// Internal method to find matches based on a [pattern] or [rawObject] in the [Delta] operations.
   ///
-  /// This method performs the core logic for matching operations based on the specified criteria.
-  ///
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationOffset]: The starting offset in the operations to begin the search.
   /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive.
   /// * [onlyOnce]: Whether to stop after the first match is found.
-  ///
-  /// Returns a list of matching [DeltaRangeResult]s.
   List<DeltaRangeResult> _matches({
     RegExp? pattern,
     Object? rawObject,
@@ -381,6 +337,8 @@ extension EssentialsQueryExt on QueryDelta {
   /// 1. If the offset and the len match into a same Operation and the Attribute is block scope, the len will be ignored and only apply the Attribute to the entire Operation
   /// 2. The target by now can only match with text or an Map into a same Operation. This means that you put all document text as a the target, this will never make a match as we expect, since is limited to the object into the Operation
   /// 3. If the Attribute is inline and the len is not passed will throw an assert error
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/format.md#usage-examples)
   QueryDelta format({
     required Attribute attribute,
     required int? offset,
@@ -411,8 +369,7 @@ extension EssentialsQueryExt on QueryDelta {
     );
   }
 
-  /// Creates a condition where will be inserted the object
-  /// at the place that we expect or specify
+  /// Creates a condition where will be inserted the object at the place that we expect or specify
   ///
   /// * [insert] is the object that gonna be inserted into the [Delta]
   /// * [target] is an object that could be a [String] or a [Map<String, dynamic>] that is used to match a part of the data of a [Operation] or directly match with all [Operation]
@@ -439,6 +396,8 @@ extension EssentialsQueryExt on QueryDelta {
   /// # Note
   /// if [startPoint] is not null, then the object will be inserted at that point
   /// and [possibleTarget], [left], and [onlyOnce] params will be ignored
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/insert.md#usage-examples)
   QueryDelta insert({
     required Object insert,
     required Object? target,
@@ -495,10 +454,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [onlyOnce]: A boolean indicating whether the deletion should happen only once. Default is `true`.
   /// * [caseSensitive]: A boolean indicating whether the deletion should be case-sensitive. Default is `false`.
   ///
-  /// Throws an [AssertionError] if any of the following conditions are violated:
-  /// * [startPoint] is less than 0.
-  /// * [lengthOfDeletion] is less than or equal to 0.
-  /// * [target] is either `'\n'` or `'\\n'`.
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/delete.md#usage-examples)
   QueryDelta delete({
     required Object? target,
     required int? startPoint,
@@ -528,7 +484,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [onlyOnce]: A boolean indicating whether the replacement should occur only once. Default is `false`.
   /// * [caseSensitive]: A boolean indicating whether the replacement should be case-sensitive. Default is `false`.
   ///
-  /// Throws an [Exception] if both `target` and `range` are `null` or invalid.
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/replace.md#usage-examples)
   QueryDelta replace({
     required Object replace,
     required Object? target,
@@ -554,6 +510,8 @@ extension EssentialsQueryExt on QueryDelta {
 extension DiffDelta on QueryDelta {
   /// Get the diff between the changes applied to the Delta
   /// and the original version passed before run the build method
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/diff.md#usage-examples)
   ///
   /// _This method is inspired on the original diff method from Delta class [Here](https://github.com/FlutterQuill/dart-quill-delta/blob/141f86aff1a65c14a25a6b59d76a4a23781c5d91/lib/src/delta/delta.dart#L310-L323)_
   DeltaCompareDiffResult compareDiff({bool cleanupSemantic = true}) {
