@@ -5,6 +5,12 @@ homepage: https://github.com/FlutterQuill/dart-quill-delta-simplify
 documentation: https://github.com/FlutterQuill/dart-quill-delta-simplify
 issue_tracker: https://github.com/FlutterQuill/dart-quill-delta-simplify/issues
 
+topics: 
+  - flutter-quill 
+  - quill-delta
+  - delta 
+  - quill
+
 environment:
   sdk: ^3.0.0
 
