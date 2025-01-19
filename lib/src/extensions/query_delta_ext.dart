@@ -462,9 +462,6 @@ extension EssentialsQueryExt on QueryDelta {
     bool onlyOnce = true,
     bool caseSensitive = false,
   }) {
-    assert(startPoint == null || startPoint >= 0, 'startPoint cannot be less of zero');
-    assert(lengthOfDeletion == null || lengthOfDeletion > 0, 'lengthOfDeletion cannot be less of zero');
-    assert(target != '\n' && target != '\\n', 'target cannot be "\\n"');
     return push(
       DeleteCondition(
         target: target,
