@@ -4,7 +4,7 @@ const _exceptionName = 'IllegalOperationPassedException';
 
 /// A custom exception class that represents an illegal operation passed to a process.
 ///
-/// The `IllegalOperationPassedException` is thrown when an invalid operation is passed, 
+/// The `IllegalOperationPassedException` is thrown when an invalid operation is passed,
 /// particularly when the operation is expected to be an "insert" but is instead a "retain" or "delete".
 /// This exception helps identify and debug issues related to incorrect operations in a sequence.
 class IllegalOperationPassedException implements Exception {

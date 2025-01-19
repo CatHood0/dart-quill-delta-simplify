@@ -25,8 +25,8 @@ List<Operation> deleteCondition(
           caseSensitive: condition.caseSensitive,
         )
       : null;
-  final DeltaRange? range =
-      DeltaRange.deltaRangeOrNull(condition.offset, condition.offset + condition.lengthOfDeletion);
+  final DeltaRange? range = DeltaRange.deltaRangeOrNull(
+      condition.offset, condition.offset + condition.lengthOfDeletion);
   if (range != null) {
     // if len of deletion is major than the entire Delta
     // then just return a empty list of operations
@@ -50,7 +50,9 @@ List<Operation> deleteCondition(
   for (int index = 0; index < ops.length; index++) {
     final Operation op = ops.elementAt(index);
     final Object? data = op.data;
-    if (data == null) throw IllegalOperationPassedException(illegal: op, expected: op.clone(''));
+    if (data == null)
+      throw IllegalOperationPassedException(
+          illegal: op, expected: op.clone(''));
     final int opLength = op.getEffectiveLength;
     if (indexToIgnore.contains(index)) {
       globalOffset += opLength;
@@ -165,11 +167,13 @@ void _pattern({
   for (RegExpMatch match in matches) {
     final startOffset = match.start;
     final endOffset = match.end;
-    if (partsToIgnore
-        .ignoreOverlap(DeltaRange(startOffset: startOffset + globalOffset, endOffset: endOffset + globalOffset))) {
+    if (partsToIgnore.ignoreOverlap(DeltaRange(
+        startOffset: startOffset + globalOffset,
+        endOffset: endOffset + globalOffset))) {
       continue;
     }
-    deltaPartsToMerge.add(DeltaRange(startOffset: startOffset, endOffset: endOffset));
+    deltaPartsToMerge
+        .add(DeltaRange(startOffset: startOffset, endOffset: endOffset));
   }
   if (deltaPartsToMerge.isEmpty) {
     modifiedOps.add(op);
@@ -179,7 +183,8 @@ void _pattern({
   StringBuffer buffer = StringBuffer();
   for (int i = 0; i < deltaPartsToMerge.length; i++) {
     final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
-    final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
+    final DeltaRange? nextPartToMerge =
+        deltaPartsToMerge.elementAtOrNull(i + 1);
     if (data is String) {
       if (i == 0) {
         buffer
@@ -236,7 +241,8 @@ void _pattern({
     return (lengthOfDeletion, null, -1);
   }
   int len = lengthOfDeletion.toInt();
-  final int localStartOffset = (range.startOffset - globalOffset).nonNegativeInt;
+  final int localStartOffset =
+      (range.startOffset - globalOffset).nonNegativeInt;
   final int localEndOffset = (range.endOffset - globalOffset).nonNegativeInt;
   // if the len is major than the length of the operation
   if (localEndOffset > opLength) {
@@ -255,7 +261,8 @@ void _pattern({
       }
     }
 
-    final (specialOp, specialIndex, useOpLength, addRestOfOps, cachedLen) = _removeInRange(
+    final (specialOp, specialIndex, useOpLength, addRestOfOps, cachedLen) =
+        _removeInRange(
       range: range,
       globalOffset: globalOffset,
       partsToIgnore: partsToIgnore,
@@ -336,12 +343,15 @@ void _pattern({
       if (nextOp == null) break;
       final Object? nextData = nextOp.data;
       final int nextOpLength = nextOp.getEffectiveLength;
-      if (partsToIgnore
-          .ignoreOverlap(DeltaRange(startOffset: cloneGlobal, endOffset: cloneGlobal + nextOpLength))) {
+      if (partsToIgnore.ignoreOverlap(DeltaRange(
+          startOffset: cloneGlobal, endOffset: cloneGlobal + nextOpLength))) {
         continue;
       }
-      if (localPerRemoveOffset > nextOpLength || localPerRemoveOffset == nextOpLength) {
-        if (nextData is String && !nextOp.isNewLineOrBlockInsertion && localPerRemoveOffset == nextOpLength) {
+      if (localPerRemoveOffset > nextOpLength ||
+          localPerRemoveOffset == nextOpLength) {
+        if (nextData is String &&
+            !nextOp.isNewLineOrBlockInsertion &&
+            localPerRemoveOffset == nextOpLength) {
           final indexToAttrs = j + 1;
           if (indexToAttrs < operations.length) {
             final blockAttrOp = operations.elementAt(indexToAttrs);
@@ -363,7 +373,8 @@ void _pattern({
         cloneGlobal += nextOpLength;
         continue;
       } else if (localPerRemoveOffset < nextOpLength) {
-        specialReplacedOperation = nextOp.clone(nextData.toString().substring(localPerRemoveOffset));
+        specialReplacedOperation =
+            nextOp.clone(nextData.toString().substring(localPerRemoveOffset));
         localPerRemoveOffset = 0;
         indexToInsertSpecialReplace = j;
         break;
@@ -388,5 +399,11 @@ void _pattern({
     useOpLength = true;
     addRestOfOps = true;
   }
-  return (specialReplacedOperation, indexToInsertSpecialReplace, useOpLength, addRestOfOps, len);
+  return (
+    specialReplacedOperation,
+    indexToInsertSpecialReplace,
+    useOpLength,
+    addRestOfOps,
+    len
+  );
 }

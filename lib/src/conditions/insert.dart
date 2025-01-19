@@ -59,9 +59,13 @@ class InsertCondition extends Condition<List<Operation>> {
     required super.target,
     super.caseSensitive = false,
     super.key,
-  })  : assert(range == null || range.startOffset >= 0, 'startOffset cannot be less than zero'),
+  })  : assert(range == null || range.startOffset >= 0,
+            'startOffset cannot be less than zero'),
         assert(
-          insertion is String || insertion is Map || insertion is Operation || insertion is List<Operation>,
+          insertion is String ||
+              insertion is Map ||
+              insertion is Operation ||
+              insertion is List<Operation>,
           'Cannot be inserted ${insertion.runtimeType} that is unknown. '
           'The unique types accepted by this insertions is: "String", "Map", "Operation" and "List<Operation>"',
         );

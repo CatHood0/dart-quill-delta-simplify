@@ -15,7 +15,7 @@ int globalOpIndexToGlobalCharIndex(int operationOffset, List<Operation> delta) {
 
 @internal
 int getOperationIndexFromCharOffset(int charOffset, List<Operation> delta) {
-  if(charOffset <= 0) return 0;
+  if (charOffset <= 0) return 0;
   int globalOffset = 0;
   for (int index = 0; index < delta.length; index++) {
     final opLength = delta.elementAt(index).getEffectiveLength;

@@ -76,7 +76,8 @@ List<Operation> formatCondition(
         if (mapEquals(target, data)) {
           int startAndEndOffset = globalOffset;
           if (partsToIgnore.ignoreOverlap(
-            DeltaRange(startOffset: startAndEndOffset, endOffset: startAndEndOffset),
+            DeltaRange(
+                startOffset: startAndEndOffset, endOffset: startAndEndOffset),
           )) {
             modifiedOps.add(op);
             globalOffset += opLength;
@@ -97,10 +98,13 @@ List<Operation> formatCondition(
     if (conditionOffset >= 0) {
       int currentGlobalOffset = globalOffset + opLength;
       int localStartOffset = (conditionOffset - globalOffset).nonNegativeInt;
-      int localEndOffset = ((conditionOffset + conditionLen) - globalOffset).nonNegativeInt;
-      if ((currentGlobalOffset > conditionOffset || conditionOffset == 0) && !onlyAddRest) {
+      int localEndOffset =
+          ((conditionOffset + conditionLen) - globalOffset).nonNegativeInt;
+      if ((currentGlobalOffset > conditionOffset || conditionOffset == 0) &&
+          !onlyAddRest) {
         onlyAddRest = true;
-        if (partsToIgnore.ignoreOverlap(DeltaRange(startOffset: startOffset, endOffset: endOffset))) {
+        if (partsToIgnore.ignoreOverlap(
+            DeltaRange(startOffset: startOffset, endOffset: endOffset))) {
           modifiedOps.add(op);
           globalOffset += opLength;
           continue;
@@ -109,20 +113,29 @@ List<Operation> formatCondition(
         // we need to add traversal part
         final bool useOpLength = localEndOffset > opLength;
         final bool willNeedTraverse = localEndOffset > opLength;
-        var (int indexToBlockAttributes, List<Operation> opsAfterCurrentOne, _) = searchForBlockAttributes(
+        var (
+          int indexToBlockAttributes,
+          List<Operation> opsAfterCurrentOne,
+          _
+        ) = searchForBlockAttributes(
           index + 1,
           operations,
           globalOffset,
           true,
         );
         if (data is String) {
-          final Operation leftOp = op.clone(data.substring(0, localStartOffset));
-          final Operation? rightOp = willNeedTraverse || localStartOffset == 0 && localEndOffset == 0
-              ? null
-              : op.clone(data.substring(localEndOffset > opLength ? localStartOffset : localEndOffset));
+          final Operation leftOp =
+              op.clone(data.substring(0, localStartOffset));
+          final Operation? rightOp =
+              willNeedTraverse || localStartOffset == 0 && localEndOffset == 0
+                  ? null
+                  : op.clone(data.substring(localEndOffset > opLength
+                      ? localStartOffset
+                      : localEndOffset));
           final String textPart = localStartOffset == 0 && localEndOffset == 0
               ? data
-              : data.substring(localStartOffset, useOpLength ? opLength : localEndOffset);
+              : data.substring(
+                  localStartOffset, useOpLength ? opLength : localEndOffset);
           // when is block, we don't need to calculate the other part that need to be removed
           // because we with block attrs, only need to be applied to the new lines into the range (offset + len)
           int charactersPerChange = rightOp == null && endOffset > opLength
@@ -238,7 +251,11 @@ List<Operation> formatCondition(
       Iterable<RegExpMatch> matches = pattern.allMatches(data);
       // ignores any exact part match and apply to the entire op
       if (isBlock) {
-        var (int indexToBlockAttributes, List<Operation> opsAfterCurrentOne, _) = searchForBlockAttributes(
+        var (
+          int indexToBlockAttributes,
+          List<Operation> opsAfterCurrentOne,
+          _
+        ) = searchForBlockAttributes(
           index + 1,
           operations,
           globalOffset,
@@ -280,10 +297,12 @@ List<Operation> formatCondition(
           final int localStartOffset = match.start;
           final int localEndOffset = match.end;
           if (partsToIgnore.ignoreOverlap(DeltaRange(
-              startOffset: localStartOffset + globalOffset, endOffset: localEndOffset + globalOffset))) {
+              startOffset: localStartOffset + globalOffset,
+              endOffset: localEndOffset + globalOffset))) {
             continue;
           }
-          deltaPartsToMerge.add(DeltaRange(startOffset: localStartOffset, endOffset: localEndOffset));
+          deltaPartsToMerge.add(DeltaRange(
+              startOffset: localStartOffset, endOffset: localEndOffset));
         }
 
         if (deltaPartsToMerge.isEmpty) {
@@ -296,11 +315,15 @@ List<Operation> formatCondition(
 
         for (int i = 0; i < deltaPartsToMerge.length; i++) {
           final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
-          final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
+          final DeltaRange? nextPartToMerge =
+              deltaPartsToMerge.elementAtOrNull(i + 1);
           if (i == 0) {
             dividedOps
               ..add(op.clone(data.substring(0, partToMerge.startOffset)))
-              ..add(op.clone(data.substring(partToMerge.startOffset, partToMerge.endOffset), attr))
+              ..add(op.clone(
+                  data.substring(
+                      partToMerge.startOffset, partToMerge.endOffset),
+                  attr))
               ..add(
                 op.clone(
                   data.substring(
@@ -311,9 +334,13 @@ List<Operation> formatCondition(
               );
           } else {
             dividedOps
-              ..add(op.clone(data.substring(partToMerge.startOffset, partToMerge.endOffset), attr))
+              ..add(op.clone(
+                  data.substring(
+                      partToMerge.startOffset, partToMerge.endOffset),
+                  attr))
               ..add(
-                op.clone(data.substring(partToMerge.endOffset, nextPartToMerge?.startOffset)),
+                op.clone(data.substring(
+                    partToMerge.endOffset, nextPartToMerge?.startOffset)),
               );
           }
         }
@@ -372,7 +399,8 @@ List<Operation> formatCondition(
         indexsToIgnore.add(nextIndex);
         cloneGlobal += nextOpLength;
         continue;
-      } else if (nextOp.isNewLineOrBlockInsertion && (cloneGlobal + nextOpLength) < charactersPerChange) {
+      } else if (nextOp.isNewLineOrBlockInsertion &&
+          (cloneGlobal + nextOpLength) < charactersPerChange) {
         modifiedOps.add(nextOp.clone(null, attr));
         indexsToIgnore.add(nextIndex);
         cloneGlobal += nextOpLength;
@@ -388,7 +416,8 @@ List<Operation> formatCondition(
         }
         modifiedOps.add(nextOp);
         // check if next is last op (it is always ignored)
-        var (int indexToNextBlockAttributes, List<Operation> ops, _) = searchForBlockAttributes(
+        var (int indexToNextBlockAttributes, List<Operation> ops, _) =
+            searchForBlockAttributes(
           nextIndex + 1,
           operations,
           cloneGlobal,
@@ -409,9 +438,12 @@ List<Operation> formatCondition(
             }
           }
           // adds the new version of the new line with the attr
-          modifiedOps.add(operations.elementAt(indexToNextBlockAttributes).clone(null, attr));
+          modifiedOps.add(operations
+              .elementAt(indexToNextBlockAttributes)
+              .clone(null, attr));
         } else {
-          if (attr.value != null) modifiedOps.add(Operation.insert('\n', attr.toJson()));
+          if (attr.value != null)
+            modifiedOps.add(Operation.insert('\n', attr.toJson()));
         }
         nonNeedSpecialInsert = true;
         break;
@@ -430,14 +462,17 @@ List<Operation> formatCondition(
         charactersPerChange -= nextOpLength;
         continue;
       }
-      if (charactersPerChange > nextOpLength || charactersPerChange == nextOpLength) {
+      if (charactersPerChange > nextOpLength ||
+          charactersPerChange == nextOpLength) {
         modifiedOps.add(
           nextData is! String
               ? nextOp
               : nextOp.clone(
-                  nextData
-                      .toString()
-                      .substring(0, charactersPerChange > nextOpLength ? nextOpLength : charactersPerChange),
+                  nextData.toString().substring(
+                      0,
+                      charactersPerChange > nextOpLength
+                          ? nextOpLength
+                          : charactersPerChange),
                   attr,
                 ),
         );
@@ -478,7 +513,8 @@ List<Operation> formatCondition(
     indexsToIgnore.add(nextIndex);
   }
   if (indexOfSpecialInsert == -1 && !nonNeedSpecialInsert && !blockMode) {
-    final int maxLength = Delta.fromOperations([...operations]..removeLast()).toPlain().length;
+    final int maxLength =
+        Delta.fromOperations([...operations]..removeLast()).toPlain().length;
     final err = DeltaRangeError.range(
       endOffset,
       0,
@@ -488,11 +524,23 @@ List<Operation> formatCondition(
     );
     if (onCatch != null) {
       onCatch.call(err);
-      return (specialInsertionOp, indexOfSpecialInsert, nonNeedSpecialInsert, blockMode, true);
+      return (
+        specialInsertionOp,
+        indexOfSpecialInsert,
+        nonNeedSpecialInsert,
+        blockMode,
+        true
+      );
     }
     throw err;
   }
-  return (specialInsertionOp, indexOfSpecialInsert, nonNeedSpecialInsert, blockMode, false);
+  return (
+    specialInsertionOp,
+    indexOfSpecialInsert,
+    nonNeedSpecialInsert,
+    blockMode,
+    false
+  );
 }
 
 void _applyBlockLevelAttributesMergingWithExistOp({

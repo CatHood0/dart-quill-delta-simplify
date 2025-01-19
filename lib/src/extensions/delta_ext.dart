@@ -19,7 +19,8 @@ extension DeltaDiff on Delta {
   DeltaCompareDiffResult compareDiff(Delta otherDelta) {
     otherDelta.check();
     check();
-    return (QueryDelta(delta: this)..params.originalDelta = otherDelta).compareDiff();
+    return (QueryDelta(delta: this)..params.originalDelta = otherDelta)
+        .compareDiff();
   }
 }
 
@@ -42,7 +43,9 @@ extension DeltaToPlainText on Delta {
   String toPlainBuilder(String Function(Operation op) opToPlainBuilder) {
     StringBuffer buffer = StringBuffer();
     for (Operation op in operations) {
-      if (!op.isInsert) throw IllegalOperationPassedException(illegal: op, expected: op.clone(''));
+      if (!op.isInsert)
+        throw IllegalOperationPassedException(
+            illegal: op, expected: op.clone(''));
       buffer.write(opToPlainBuilder(op));
     }
     return buffer.toString();
@@ -112,7 +115,8 @@ extension EasyDelta on Delta {
 
   void check() {
     assert(isNotEmpty, 'operations cannot be empty');
-    assert(last.isNewLineOrBlockInsertion || last.containsNewLine(), 'last operation must be a new line');
+    assert(last.isNewLineOrBlockInsertion || last.containsNewLine(),
+        'last operation must be a new line');
   }
 
   int get getTextLength => operations.getEffectiveLength;

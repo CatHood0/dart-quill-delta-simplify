@@ -19,7 +19,8 @@ import 'package:meta/meta.dart';
     final Operation nextOp = delta.elementAt(index);
     // ignore last
     if (nextOp.isBlockLevelInsertion ||
-        (returnANonBlockLevelInsertionIndexIfNeeded && nextOp.isNewLineOrBlockInsertion)) {
+        (returnANonBlockLevelInsertionIndexIfNeeded &&
+            nextOp.isNewLineOrBlockInsertion)) {
       return (index, opsBeforeBlock, cloneOffset);
     }
     // check if there are some newlines into the data, and if it is, then ignore because

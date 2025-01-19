@@ -57,7 +57,8 @@ List<Operation> replaceCondition(
       final int currentGlobalOffset = globalOffset + (opLength);
       final int startOffset = (range.startOffset - globalOffset).nonNegativeInt;
       final int endOffset = (range.endOffset - globalOffset).nonNegativeInt;
-      final bool replaceIsOutOfRangeOfThisOperation = range.startOffset >= currentGlobalOffset;
+      final bool replaceIsOutOfRangeOfThisOperation =
+          range.startOffset >= currentGlobalOffset;
       // check if we only need to add this operation
       // since we are out of the range of the
       // replace operation
@@ -85,10 +86,16 @@ List<Operation> replaceCondition(
         // we need to check first if is we really need to search for other operations to replace
         // because if the cursor selection if into the operation range, then we don't need to
         // make unnecessary traversal operations
-        bool isIntoRange = range.startOffset < currentGlobalOffset && range.endOffset <= currentGlobalOffset;
+        bool isIntoRange = range.startOffset < currentGlobalOffset &&
+            range.endOffset <= currentGlobalOffset;
         if (!isIntoRange) {
-          final (Operation? specialOp, int specialIndex, bool useOpLength, bool addRest, bool ignoreCondition) =
-              _mergeIfNeeded(
+          final (
+            Operation? specialOp,
+            int specialIndex,
+            bool useOpLength,
+            bool addRest,
+            bool ignoreCondition
+          ) = _mergeIfNeeded(
             range: range,
             globalOffset: globalOffset,
             opLength: opLength,
@@ -106,29 +113,36 @@ List<Operation> replaceCondition(
           indexToInsertSpecialReplace = specialIndex;
         }
         if (isEmbed || isOperation) {
-          final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
-          final Operation mainOp = isEmbed ? Operation.insert(replace) : replace as Operation;
-          final Operation righOp =
-              op.clone(data is! String ? null : data.substring(endOffset > opLength ? opLength : endOffset));
+          final Operation leftOp =
+              op.clone(data is! String ? null : data.substring(0, startOffset));
+          final Operation mainOp =
+              isEmbed ? Operation.insert(replace) : replace as Operation;
+          final Operation righOp = op.clone(data is! String
+              ? null
+              : data.substring(endOffset > opLength ? opLength : endOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             mainOp,
             righOp,
           ]);
         } else if (isListOperation) {
-          final Operation leftOp = op.clone(data is! String ? null : data.substring(0, startOffset));
+          final Operation leftOp =
+              op.clone(data is! String ? null : data.substring(0, startOffset));
           final List<Operation> mainOps = <Operation>[...replace];
-          final Operation righOp =
-              op.clone(data is! String ? null : data.substring(endOffset > opLength ? opLength : endOffset));
+          final Operation righOp = op.clone(data is! String
+              ? null
+              : data.substring(endOffset > opLength ? opLength : endOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             ...mainOps,
             righOp,
           ]);
         } else {
-          final String leftPart = data is! String ? '' : data.substring(0, startOffset);
-          final String rightPart =
-              data is! String ? '' : data.substring(endOffset > opLength ? opLength : endOffset);
+          final String leftPart =
+              data is! String ? '' : data.substring(0, startOffset);
+          final String rightPart = data is! String
+              ? ''
+              : data.substring(endOffset > opLength ? opLength : endOffset);
           final Operation mainOp = Operation.insert(
             '$leftPart$replace$rightPart',
             data is Map ? null : op.attributes,
@@ -147,8 +161,8 @@ List<Operation> replaceCondition(
     if (target is Map && data is Map) {
       if (mapEquals(target, data)) {
         int startAndEndOffset = globalOffset;
-        if (partsToIgnore
-            .ignoreOverlap(DeltaRange(startOffset: startAndEndOffset, endOffset: startAndEndOffset))) {
+        if (partsToIgnore.ignoreOverlap(DeltaRange(
+            startOffset: startAndEndOffset, endOffset: startAndEndOffset))) {
           modifiedOps.add(op);
           globalOffset += opLength;
           continue;
@@ -179,11 +193,13 @@ List<Operation> replaceCondition(
       for (RegExpMatch match in matches) {
         final localStartOffset = match.start;
         final localEndOffset = match.end;
-        if (partsToIgnore.ignoreOverlap(
-            DeltaRange(startOffset: localStartOffset + globalOffset, endOffset: localEndOffset + globalOffset))) {
+        if (partsToIgnore.ignoreOverlap(DeltaRange(
+            startOffset: localStartOffset + globalOffset,
+            endOffset: localEndOffset + globalOffset))) {
           continue;
         }
-        deltaPartsToMerge.add(DeltaRange(startOffset: localStartOffset, endOffset: localEndOffset));
+        deltaPartsToMerge.add(DeltaRange(
+            startOffset: localStartOffset, endOffset: localEndOffset));
       }
       if (deltaPartsToMerge.isEmpty) {
         modifiedOps.add(op);
@@ -195,7 +211,8 @@ List<Operation> replaceCondition(
 
       for (int i = 0; i < deltaPartsToMerge.length; i++) {
         final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
-        final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
+        final DeltaRange? nextPartToMerge =
+            deltaPartsToMerge.elementAtOrNull(i + 1);
         if (replace is String) {
           if (i == 0) {
             buffer
@@ -244,7 +261,8 @@ List<Operation> replaceCondition(
             dividedOps.add(replace as Operation);
           }
           dividedOps.add(
-            op.clone(data.substring(partToMerge.endOffset, nextPartToMerge?.startOffset)),
+            op.clone(data.substring(
+                partToMerge.endOffset, nextPartToMerge?.startOffset)),
           );
         }
         //end of match loop
@@ -282,10 +300,15 @@ List<Operation> replaceCondition(
   bool useOpLength = false;
   bool addRestOfOps = false;
   if (range.endOffset > opLength) {
-    int localPerRemoveOffset = range.startOffset != 0 ? 0 : (range.endOffset - opLength).nonNegativeInt;
+    int localPerRemoveOffset = range.startOffset != 0
+        ? 0
+        : (range.endOffset - opLength).nonNegativeInt;
     if (localPerRemoveOffset == 0) {
-      int effectiveOffsetPerRemove = data.toString().substring(startOffset).length;
-      localPerRemoveOffset = ((range.endOffset - range.startOffset) - effectiveOffsetPerRemove).nonNegativeInt;
+      int effectiveOffsetPerRemove =
+          data.toString().substring(startOffset).length;
+      localPerRemoveOffset =
+          ((range.endOffset - range.startOffset) - effectiveOffsetPerRemove)
+              .nonNegativeInt;
     }
     // in some cases, we are selecting an entire operation
     // and does not need to be replaced a special part of the ops
@@ -298,7 +321,8 @@ List<Operation> replaceCondition(
       if (nextOp == null) break;
       final Object? nextData = nextOp.data;
       final int nextOpLength = nextOp.getEffectiveLength;
-      if (localPerRemoveOffset > nextOpLength || localPerRemoveOffset == nextOpLength) {
+      if (localPerRemoveOffset > nextOpLength ||
+          localPerRemoveOffset == nextOpLength) {
         localPerRemoveOffset -= nextOpLength;
         indexToIgnore.add(j);
         if (localPerRemoveOffset <= 0) {
@@ -308,7 +332,8 @@ List<Operation> replaceCondition(
         continue;
       } else if (localPerRemoveOffset < nextOpLength) {
         if (nextData is String) {
-          specialReplacedOperation = nextOp.clone(nextData.substring(localPerRemoveOffset));
+          specialReplacedOperation =
+              nextOp.clone(nextData.substring(localPerRemoveOffset));
           indexToInsertSpecialReplace = j;
         } else {
           indexToIgnore.add(j);
@@ -332,12 +357,24 @@ List<Operation> replaceCondition(
       );
       if (onCatch != null) {
         onCatch.call(err);
-        return (specialReplacedOperation, indexToInsertSpecialReplace, useOpLength, addRestOfOps, true);
+        return (
+          specialReplacedOperation,
+          indexToInsertSpecialReplace,
+          useOpLength,
+          addRestOfOps,
+          true
+        );
       }
       throw err;
     }
     useOpLength = true;
     addRestOfOps = true;
   }
-  return (specialReplacedOperation, indexToInsertSpecialReplace, useOpLength, addRestOfOps, false);
+  return (
+    specialReplacedOperation,
+    indexToInsertSpecialReplace,
+    useOpLength,
+    addRestOfOps,
+    false
+  );
 }

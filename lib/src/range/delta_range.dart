@@ -94,7 +94,8 @@ class DeltaRange {
     if (this == otherPart || identical(this, otherPart)) return true;
 
     // Check for exact match with same offset but different end
-    if (otherPart.hasSameOffset && otherPart.endOffset > endOffset) return false;
+    if (otherPart.hasSameOffset && otherPart.endOffset > endOffset)
+      return false;
 
     // Get limits of the current range
     final localStartOffset = startOffset;
@@ -102,14 +103,18 @@ class DeltaRange {
 
     // Get limits of the other range
     final otherStartOffset = otherPart.startOffset;
-    final otherEndOffset = otherPart.endOffset == -1 ? double.infinity : otherPart.endOffset;
+    final otherEndOffset =
+        otherPart.endOffset == -1 ? double.infinity : otherPart.endOffset;
 
     // Check for overlap or touching edges
-    return (otherStartOffset >= localStartOffset && otherEndOffset <= localEndOffset) || // Fully contained
+    return (otherStartOffset >= localStartOffset &&
+            otherEndOffset <= localEndOffset) || // Fully contained
         (strictPartial
-            ? (otherStartOffset <= localEndOffset && otherEndOffset >= localStartOffset)
+            ? (otherStartOffset <= localEndOffset &&
+                otherEndOffset >= localStartOffset)
             : (otherStartOffset < localEndOffset &&
-                otherEndOffset > localStartOffset)); // Partial or touching overlap
+                otherEndOffset >
+                    localStartOffset)); // Partial or touching overlap
   }
 
   @override

@@ -44,12 +44,16 @@ extension OperationToPlain on Operation {
   /// Converts the operation to its plain text representation.
   String toPlain({String Function(Object embedData)? embedBuilder}) {
     if (isRetain || isDelete || isEmpty || data == null) return '';
-    return data is String ? '$data' : embedBuilder?.call(data!) ?? _kObjectReplacementCharacter;
+    return data is String
+        ? '$data'
+        : embedBuilder?.call(data!) ?? _kObjectReplacementCharacter;
   }
 
   /// Checks if the operation's data is empty.
   bool get ignoreIfEmpty {
-    return data == null || data is String && (data.toString().trim().isEmpty) || (data is Map && (data as Map).isEmpty);
+    return data == null ||
+        data is String && (data.toString().trim().isEmpty) ||
+        (data is Map && (data as Map).isEmpty);
   }
 }
 
@@ -58,10 +62,13 @@ extension OperationToPlain on Operation {
 extension CheckOperation on Operation {
   /// Checks if the operation represents a block-level insertion (e.g., a newline with attributes).
   bool get isBlockLevelInsertion =>
-      data is String && ('$data'.hasOnlyNewLines || '$data' == '\n') && attributes != null;
+      data is String &&
+      ('$data'.hasOnlyNewLines || '$data' == '\n') &&
+      attributes != null;
 
   /// Checks if the operation represents a new line.
-  bool get isNewLine => data is String && ('$data'.hasOnlyNewLines || '$data' == '\n');
+  bool get isNewLine =>
+      data is String && ('$data'.hasOnlyNewLines || '$data' == '\n');
 
   /// Checks if the operation contains embedded data.
   bool get isEmbed => data is Map;
@@ -87,7 +94,9 @@ extension CloneOperation on Operation {
   /// * [attribute]: An optional attribute to replace or add to the operation.
   /// * [replaceCurrentByNewAttr]: If true, the existing attributes are replaced by the new attribute.
   Operation clone(Object? newData,
-      [Attribute? attribute, bool replaceCurrentByNewAttr = false, bool withoutAttrs = false]) {
+      [Attribute? attribute,
+      bool replaceCurrentByNewAttr = false,
+      bool withoutAttrs = false]) {
     final Map<String, dynamic> attrs = <String, dynamic>{...?attributes};
     if (attribute != null) {
       if (attribute.value == null) {

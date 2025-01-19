@@ -28,8 +28,10 @@ class DeltaRangeResult {
   }
 
   @override
-  int get hashCode => delta.hashCode ^ startOffset.hashCode ^ endOffset.hashCode;
+  int get hashCode =>
+      delta.hashCode ^ startOffset.hashCode ^ endOffset.hashCode;
 
   @override
-  String toString() => 'DeltaRangeResult(delta: [$delta], Offset: [$startOffset, $endOffset])';
+  String toString() =>
+      'DeltaRangeResult(delta: [$delta], Offset: [$startOffset, $endOffset])';
 }

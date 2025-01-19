@@ -21,13 +21,15 @@ List<Operation> insertCondition(
   final bool isOperation = insertion is Operation && insertion.isInsert;
   final bool isListOperation = insertion is List<Operation>;
   if (insertion is Operation && !insertion.isInsert) return operations;
-  final RegExp? pattern =
-      range != null || target == null || (target is String && target.isEmpty) || target is Map<String, dynamic>
-          ? null
-          : RegExp(
-              target as String,
-              caseSensitive: condition.caseSensitive,
-            );
+  final RegExp? pattern = range != null ||
+          target == null ||
+          (target is String && target.isEmpty) ||
+          target is Map<String, dynamic>
+      ? null
+      : RegExp(
+          target as String,
+          caseSensitive: condition.caseSensitive,
+        );
   int globalOffset = 0;
   bool onlyAddRest = false;
   if (condition.insertAtLastOperation) {
@@ -78,35 +80,44 @@ List<Operation> insertCondition(
       final int nextGlocalOffset = globalOffset + (opLength);
       final int startOffset = range.startOffset - globalOffset;
       if (nextGlocalOffset > range.startOffset && !onlyAddRest) {
-        if (partsToIgnore.ignoreOverlap(DeltaRange.onlyStartPoint(startOffset: range.startOffset))) {
+        if (partsToIgnore.ignoreOverlap(
+            DeltaRange.onlyStartPoint(startOffset: range.startOffset))) {
           modifiedOps.add(op);
           globalOffset += opLength;
           continue;
         }
         onlyAddRest = true;
         if (isEmbed || isOperation) {
-          final Operation leftOp = op.clone(ofData is! String ? null : ofData.substring(0, startOffset));
-          final Operation mainOp =
-              isEmbed ? Operation.insert(condition.insertion) : condition.insertion as Operation;
-          final Operation righOp = op.clone(ofData is! String ? null : ofData.substring(startOffset));
+          final Operation leftOp = op.clone(
+              ofData is! String ? null : ofData.substring(0, startOffset));
+          final Operation mainOp = isEmbed
+              ? Operation.insert(condition.insertion)
+              : condition.insertion as Operation;
+          final Operation righOp = op
+              .clone(ofData is! String ? null : ofData.substring(startOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             mainOp,
             righOp,
           ]);
         } else if (isListOperation) {
-          final Operation leftOp = op.clone(ofData is! String ? null : ofData.substring(0, startOffset));
+          final Operation leftOp = op.clone(
+              ofData is! String ? null : ofData.substring(0, startOffset));
           final List<Operation> mainOp = condition.insertion as List<Operation>;
-          final Operation righOp = op.clone(ofData is! String ? null : ofData.substring(startOffset));
+          final Operation righOp = op
+              .clone(ofData is! String ? null : ofData.substring(startOffset));
           modifiedOps.addAll(<Operation>[
             leftOp,
             ...mainOp,
             righOp,
           ]);
         } else {
-          final String leftPart = ofData is! String ? '' : ofData.substring(0, startOffset);
-          final String rightPart = ofData is! String ? '' : ofData.substring(startOffset);
-          final Operation mainOp = Operation.insert('$leftPart${condition.insertion}$rightPart', op.attributes);
+          final String leftPart =
+              ofData is! String ? '' : ofData.substring(0, startOffset);
+          final String rightPart =
+              ofData is! String ? '' : ofData.substring(startOffset);
+          final Operation mainOp = Operation.insert(
+              '$leftPart${condition.insertion}$rightPart', op.attributes);
           modifiedOps.add(mainOp);
         }
         globalOffset += opLength;
@@ -114,7 +125,9 @@ List<Operation> insertCondition(
       }
     }
     // pattern
-    if (ofData is String && pattern != null && pattern.hasMatch(ofData.toString())) {
+    if (ofData is String &&
+        pattern != null &&
+        pattern.hasMatch(ofData.toString())) {
       final Iterable<RegExpMatch> matches = pattern.allMatches(ofData);
       if (matches.length == 1) {
         final RegExpMatch match = matches.single;
@@ -122,7 +135,8 @@ List<Operation> insertCondition(
         final int endGlobalOffset = match.end + globalOffset;
         final int startOffset = match.start;
         final int endOffset = match.end;
-        if (partsToIgnore.ignoreOverlap(DeltaRange(startOffset: startGlobalOffset, endOffset: endGlobalOffset))) {
+        if (partsToIgnore.ignoreOverlap(DeltaRange(
+            startOffset: startGlobalOffset, endOffset: endGlobalOffset))) {
           modifiedOps.add(op);
           globalOffset += opLength;
           continue;
@@ -132,8 +146,9 @@ List<Operation> insertCondition(
             ofData.substring(0, condition.left ? startOffset : endOffset),
             op.attributes,
           );
-          final Operation mainOp =
-              !isOperation ? Operation.insert(condition.insertion, null) : condition.insertion as Operation;
+          final Operation mainOp = !isOperation
+              ? Operation.insert(condition.insertion, null)
+              : condition.insertion as Operation;
           final Operation righOp = Operation.insert(
             ofData.substring(condition.left ? startOffset : endOffset),
             op.attributes,
@@ -160,18 +175,23 @@ List<Operation> insertCondition(
           ]);
         } else {
           if (condition.asDifferentOp) {
-            final Operation leftOp = op.clone(ofData.substring(0, condition.left ? startOffset : endOffset));
+            final Operation leftOp = op.clone(
+                ofData.substring(0, condition.left ? startOffset : endOffset));
             final Operation mainOp = op.clone(condition.insertion);
-            final Operation righOp = op.clone(ofData.substring(condition.left ? startOffset : endOffset));
+            final Operation righOp = op.clone(
+                ofData.substring(condition.left ? startOffset : endOffset));
             modifiedOps.addAll(<Operation>[
               leftOp,
               mainOp,
               righOp,
             ]);
           } else {
-            final String leftPart = ofData.substring(0, condition.left ? startOffset : endOffset);
-            final String rightPart = ofData.substring(condition.left ? startOffset : endOffset);
-            final Operation mainOp = op.clone('$leftPart${condition.insertion}$rightPart');
+            final String leftPart =
+                ofData.substring(0, condition.left ? startOffset : endOffset);
+            final String rightPart =
+                ofData.substring(condition.left ? startOffset : endOffset);
+            final Operation mainOp =
+                op.clone('$leftPart${condition.insertion}$rightPart');
             modifiedOps.add(mainOp);
           }
         }
@@ -184,14 +204,17 @@ List<Operation> insertCondition(
           final int startOffset = match.start;
           final int endOffset = match.end;
           // avoid make a change in a part that need to be ignored
-          if (partsToIgnore.ignoreOverlap(
-              DeltaRange(startOffset: startOffset + globalOffset, endOffset: endOffset + globalOffset))) {
+          if (partsToIgnore.ignoreOverlap(DeltaRange(
+              startOffset: startOffset + globalOffset,
+              endOffset: endOffset + globalOffset))) {
             continue;
           }
           // ensure to take a correct start offset for insertions when the insertion will be
           // do it at the right of the word
-          final int effectiveOffsetToWord = condition.left ? startOffset : endOffset;
-          deltaPartsToMerge.add(DeltaRange(startOffset: effectiveOffsetToWord, endOffset: endOffset));
+          final int effectiveOffsetToWord =
+              condition.left ? startOffset : endOffset;
+          deltaPartsToMerge.add(DeltaRange(
+              startOffset: effectiveOffsetToWord, endOffset: endOffset));
         }
         if (deltaPartsToMerge.isEmpty) {
           modifiedOps.add(op);
@@ -203,7 +226,8 @@ List<Operation> insertCondition(
 
         for (int i = 0; i < deltaPartsToMerge.length; i++) {
           final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
-          final DeltaRange? nextPartToMerge = deltaPartsToMerge.elementAtOrNull(i + 1);
+          final DeltaRange? nextPartToMerge =
+              deltaPartsToMerge.elementAtOrNull(i + 1);
           if (insertion is String) {
             if (i == 0) {
               buffer
@@ -226,7 +250,8 @@ List<Operation> insertCondition(
                 );
             }
           } else if (i == 0) {
-            dividedOps.add(op.clone(ofData.substring(0, partToMerge.startOffset)));
+            dividedOps
+                .add(op.clone(ofData.substring(0, partToMerge.startOffset)));
             if (isEmbed) {
               dividedOps.add(Operation.insert(insertion));
             } else if (isListOperation) {
@@ -250,7 +275,8 @@ List<Operation> insertCondition(
             }
             dividedOps.add(
               op.clone(
-                ofData.substring(partToMerge.endOffset, nextPartToMerge?.startOffset),
+                ofData.substring(
+                    partToMerge.endOffset, nextPartToMerge?.startOffset),
               ),
             );
           }

@@ -32,7 +32,8 @@ class DeleteCondition extends PointerCondition<int, List<Operation>> {
     super.caseSensitive = false,
     super.key,
   })  : assert(target != '\n' && target != '\\n', 'target cannot be "\\n"'),
-        assert(offset == -1 || offset >= 0, 'offset must be equal to or greater than zero (only -1 disables it)'),
+        assert(offset == -1 || offset >= 0,
+            'offset must be equal to or greater than zero (only -1 disables it)'),
         assert(lengthOfDeletion == -1 || lengthOfDeletion > 0,
             'lengthOfDeletion must be greater than zero (only -1 disables it)');
 

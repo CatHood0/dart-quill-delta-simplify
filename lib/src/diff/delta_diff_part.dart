@@ -50,7 +50,12 @@ class DeltaDiffPart {
   }
 
   @override
-  int get hashCode => before.hashCode ^ after.hashCode ^ start.hashCode ^ end.hashCode ^ args.hashCode;
+  int get hashCode =>
+      before.hashCode ^
+      after.hashCode ^
+      start.hashCode ^
+      end.hashCode ^
+      args.hashCode;
 
   @override
   String toString() {

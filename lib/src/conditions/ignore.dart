@@ -9,7 +9,8 @@ class IgnoreCondition extends PointerCondition<int, void> {
     required super.offset,
     this.len,
   })  : assert(offset >= 0, 'offset cannot be less than zero'),
-        assert(len == null || len > 0, 'len cannot be equals or less than zero'),
+        assert(
+            len == null || len > 0, 'len cannot be equals or less than zero'),
         super(target: null, caseSensitive: false);
 
   @override
@@ -18,7 +19,8 @@ class IgnoreCondition extends PointerCondition<int, void> {
     List<DeltaRange> partsToIgnore = const [],
     OnCatchCallback? onCatch,
   ]) {
-    throw Exception('IgnoreCondition has no build because is treated by a different way');
+    throw Exception(
+        'IgnoreCondition has no build because is treated by a different way');
   }
 
   @override
@@ -32,5 +34,10 @@ class IgnoreCondition extends PointerCondition<int, void> {
   }
 
   @override
-  int get hashCode => target.hashCode ^ key.hashCode ^ caseSensitive.hashCode ^ len.hashCode ^ offset.hashCode;
+  int get hashCode =>
+      target.hashCode ^
+      key.hashCode ^
+      caseSensitive.hashCode ^
+      len.hashCode ^
+      offset.hashCode;
 }

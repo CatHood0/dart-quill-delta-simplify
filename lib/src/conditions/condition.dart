@@ -51,13 +51,16 @@ abstract class Condition<T extends Object?> {
   /// This property checks if the `target` is either `null`, an empty `String`, or an empty `Map`.
   /// It returns `true` if the target is invalid.
   bool get checkIfTargetIsinvalid =>
-      target == null || target is String && '$target'.isEmpty || target is Map && (target as Map).isEmpty;
+      target == null ||
+      target is String && '$target'.isEmpty ||
+      target is Map && (target as Map).isEmpty;
 
   /// A getter that checks if the `target` can be used as a pattern.
   ///
   /// This property checks if the `target` is a non-empty `String` that can potentially be used
   /// as a pattern for matching. It returns `true` if the `target` is a valid pattern.
-  bool get checkIfTargetIsValidToBePattern => target != null && target is String && '$target'.isNotEmpty;
+  bool get checkIfTargetIsValidToBePattern =>
+      target != null && target is String && '$target'.isNotEmpty;
 
   /// This method is responsible for building the result based on the `Delta` object
   ///
@@ -75,7 +78,9 @@ abstract class Condition<T extends Object?> {
   @mustBeOverridden
   bool operator ==(covariant Condition other) {
     if (identical(other, this)) return true;
-    return other.key == key && other.target == target && other.caseSensitive == caseSensitive;
+    return other.key == key &&
+        other.target == target &&
+        other.caseSensitive == caseSensitive;
   }
 
   @override

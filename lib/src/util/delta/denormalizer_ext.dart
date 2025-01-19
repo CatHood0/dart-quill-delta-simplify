@@ -61,7 +61,8 @@ extension DeltaDenormalizer on Delta {
         if (cleanAttributes != null) {
           cleanAttributes.removeWhere(removeInlineAttrs);
         }
-        resultOps.add(Operation.insert(line, cleanAttributes?.isNotEmpty == true ? cleanAttributes : null));
+        resultOps.add(Operation.insert(line,
+            cleanAttributes?.isNotEmpty == true ? cleanAttributes : null));
       } else {
         resultOps.add(Operation.insert(line, attributes));
       }

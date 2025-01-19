@@ -18,14 +18,16 @@ class DeltaRangeError implements Exception {
   /// Message describing the problem.
   final dynamic message;
 
-  DeltaRangeError(this.invalidValue, this.name, this.message, this.start, this.end, this._hasValue);
+  DeltaRangeError(this.invalidValue, this.name, this.message, this.start,
+      this.end, this._hasValue);
 
   /// Create a new [DeltaRangeError] with a message for the given [value].
   /// An optional [name] can specify the argument name that has the
   ///
   /// invalid value, and the [message] can override the default error
   /// description.
-  factory DeltaRangeError.value(num value, [String? name, String? message]) => DeltaRangeError(
+  factory DeltaRangeError.value(num value, [String? name, String? message]) =>
+      DeltaRangeError(
         value,
         name,
         message ?? "Value not in range",
@@ -46,7 +48,8 @@ class DeltaRangeError implements Exception {
   /// An optional [name] can specify the argument name that has the
   /// invalid value, and the [message] can override the default error
   /// description.
-  factory DeltaRangeError.range(num invalidValue, int? minValue, int? maxValue, [String? name, String? message]) =>
+  factory DeltaRangeError.range(num invalidValue, int? minValue, int? maxValue,
+          [String? name, String? message]) =>
       DeltaRangeError(
         invalidValue,
         name,
@@ -65,7 +68,8 @@ class DeltaRangeError implements Exception {
   /// name and message text of the thrown error.
   ///
   /// Returns [value] if it is in the interval.
-  static int checkValueInInterval(int value, int minValue, int maxValue, [String? name, String? message]) {
+  static int checkValueInInterval(int value, int minValue, int maxValue,
+      [String? name, String? message]) {
     if (value < minValue || value > maxValue) {
       throw DeltaRangeError.range(value, minValue, maxValue, name, message);
     }
@@ -87,9 +91,11 @@ class DeltaRangeError implements Exception {
   /// otherwise the length is found as `indexable.length`.
   ///
   /// Returns [index] if it is a valid index.
-  static int checkValidIndex(int index, dynamic indexable, [String? name, int? length, String? message]) {
+  static int checkValidIndex(int index, dynamic indexable,
+      [String? name, int? length, String? message]) {
     length ??= (indexable.length as int);
-    return IndexError.check(index, length, indexable: indexable, name: name, message: message);
+    return IndexError.check(index, length,
+        indexable: indexable, name: name, message: message);
   }
 
   /// Check that a range represents a slice of an indexable object.

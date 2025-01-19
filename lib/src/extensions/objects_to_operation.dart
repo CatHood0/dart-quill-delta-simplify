@@ -22,7 +22,8 @@ extension ObjectToOperation on Object {
   /// print(operationWithAttributes); // {"insert": "Hello"}
   /// print(operationWithAttributes); // [{"insert": "Hello", "attributes": {"color": "red"}, {"insert": "⏎", "attributes": {"align": "center"}}}]
   /// ```
-  Object toOperation([Attributes? inlineAttributes, Attributes? blockAttributes]) {
+  Object toOperation(
+      [Attributes? inlineAttributes, Attributes? blockAttributes]) {
     if (this is Operation || this is Iterable<Operation>) return this;
     if (this is! String && this is! Map) {
       throw NoAcceptedObjectType(
@@ -33,14 +34,19 @@ extension ObjectToOperation on Object {
     if (blockAttributes == null || blockAttributes.isEmpty) {
       return Operation.insert(
         this,
-        inlineAttributes != null && inlineAttributes.isNotEmpty ? {...inlineAttributes} : null,
+        inlineAttributes != null && inlineAttributes.isNotEmpty
+            ? {...inlineAttributes}
+            : null,
       );
     }
-    if (this is Map && (this as Map).containsKey('insert')) return (this as Map).toOperation();
+    if (this is Map && (this as Map).containsKey('insert'))
+      return (this as Map).toOperation();
     return [
       Operation.insert(
         this,
-        inlineAttributes != null && inlineAttributes.isNotEmpty ? {...inlineAttributes} : null,
+        inlineAttributes != null && inlineAttributes.isNotEmpty
+            ? {...inlineAttributes}
+            : null,
       ),
       if (this is String && blockAttributes.isNotEmpty)
         Operation.insert(
@@ -78,7 +84,9 @@ extension MapToOperation on Map {
     }
     return Operation.insert(
       this,
-      inlineAttributes != null && inlineAttributes.isNotEmpty ? {...inlineAttributes} : null,
+      inlineAttributes != null && inlineAttributes.isNotEmpty
+          ? {...inlineAttributes}
+          : null,
     );
   }
 }

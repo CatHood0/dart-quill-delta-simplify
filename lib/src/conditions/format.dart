@@ -46,9 +46,14 @@ class FormatCondition extends Condition<List<Operation>> {
     this.onlyOnce = false,
     this.offset,
     this.len,
-  })  : assert(target == null || (target is String && target.isNotEmpty) || (target is Map && target.isNotEmpty),
+  })  : assert(
+            target == null ||
+                (target is String && target.isNotEmpty) ||
+                (target is Map && target.isNotEmpty),
             'target can be only String or Map'),
-        assert((target == null || target is Map) || target is String && !target.hasOnlyNewLines,
+        assert(
+            (target == null || target is Map) ||
+                target is String && !target.hasOnlyNewLines,
             'target cannot contain newlines'),
         assert(
           (!attribute.isInline || attribute.isInline && target != null) ||
