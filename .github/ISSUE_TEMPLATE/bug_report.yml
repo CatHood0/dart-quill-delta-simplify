@@ -1,0 +1,75 @@
+name: Report a bug
+description: Report issues with Dart Quill Delta Simplication.
+labels: 'bug'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide the following details to help us address your issue effectively.
+
+  - type: input
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: e.g., "The format method is not formatting the specified part."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Provide a clear step-by-step guide to reproduce the issue.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: e.g., "The deletion remove 'Part'."
+    validations:
+      required: false 
+      
+  - type: textarea
+    attributes:
+      label: Actual behavior
+      placeholder: e.g., "The deletion doesn't do nothing."
+    validations:
+      required: false 
+
+  - type: input
+    attributes:
+      label: Version of the package
+      description: Specify the version of Flutter Quill package you're using.
+      placeholder: e.g., "10.*.*v"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: |
+        Add any extra information such as screenshots, videos, or logs to help diagnose the issue.
+
+        Consider sharing the pubspec.lock file of the project if relevant.
+      value: |
+        <details>
+        <summary>Screenshots / Video demonstration</summary>
+
+        [Attach media here]
+
+        </details>
+
+        <details><summary>Logs</summary>
+
+        ```console
+        [Paste logs here]
+        ```
+
+        </details>
+    validations:
+      required: false
