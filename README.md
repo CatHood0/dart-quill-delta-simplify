@@ -1,6 +1,6 @@
 # ✂️ Dart Quill Delta Simplify
 
-This is a package designed to facilitate the manipulation of documents in the **Quill Delta** format within the `Flutter/Dart` ecosystem. The **Quill Delta** format is a data structure used by the **Quill** text editor to represent rich content, including text, attributes (such as **bold** or _italic_), and multimedia insertions.
+This is a package designed to facilitate the manipulation of documents in the **Quill Delta** format within the `Flutter/Dart` ecosystem. The **Quill Delta** format is a data structure used by the **Quill text editor** and **Fluter Quill** to represent rich content, including text, attributes (such as **bold** or _italic_), and multimedia insertions.
 
 ## ❓ Why use it?
 
