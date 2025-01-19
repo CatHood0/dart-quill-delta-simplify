@@ -4,10 +4,10 @@ import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
-import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import '../../conditions.dart';
 import '../range/delta_range.dart';
+import '../util/collections.dart';
 
 @internal
 List<Operation> replaceCondition(

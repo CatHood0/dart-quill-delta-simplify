@@ -4,11 +4,11 @@ import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:meta/meta.dart';
 
 import '../../delta_ranges.dart';
+import '../util/collections.dart';
 
 @internal
 List<Operation> deleteCondition(

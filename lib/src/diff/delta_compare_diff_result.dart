@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import '../../delta_diff.dart';
+import '../util/collections.dart';
 
 /// This class represents the result of comparing two Deltas, specifically
 /// the list of differences between them. It stores the differences as a

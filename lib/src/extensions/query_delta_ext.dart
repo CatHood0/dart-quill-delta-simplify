@@ -1,13 +1,13 @@
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
+import 'package:dart_quill_delta_simplify/src/util/check_op_attrs.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
-import 'package:dart_quill_delta_simplify/src/util/list_attrs_ext.dart';
 import 'package:diff_match_patch/diff_match_patch.dart' as dmp;
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
+import '../util/collections.dart';
 import '../util/op_offset_to_char_offset.dart';
 
 extension EssentialsQueryExt on QueryDelta {
