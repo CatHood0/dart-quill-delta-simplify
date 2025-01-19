@@ -72,7 +72,7 @@ class DeleteCondition extends PointerCondition<int, List<Operation>> {
 
   @override
   String toString() {
-    return 'InsertCondition('
+    return 'DeleteCondition('
         'target: $target, '
         'offset: $offset, '
         'caseSensitive: $caseSensitive, '
