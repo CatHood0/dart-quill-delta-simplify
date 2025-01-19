@@ -1,8 +1,8 @@
 # A more exact Delta Diff 
 
-The following **Dart** code demonstrates how to perform a more precise delta comparison using the QueryDelta class and DeltaCompareDiffResult. 
+The following **Dart** code demonstrates how to perform a more precise `Delta` comparison using the `QueryDelta` class and `DeltaCompareDiffResult`. 
 
-## Example
+## Usage Examples
 
 ```dart
 final Delta delta = Delta()..insert('Experimental version Delta\n');

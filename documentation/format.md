@@ -22,6 +22,8 @@ QueryDelta format({
 
 * The `target` allows matching a specific part of the `Delta` to apply the format. This is helpful for selectively formatting only parts of the text that meet certain criteria.
 
+## Usage Examples
+
 ### Applying **Bold** to a Specific Range
 
 ```dart

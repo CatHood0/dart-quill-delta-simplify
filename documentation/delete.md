@@ -14,6 +14,8 @@ QueryDelta delete({
 })
 ```
 
+## Usage Examples
+
 ### Deleting a specific portion of text
 
 ```dart
