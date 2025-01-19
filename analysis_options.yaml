@@ -1,9 +1,8 @@
-include: package:flutter_lints/flutter.yaml
 analyzer:
   language:
-    strict-casts: false 
+    strict-casts: true 
     strict-inference: false 
-    strict-raw-types: false 
+    strict-raw-types: true 
   errors:
     avoid_init_to_null: ignore
     avoid_print: ignore
@@ -22,10 +21,9 @@ linter:
     unnecessary_final: false 
     prefer_expression_function_bodies: false
     always_put_required_named_parameters_first: false
-    flutter_style_todos: true 
     avoid_catches_without_on_clauses: false 
     lines_longer_than_80_chars: false
-    avoid_annotating_with_dynamic: false
+    avoid_annotating_with_dynamic: false 
     always_use_package_imports: false
     no_default_cases: false
     prefer_asserts_with_message: true 
