@@ -51,11 +51,6 @@ To test your changes:
 3. **Performance**:
 
    Write efficient code and avoid unnecessary overhead.
-   Profile the application for performance bottlenecks and optimize critical sections if needed.
-
-4. **Bundle size**:
-
-   Try to make the package size as less as possible but as much as needed
 
 5. **Code Review**:
 
