@@ -3,7 +3,7 @@ import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/v6.dart';
 
-const UuidV6 generator = UuidV6();
+const UuidV6 _generator = UuidV6();
 
 /// An abstract class representing a condition that can be applied to a `Delta` object.
 ///
@@ -29,19 +29,12 @@ abstract class Condition<T extends Object?> {
   /// comparison will be case sensitive; otherwise, it will be case insensitive.
   final bool caseSensitive;
 
-  /// Constructor for the `Condition` class.
-  ///
-  /// - `target`: The value on which the condition is based. It must be either a `String` or a `Map`.
-  /// - `caseSensitive`: A boolean indicating if comparisons should be case sensitive.
-  /// - `key`: A exclusive id for the condition.
-  ///
-  /// Throws an assertion error if `target` is neither a `String` nor a `Map`.
   Condition({
     required this.target,
     required this.caseSensitive,
     String? key,
   })  : assert(key == null || key.trim().isNotEmpty, 'key cannot be empty'),
-        key = key ?? generator.generate(),
+        key = key ?? _generator.generate(),
         assert(
           target == null || target is String || target is Map,
           'Condition class only accepts "String" and "Map" types to be assigned for "target" param',
@@ -68,11 +61,11 @@ abstract class Condition<T extends Object?> {
 
   /// This method is responsible for building the result based on the `Delta` object
   ///
-  /// - [`delta`]: The `Delta` object to evaluate against.
-  /// - [`partsToIgnore`]: An optional list of `DeltaRange` objects that represent parts to be ignored
+  /// * [delta]: The `Delta` object to evaluate against.
+  /// * [partsToIgnore]: An optional list of `DeltaRange` objects that represent parts to be ignored
   ///   during evaluation. Default is an empty list.
-  /// - [`registerChange`]: An optional callback function to register changes that occur during the evaluation.
-  /// - [`onCatch`]: An optional callback function to catch any exception that occur during the evaluation.
+  /// * [registerChange]: An optional callback function to register changes that occur during the evaluation.
+  /// * [onCatch]: An optional callback function to catch any exception that occur during the evaluation.
   T build(
     Delta delta, [
     List<DeltaRange> partsToIgnore = const [],
