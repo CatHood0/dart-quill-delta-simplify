@@ -1,4 +1,5 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
+import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/internals/format_condition_method.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
 import 'package:flutter_quill/flutter_quill.dart' show Attribute;
@@ -12,10 +13,6 @@ import '../range/delta_range.dart';
 /// The [FormatCondition] class extends the [Condition] class and is designed to format specific parts
 /// of a [Delta] object by applying an [Attribute]. It allows targeting a substring or a range defined
 /// by an offset and length within the [Delta].
-///
-/// This class is useful for scenarios where text formatting needs to be conditionally applied based
-/// on the content or structure of a [Delta] object, such as bolding text, changing text color, or
-/// applying other style attributes.
 class FormatCondition extends Condition<List<Operation>> {
   /// The attribute to be applied to the [Delta].
   ///
@@ -50,7 +47,16 @@ class FormatCondition extends Condition<List<Operation>> {
     this.onlyOnce = false,
     this.offset,
     this.len,
-  });
+  })  : assert(target == null || (target is String && target.isNotEmpty) || (target is Map && target.isNotEmpty),
+            'target can be only String or Map'),
+        assert((target == null || target is Map) || target is String && !target.hasOnlyNewLines,
+            'target cannot contain newlines'),
+        assert(
+          (!attribute.isInline || attribute.isInline && target != null) ||
+              attribute.isInline && (len != null && len > 0),
+          'len cannot be null or less than zero, or the target '
+          'cannot be undefined if the Attribute(${attribute.runtimeType}) is inline',
+        );
 
   @override
   List<Operation> build(
@@ -66,11 +72,6 @@ class FormatCondition extends Condition<List<Operation>> {
       registerChange,
       onCatch,
     );
-  }
-
-  @override
-  String toString() {
-    return 'FormatCondition(Attribute: $attribute, target: $target, caseSensitive: $caseSensitive, offset: $offset, len: $len)';
   }
 
   @override
@@ -92,4 +93,9 @@ class FormatCondition extends Condition<List<Operation>> {
       len.hashCode ^
       attribute.hashCode ^
       offset.hashCode;
+
+  @override
+  String toString() {
+    return 'FormatCondition(Attribute: $attribute, target: $target, caseSensitive: $caseSensitive, offset: $offset, len: $len)';
+  }
 }

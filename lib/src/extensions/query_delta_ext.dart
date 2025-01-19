@@ -347,16 +347,6 @@ extension EssentialsQueryExt on QueryDelta {
     bool caseSensitive = false,
     bool onlyOnce = false,
   }) {
-    assert(target == null || (target is String && target.isNotEmpty) || (target is Map && target.isNotEmpty),
-        'target can be only String or Map');
-    assert((target == null || target is Map) || target is String && !target.hasOnlyNewLines,
-        'target cannot contain newlines');
-    assert(
-      (!attribute.isInline || attribute.isInline && target != null) ||
-          attribute.isInline && (len != null && len > 0),
-      'len cannot be null or less than zero, or the target '
-      'cannot be undefined if the Attribute(${attribute.runtimeType}) is inline',
-    );
     return push(
       FormatCondition(
         target: target,
