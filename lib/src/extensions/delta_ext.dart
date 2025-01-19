@@ -51,6 +51,65 @@ extension DeltaToPlainText on Delta {
 
 /// Provides an extension on [Delta] for easy formatting, insertion, replacement, and deletion.
 extension EasyDelta on Delta {
+  /// Matches operations in a [Delta] based on specific [Attributes].
+  ///
+  /// * [inlineAttrs]: A map of inline attributes to match against the operations.
+  /// * [blockAttrs]: A map of block attributes to match against the operations.
+  /// * [blockAttrKeys]: A list of block attribute keys to match against the operations.
+  /// * [inlineAttrKeys]: A list of inline attribute keys to match against the operations.
+  /// * [strictKeysCheck]: If `true`, only matches operations where all specified keys are present.
+  /// * [onlyOnce]: If `true`, stops searching after the first match.
+  ///
+  List<DeltaRangeResult> matchAttributes({
+    required Attributes? inlineAttrs,
+    required Attributes? blockAttrs,
+    required List<String>? blockAttrKeys,
+    required List<String>? inlineAttrKeys,
+    bool strictKeysCheck = true,
+    bool onlyOnce = false,
+  }) =>
+      toQuery.matchAttributes(
+        inlineAttrs: inlineAttrs,
+        blockAttrs: blockAttrs,
+        blockAttrKeys: blockAttrKeys,
+        inlineAttrKeys: inlineAttrKeys,
+        strictKeysCheck: strictKeysCheck,
+        onlyOnce: onlyOnce,
+      );
+
+  /// Finds the first match of the given [pattern] or [rawObject] in the [Delta] operations list.
+  ///
+  /// * [pattern]: The string pattern to search for.
+  /// * [rawObject]: The object to search for within the operations.
+  /// * [operationIndex]: The index of the operation.
+  DeltaRangeResult firstMatch(
+    RegExp? pattern,
+    Object? rawObject, {
+    int? operationIndex,
+  }) =>
+      toQuery.firstMatch(
+        pattern,
+        rawObject,
+        operationIndex: operationIndex,
+      );
+
+  /// Finds all matches of the given [pattern] or [rawObject] in the [Delta] operations list.
+  ///
+  /// * [pattern]: The string pattern to search for.
+  /// * [rawObject]: The object to search for within the operations.
+  /// * [operationIndex]: The index of the operation.
+  /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
+  List<DeltaRangeResult> allMatches(
+    RegExp? pattern,
+    Object? rawObject, {
+    int? operationIndex,
+  }) =>
+      toQuery.allMatches(
+        pattern,
+        rawObject,
+        operationIndex: operationIndex,
+      );
+
   void check() {
     assert(isNotEmpty, 'operations cannot be empty');
     assert(last.isNewLineOrBlockInsertion || last.containsNewLine(), 'last operation must be a new line');
