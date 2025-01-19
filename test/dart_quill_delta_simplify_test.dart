@@ -559,7 +559,7 @@ void main() {
   // match parts
   group('matches', () {
     test('should get portion of the Delta with match pattern', () {
-      final DeltaRangeResult result = delta.toQuery.firstMatch(
+      final DeltaRangeResult? result = delta.toQuery.firstMatch(
         RegExp('Experimental', caseSensitive: false),
         null,
         operationIndex: 0,
