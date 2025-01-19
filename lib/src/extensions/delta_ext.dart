@@ -192,19 +192,19 @@ extension EasyDelta on Delta {
 
   /// Replaces a range of text in the [Delta] with the specified insertion.
   ///
-  /// * [insertion]: The text or object to insert as a replacement.
+  /// * [replace]: The text or object to insert as a replacement.
   /// * [range]: The range to replace.
   /// * [target]: The target object for the replacement.
   /// * [onlyOnce]: Whether to replace only once.
   void simpleReplace({
-    required Object insertion,
+    required Object replace,
     required DeltaRange? range,
     required Object? target,
     bool onlyOnce = true,
   }) {
     final delta = QueryDelta(delta: this)
         .replace(
-          replace: insertion,
+          replace: replace,
           target: target,
           range: range,
           onlyOnce: onlyOnce,
