@@ -10,7 +10,7 @@ Manipulating content in a `Delta` format can be complex, especially when dealing
 
 For detailed usage and API references, refer to the official [Dart Quill Delta](https://github.com/FlutterQuill/dart-quill-delta?tab=readme-ov-file#-dart-quill-delta) documentation.
 
-### Resources
+### 📎 Resources
 
 For detailed usage of the `QueryDelta` API, you can see:
 
@@ -181,7 +181,7 @@ void main() {
 }
 ```
 
-## Contributing
+## 🌳 Contributing
 
 We greatly appreciate your time and effort.
 
