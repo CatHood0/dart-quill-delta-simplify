@@ -422,8 +422,6 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [len] the char length of the ignored part
   /// * [ignoreLength] only use this when you want to ignore a [Operation] with a [Embed] as its data
   QueryDelta ignorePart(int offset, {int? len, bool ignoreLen = false}) {
-    assert(offset >= 0, 'offset cannot be less than zero');
-    assert(len == null || len > 0, 'len cannot be equals or less than zero');
     return push(
       IgnoreCondition(
         offset: ignoreLen

@@ -8,7 +8,9 @@ class IgnoreCondition extends PointerCondition<int, void> {
   IgnoreCondition({
     required super.offset,
     this.len,
-  }) : super(target: null, caseSensitive: false);
+  })  : assert(offset >= 0, 'offset cannot be less than zero'),
+        assert(len == null || len > 0, 'len cannot be equals or less than zero'),
+        super(target: null, caseSensitive: false);
 
   @override
   void build(
