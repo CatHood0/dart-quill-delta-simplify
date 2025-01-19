@@ -82,7 +82,7 @@ extension EasyDelta on Delta {
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
-  DeltaRangeResult firstMatch(
+  DeltaRangeResult? firstMatch(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,

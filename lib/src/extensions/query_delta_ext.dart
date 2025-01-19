@@ -53,7 +53,7 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [operationIndex]: The index of the operation.
   ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#first-match)
-  DeltaRangeResult firstMatch(
+  DeltaRangeResult? firstMatch(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
@@ -70,7 +70,7 @@ extension EssentialsQueryExt on QueryDelta {
       rawObject: rawObject,
       operationOffset: operationIndex,
       onlyOnce: true,
-    ).single;
+    ).firstOrNull;
   }
 
   /// Finds all matches of the given [pattern] or [rawObject] in the [Delta] operations list.
