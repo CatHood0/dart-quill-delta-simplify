@@ -7,5 +7,4 @@ export 'extensions.dart';
 export 'conditions.dart';
 export 'delta_diff.dart';
 export 'delta_ranges.dart';
-export 'delta_changes.dart';
 export 'query_delta_exceptions.dart';
