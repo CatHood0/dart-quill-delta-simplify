@@ -181,3 +181,10 @@ void main() {
 }
 ```
 
+## Contributing
+
+We greatly appreciate your time and effort.
+
+To keep the project consistent and maintainable, we have a few guidelines that we ask all contributors to follow. These guidelines help ensure that everyone can understand and work with the code easier.
+
+See [Contributing](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/CONTRIBUTING.md) for more details.
