@@ -27,8 +27,7 @@ Make sure you have the [Requirement](#-development-prerequisites) installed and 
 
 To test your changes:
 
-1. Go to the [Example project](./example/) in [main.dart](./example/lib/main.dart) and run the project either by using
-   your IDE or `flutter run`
+1. run the tests using your IDE or `flutter run`
 2. Make sure to read the [Development Notes](#development-notes) if you made certain changes
    or [Translations Page](./doc/translation.md) if you made changes to the translations of the package
 
