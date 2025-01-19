@@ -126,9 +126,9 @@ void main() {
         startPoint: 0,
         lengthOfDeletion: 5,
       )
-      .build();
+      .build(); // no changes ocurrs since the deletion is into the Range of the Ignore Part
 
-  print(newDelta.delta); // Should print 'World!'
+  print(newDelta.delta); // Should print 'Hello World!'
 }
 ```
 
