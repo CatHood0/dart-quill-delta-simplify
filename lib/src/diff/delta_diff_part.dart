@@ -25,10 +25,10 @@ class DeltaDiffPart {
   final int end;
 
   /// Additional arguments that describe the type of change. The allowed keys are:
-  /// - `isRemovedPart`: `true` if this part was removed.
-  /// - `isUpdatedPart`: `true` if this part was updated.
-  /// - `isAddedPart`: `true` if this part was added.
-  /// - `isEquals`: `true` if this part was exactly equals than the before.
+  /// * [isRemovedPart]: `true` if this part was removed.
+  /// * [isUpdatedPart]: `true` if this part was updated.
+  /// * [isAddedPart]: `true` if this part was added.
+  /// * [isEquals]: `true` if this part was exactly equals than the before.
   final Map<String, dynamic>? args;
 
   DeltaDiffPart({
