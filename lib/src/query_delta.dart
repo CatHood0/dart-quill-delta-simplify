@@ -5,6 +5,7 @@ import 'package:dart_quill_delta_simplify/conditions.dart';
 import 'package:dart_quill_delta_simplify/extensions.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/illegal_condition_build_result.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/no_conditions_created_while_build_execution_exception.dart';
+import 'package:dart_quill_delta_simplify/src/query_delta_params.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/normalizer_ext.dart';
@@ -21,9 +22,8 @@ class QueryDelta {
   /// The input [Delta] used to create modifications.
   Delta _input = Delta();
 
-  /// A map holding various parameters such as the original version of the [Delta],
-  /// errors encountered, conditions to apply, and cached changes.
-  Map<String, dynamic> params = {};
+  /// A class that holds various useful parameters for QueryDelta,
+  QueryDeltaParams params = QueryDeltaParams();
 
   QueryDelta({
     required Delta delta,
@@ -31,48 +31,49 @@ class QueryDelta {
         assert(delta.last.isNewLineOrBlockInsertion || delta.last.containsNewLine(),
             'last operation must contain a new line') {
     _input = Delta.fromOperations(delta.operations);
-    params['original_version'] = Delta.fromOperations(delta.operations);
-    params['conditions'] = <Condition>[];
-    params['used-conditions'] = <String>[];
+    params
+      ..originalDelta = Delta.fromOperations(delta.operations)
+      ..conditions = <Condition>[]
+      ..usedConditions = <String>[];
   }
 
   factory QueryDelta.fromJson(String json, [List<Condition>? conditions]) {
     return QueryDelta(delta: Delta.fromJson(jsonDecode(json) as List<dynamic>))
-      ..params['conditions'].addAll(conditions);
+      ..params.conditions.addAll(conditions ?? <Condition>[]);
   }
 
   factory QueryDelta.fromOperations(List<Operation> ops, [List<Condition>? conditions]) {
-    return QueryDelta(delta: Delta.fromOperations(ops))..params['conditions'].addAll(conditions);
+    return QueryDelta(delta: Delta.fromOperations(ops))..params.conditions.addAll(conditions ?? <Condition>[]);
   }
 
   factory QueryDelta.withConditions(Delta delta, List<Condition> conditions) {
-    return QueryDelta(delta: delta)..params['conditions'].addAll(conditions);
+    return QueryDelta(delta: delta)..params.conditions.addAll(conditions);
   }
 
   /// Adds a single [Condition] to the list of conditions to be applied to the [Delta].
   ///
   /// * [condition]: The condition to apply.
-  QueryDelta push(Condition condition) => this..params['conditions'].add(condition);
+  QueryDelta push(Condition condition) => this..params.conditions.add(condition);
 
   /// Adds a list of [Condition] objects to the conditions to be applied to the [Delta].
   ///
   /// * [condition]: A list of conditions to apply.
-  QueryDelta pushAll(List<Condition> condition) => this..params['conditions'].addAll(condition);
+  QueryDelta pushAll(List<Condition> condition) => this..params.conditions.addAll(condition);
 
   /// If a exception is catched, this will be called.
-  QueryDelta catchErr(OnCatchCallback onCatchError) => this..params['catch'] = onCatchError;
+  QueryDelta catchErr(OnCatchCallback onCatchError) => this..params.onCatch = onCatchError;
 
   /// Converts the built [QueryDelta] into a [Delta]. If the build has not been
   /// executed, an exception will be thrown.
   ///
   /// Throws [Exception] if [build()] has not been called before.
-  Delta toDelta() => params['result'] == null
+  Delta toDelta() => params.result == null
       ? throw Exception('first run build() before use toDelta() method')
-      : params['result'].delta;
+      : params.result!.delta;
 
   /// Attempts to convert the built [QueryDelta] into a [Delta]. If the build has
   /// not been executed or has failed, `null` is returned.
-  Delta? tryToDelta() => params['result']?.delta;
+  Delta? tryToDelta() => params.result?.delta;
 
   /// Builds a final [Delta] based on the conditions applied so far.
   ///
@@ -99,20 +100,20 @@ class QueryDelta {
     bool preventReuseConditions = true,
     bool maintainIgnoresConditions = true,
   }) {
-    if (params['conditions'] == null || params['conditions'].isEmpty) {
+    if (params.conditions.isEmpty) {
       throw const NoConditionsCreatedWhileBuildExecutionException();
     }
     // clone the current input version since something can fail and we do not need
     // partial modifications
     Delta inputClone = _input.denormalize();
-    final List<Condition> conditions = params['conditions'] as List<Condition>;
+    final List<Condition> conditions = params.conditions;
     final List<DeltaRange> partsToIgnore = <DeltaRange>[];
-    final OnCatchCallback? onCatch = params['catch'] as OnCatchCallback?;
+    final OnCatchCallback? onCatch = params.onCatch;
     for (Condition condition in conditions) {
-      final bool wasUsedAlready = params['used-conditions'].contains(condition.key);
+      final bool wasUsedAlready = params.usedConditions.contains(condition.key);
       if (preventReuseConditions && wasUsedAlready) continue;
       if (condition is IgnoreCondition) {
-        if (!wasUsedAlready && !maintainIgnoresConditions) params['used-conditions'].add(condition.key);
+        if (!wasUsedAlready && !maintainIgnoresConditions) params.usedConditions.add(condition.key);
         final len = condition.len ?? -1;
         partsToIgnore.add(
           DeltaRange(
@@ -123,12 +124,8 @@ class QueryDelta {
         continue;
       }
       if (condition is ReplaceCondition && partsToIgnore.ignoreOverlap(condition.range)) continue;
-      final Object? result = condition.build(
-        inputClone,
-        partsToIgnore,
-        onCatch,
-      );
-      if (!wasUsedAlready) params['used-conditions'].add(condition.key);
+      final Object? result = condition.build(inputClone, partsToIgnore, onCatch);
+      if (!wasUsedAlready) params.usedConditions.add(condition.key);
       if (result is Iterable<Operation>) {
         inputClone = Delta.fromOperations([...result]);
       } else if (result is Operation) {
@@ -149,13 +146,13 @@ class QueryDelta {
         inputClone.insert(result);
       } else if (result is Map) {
         if (result.containsKey('insert')) {
-          inputClone.insert(result['insert'], result['attributes']);
+          inputClone.insert(result.toOperation());
           continue;
         }
         final IllegalConditionBuildResult err = IllegalConditionBuildResult(
           condition: condition,
           illegal: result,
-          expected: {'insert': ''},
+          expected: <String, dynamic>{'insert': '$result'},
         );
         if (onCatch != null) {
           onCatch.call(err);
@@ -178,10 +175,10 @@ class QueryDelta {
         }
         inputClone = Delta.fromOperations(ops);
       } else {
-        final err = IllegalConditionBuildResult(
+        final IllegalConditionBuildResult err = IllegalConditionBuildResult(
           condition: condition,
           illegal: result,
-          expected: [
+          expected: <Type>[
             Iterable<Operation>,
             Operation,
             String,
@@ -198,7 +195,7 @@ class QueryDelta {
     // the delta needs to be normalized to avoid an exception from the Document class of Flutter Quill
     _input = inputClone.normalize();
     final BuildResult result = BuildResult(delta: _input);
-    params['result'] = result;
+    params.result = result;
     return result;
   }
 
@@ -207,11 +204,7 @@ class QueryDelta {
   ///
   /// * [alternativeDelta]: An optional [Delta] to use as the input for the clone.
   QueryDelta clone([Delta? alternativeDelta]) {
-    return QueryDelta(delta: alternativeDelta ?? _input)
-      ..params['original_version'] = params['original_version']
-      ..params['errors'] = params['errors']
-      ..params['conditions'] = params['conditions']
-      ..params['result'] = params['result'];
+    return QueryDelta(delta: alternativeDelta ?? _input)..params = QueryDeltaParams.fromAnother(params);
   }
 
   /// used only by internal resources

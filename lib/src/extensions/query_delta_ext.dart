@@ -500,8 +500,10 @@ extension DiffDelta on QueryDelta {
   ///
   /// _This method is inspired on the original diff method from Delta class [Here](https://github.com/FlutterQuill/dart-quill-delta/blob/141f86aff1a65c14a25a6b59d76a4a23781c5d91/lib/src/delta/delta.dart#L310-L323)_
   DeltaCompareDiffResult compareDiff({bool cleanupSemantic = true}) {
-    final Delta originalDelta = params['original_version'] as Delta;
+    final Delta originalDelta = params.originalDelta;
     final Delta newDelta = getDelta();
+    originalDelta.check();
+    newDelta.check();
     if (listEquals(newDelta.operations, originalDelta.operations)) return DeltaCompareDiffResult(diffParts: []);
 
     final String stringThis = newDelta.toPlainBuilder(

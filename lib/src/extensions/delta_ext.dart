@@ -19,7 +19,7 @@ extension DeltaDiff on Delta {
   DeltaCompareDiffResult compareDiff(Delta otherDelta) {
     otherDelta.check();
     check();
-    return (QueryDelta(delta: this)..params['original_version'] = otherDelta).compareDiff();
+    return (QueryDelta(delta: this)..params.originalDelta = otherDelta).compareDiff();
   }
 }
 
