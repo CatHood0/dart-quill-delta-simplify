@@ -71,4 +71,14 @@ class DeleteCondition extends PointerCondition<int, List<Operation>> {
       onlyOnce.hashCode ^
       offset.hashCode ^
       lengthOfDeletion.hashCode;
+
+  @override
+  String toString() {
+    return 'InsertCondition('
+        'target: $target, '
+        'offset: $offset, '
+        'caseSensitive: $caseSensitive, '
+        'len: $lengthOfDeletion, '
+        'onlyOnce: $onlyOnce)';
+  }
 }

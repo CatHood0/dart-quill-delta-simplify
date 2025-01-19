@@ -74,4 +74,14 @@ class ReplaceCondition extends Condition<List<Operation>> {
       onlyOnce.hashCode ^
       range.hashCode ^
       replace.hashCode;
+
+  @override
+  String toString() {
+    return 'ReplaceCondition('
+        'target: $target, '
+        'caseSensitive: $caseSensitive, '
+        'DeltaRange: $range, '
+        'replace: $replace, '
+        'onlyOnce: $onlyOnce)';
+  }
 }

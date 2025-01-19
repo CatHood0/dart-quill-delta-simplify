@@ -84,11 +84,6 @@ class InsertCondition extends Condition<List<Operation>> {
   }
 
   @override
-  String toString() {
-    return 'InsertCondition(target: $target, DeltaRange: $range, insertion: $insertion)';
-  }
-
-  @override
   bool operator ==(covariant InsertCondition other) {
     if (identical(other, this)) return true;
     return other.key == key &&
@@ -114,4 +109,16 @@ class InsertCondition extends Condition<List<Operation>> {
       left.hashCode ^
       asDifferentOp.hashCode ^
       insertAtLastOperation.hashCode;
+
+  @override
+  String toString() {
+    return 'InsertCondition('
+        'target: $target, '
+        'DeltaRange: $range, '
+        'insertion: $insertion, '
+        'onlyOnce: $onlyOnce, '
+        'left: $left, '
+        'asDifferentOp: $asDifferentOp, '
+        'insertAtLastOperation: $insertAtLastOperation)';
+  }
 }
