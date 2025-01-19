@@ -29,6 +29,9 @@ List<Operation> formatCondition(
         );
   final int conditionOffset = condition.offset ?? -1;
   final int conditionLen = condition.len ?? 0;
+  // we can't specify the generic type by default
+  // because this Attribute can be a custom one created by the dev
+  // ignore: strict_raw_type
   final Attribute attr = condition.attribute;
   final Set<int> indexsToIgnore = {};
   final bool isBlock = attr.scope == AttributeScope.block;
@@ -364,6 +367,9 @@ List<Operation> formatCondition(
   required int globalOffset,
   required int charactersPerChange,
   required DeltaRange rangeAccepted,
+  // we can't specify the generic type by default
+  // because this Attribute can be a custom one created by the dev
+  // ignore: strict_raw_type
   required Attribute attr,
   required Operation op,
   required int index,
@@ -547,6 +553,9 @@ void _applyBlockLevelAttributesMergingWithExistOp({
   required int globalOffset,
   required Object? data,
   required FormatCondition condition,
+  // we can't specify the generic type by default
+  // because this Attribute can be a custom one created by the dev
+  // ignore: strict_raw_type
   required Attribute attr,
   required Operation op,
   required int index,
@@ -580,6 +589,9 @@ void _applyInsertingNewOpBlockLevelAttributes({
   required int globalOffset,
   required Object? data,
   required FormatCondition condition,
+  // we can't specify the generic type by default
+  // because this Attribute can be a custom one created by the dev
+  // ignore: strict_raw_type
   required Attribute attr,
   required Operation op,
   required int index,

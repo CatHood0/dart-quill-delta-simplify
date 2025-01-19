@@ -94,6 +94,9 @@ extension CloneOperation on Operation {
   /// * [attribute]: An optional attribute to replace or add to the operation.
   /// * [replaceCurrentByNewAttr]: If true, the existing attributes are replaced by the new attribute.
   Operation clone(Object? newData,
+      // we can't specify the generic type by default
+      // because this Attribute can be a custom one created by the dev
+      // ignore: strict_raw_type
       [Attribute? attribute,
       bool replaceCurrentByNewAttr = false,
       bool withoutAttrs = false]) {

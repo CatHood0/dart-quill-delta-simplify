@@ -32,8 +32,9 @@ List<String> tokenizeWithNewLines(String str) {
   return lines.foldIndexed(<String>[], (int ind, List<String> pv, String line) {
     if (ind != lastIndex) {
       if (line != '') {
-        pv.add(line);
-        pv.add(newLine);
+        pv
+          ..add(line)
+          ..add(newLine);
       } else {
         pv.add(newLine);
       }

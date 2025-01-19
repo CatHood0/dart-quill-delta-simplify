@@ -59,7 +59,7 @@ extension ObjectToOperation on Object {
 
 /// Extension on `Map` that provides functionality to convert a map into an
 /// [Operation] for insertion.
-extension MapToOperation on Map {
+extension MapToOperation on Map<String, dynamic> {
   /// Converts the current map into an [Operation.insert].
   ///
   /// * `inlineAttributes`: Optional inline attributes that are applied to the operation.

@@ -367,6 +367,9 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/format.md#usage-examples)
   QueryDelta format({
+    // we can't specify the generic type by default
+    // because this Attribute can be a custom one created by the dev
+    // ignore: strict_raw_type
     required Attribute attribute,
     required int? offset,
     required int? len,

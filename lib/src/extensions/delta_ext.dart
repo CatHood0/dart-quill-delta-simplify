@@ -130,6 +130,9 @@ extension EasyDelta on Delta {
   /// * [onlyOnce]: Whether to format only once.
   void simpleFormat({
     required int? offset,
+    // we can't specify the generic type by default
+    // because this Attribute can be a custom one created by the dev
+    // ignore: strict_raw_type
     required Attribute attribute,
     int? len,
     Object? target,

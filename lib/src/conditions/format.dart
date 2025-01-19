@@ -17,6 +17,8 @@ class FormatCondition extends Condition<List<Operation>> {
   ///
   /// This attribute specifies the formatting style, such as bold, italic, or color,
   /// that will be applied to the targeted text or range in the [Delta].
+  // Note: we can't specify the generic type by default because this Attribute can be a custom one created by the dev
+  // ignore: strict_raw_type
   final Attribute attribute;
 
   /// The offset within the [Delta] where the formatting should begin.
