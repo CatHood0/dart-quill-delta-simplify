@@ -104,3 +104,30 @@ print(result);
 //  DeltaRangeResult(delta: [{"insert": "Header 2"}, {"insert": "⏎", "attributes": {"header": 2}}], Offset: [58, 67]),
 // ] 
 ```
+
+## Embeds Matching
+
+```dart
+List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {}
+```
+
+### Example
+
+```dart
+final Delta delta = Delta()
+    ..insert('This is a bold text.\n', {'bold': true})
+    ..insert({'image': 'https://www.google.com/my/image-link'})
+    ..insert('Header 1')
+    ..insert('\n', {'header': 1})
+    ..insert('This is a normal paragraph.\n')
+    ..insert('Header 2')
+    ..insert('\n', {'header': 2})
+    ..insert({'video': 'https://www.google.com/my/video-link'})
+    ..insert('Another common paragraph.\n');
+final List<DeltaRangeResult> result = QueryDelta(delta: delta).getAllEmbeds(); // or getFirstEmbed()
+print(result); 
+// [
+//  DeltaRangeResult(delta: [{"insert": {"image": "https://www.google.com/my/image-link"}}], Offset: [21, 21]),
+//  DeltaRangeResult(delta: [{"insert": {"video": "https://www.google.com/my/video-link"}}], Offset: [68, 68]),
+// ] 
+```

@@ -81,6 +81,20 @@ extension EasyDelta on Delta {
         onlyOnce: onlyOnce,
       );
 
+  /// Finds first embed in Delta
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#embeds-matching)
+  DeltaRangeResult? getFirstEmbed({bool Function(Operation)? ignoreWhen}) {
+    return toQuery.getFirstEmbed(ignoreWhen: ignoreWhen);
+  }
+
+  /// Finds all embeds in Delta
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#embeds-matching)
+  List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {
+    return toQuery.getAllEmbeds(ignoreWhen: ignoreWhen);
+  }
+
   /// Finds the first match of the given [pattern] or [rawObject] in the [Delta] operations list.
   ///
   /// * [pattern]: The string pattern to search for.
