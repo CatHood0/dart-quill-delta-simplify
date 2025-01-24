@@ -1,4 +1,3 @@
-
 import '../util/collections.dart';
 
 /// A class that represents a part of the difference between two Deltas.
