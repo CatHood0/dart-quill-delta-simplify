@@ -172,9 +172,9 @@ extension EasyDelta on Delta {
     final Delta delta = QueryDelta(delta: this)
         .insert(
           insert: insert,
-          startPoint: startPoint,
+          startPoint: insertAtLastOperation ? null : startPoint,
           caseSensitive: caseSensitive,
-          target: target,
+          target: insertAtLastOperation ? null : target,
           left: left,
           onlyOnce: startPoint != null ? true : onlyOnce,
           asDifferentOp: asDifferentOp,
