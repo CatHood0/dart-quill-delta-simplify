@@ -27,10 +27,7 @@ class QueryDelta {
 
   QueryDelta({
     required Delta delta,
-  })  : assert(delta.isNotEmpty, 'cannot be passed an empty Delta'),
-        assert(
-            delta.last.isNewLineOrBlockInsertion ||
-                delta.last.containsNewLine(),
+  }) : assert(delta.isEmpty || delta.last.isNewLineOrBlockInsertion || delta.last.containsNewLine(),
             'last operation must contain a new line') {
     _input = Delta.fromOperations(delta.operations);
     params
@@ -44,10 +41,8 @@ class QueryDelta {
       ..params.conditions.addAll(conditions ?? <Condition>[]);
   }
 
-  factory QueryDelta.fromOperations(List<Operation> ops,
-      [List<Condition>? conditions]) {
-    return QueryDelta(delta: Delta.fromOperations(ops))
-      ..params.conditions.addAll(conditions ?? <Condition>[]);
+  factory QueryDelta.fromOperations(List<Operation> ops, [List<Condition>? conditions]) {
+    return QueryDelta(delta: Delta.fromOperations(ops))..params.conditions.addAll(conditions ?? <Condition>[]);
   }
 
   factory QueryDelta.withConditions(Delta delta, List<Condition> conditions) {
@@ -57,18 +52,15 @@ class QueryDelta {
   /// Adds a single [Condition] to the list of conditions to be applied to the [Delta].
   ///
   /// * [condition]: The condition to apply.
-  QueryDelta push(Condition condition) =>
-      this..params.conditions.add(condition);
+  QueryDelta push(Condition condition) => this..params.conditions.add(condition);
 
   /// Adds a list of [Condition] objects to the conditions to be applied to the [Delta].
   ///
   /// * [condition]: A list of conditions to apply.
-  QueryDelta pushAll(List<Condition> condition) =>
-      this..params.conditions.addAll(condition);
+  QueryDelta pushAll(List<Condition> condition) => this..params.conditions.addAll(condition);
 
   /// If a exception is catched, this will be called.
-  QueryDelta catchErr(OnCatchCallback onCatchError) =>
-      this..params.onCatch = onCatchError;
+  QueryDelta catchErr(OnCatchCallback onCatchError) => this..params.onCatch = onCatchError;
 
   /// Converts the built [QueryDelta] into a [Delta]. If the build has not been
   /// executed, an exception will be thrown.
@@ -120,8 +112,7 @@ class QueryDelta {
       final bool wasUsedAlready = params.usedConditions.contains(condition.key);
       if (preventReuseConditions && wasUsedAlready) continue;
       if (condition is IgnoreCondition) {
-        if (!wasUsedAlready && !maintainIgnoresConditions)
-          params.usedConditions.add(condition.key);
+        if (!wasUsedAlready && !maintainIgnoresConditions) params.usedConditions.add(condition.key);
         final len = condition.len ?? -1;
         partsToIgnore.add(
           DeltaRange(
@@ -131,10 +122,8 @@ class QueryDelta {
         );
         continue;
       }
-      if (condition is ReplaceCondition &&
-          partsToIgnore.ignoreOverlap(condition.range)) continue;
-      final Object? result =
-          condition.build(inputClone, partsToIgnore, onCatch);
+      if (condition is ReplaceCondition && partsToIgnore.ignoreOverlap(condition.range)) continue;
+      final Object? result = condition.build(inputClone, partsToIgnore, onCatch);
       if (!wasUsedAlready) params.usedConditions.add(condition.key);
       if (result is Iterable<Operation>) {
         inputClone = Delta.fromOperations([...result]);
@@ -214,8 +203,7 @@ class QueryDelta {
   ///
   /// * [alternativeDelta]: An optional [Delta] to use as the input for the clone.
   QueryDelta clone([Delta? alternativeDelta]) {
-    return QueryDelta(delta: alternativeDelta ?? _input)
-      ..params = QueryDeltaParams.fromAnother(params);
+    return QueryDelta(delta: alternativeDelta ?? _input)..params = QueryDeltaParams.fromAnother(params);
   }
 
   /// used only by internal resources
