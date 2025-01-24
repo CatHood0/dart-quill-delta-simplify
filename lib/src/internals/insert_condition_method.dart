@@ -308,36 +308,47 @@ void _insertAtLast({
 }) {
   modifiedOps.addAll(<Operation>[...operations]);
   if (operations.isNotEmpty) globalOffset += operations.getEffectiveLength;
+  final Operation lastOp = modifiedOps.lastOrNull ?? Operation.insert('');
+  bool removed = false;
   if (isEmbed) {
     final Operation mainOp = Operation.insert(condition.insertion, null);
-    final Operation lastOp = modifiedOps.last;
     if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion) {
       modifiedOps.removeLast();
-    }
-    modifiedOps
-      ..add(mainOp)
-      ..add(Operation.insert('\n'));
-  } else if (isOperation) {
-    final Operation mainOp = condition.insertion as Operation;
-    final Operation lastOp = modifiedOps.last;
-    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion && mainOp.isEmbed) {
-      modifiedOps.removeLast();
+      removed = true;
     }
     modifiedOps.add(mainOp);
-    if (mainOp.isEmbed || !mainOp.data.toString().contains('\n')) {
+    if (removed) {
+      modifiedOps.add(Operation.insert('\n'));
+    }
+  } else if (isOperation) {
+    final Operation mainOp = condition.insertion as Operation;
+    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion && mainOp.isEmbed) {
+      modifiedOps.removeLast();
+      removed = true;
+    }
+    modifiedOps.add(mainOp);
+    if (mainOp.isEmbed || !mainOp.data.toString().contains('\n') && removed) {
       modifiedOps.add(Operation.insert('\n'));
     }
   } else if (isListOperation) {
     final List<Operation> mainOp = condition.insertion as List<Operation>;
-    final Operation lastOp = mainOp.last;
+    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion) {
+      modifiedOps.removeLast();
+      removed = true;
+    }
     modifiedOps.addAll(<Operation>[...mainOp]);
-    if (!lastOp.isNewLineOrBlockInsertion) {
+    if (!(modifiedOps.lastOrNull?.isNewLineOrBlockInsertion ?? false) ||
+        removed) {
       modifiedOps.add(Operation.insert('\n'));
     }
   } else {
     final Operation mainOp = Operation.insert(condition.insertion);
+    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion) {
+      modifiedOps.removeLast();
+      removed = true;
+    }
     modifiedOps.add(mainOp);
-    if (!condition.insertion.toString().contains('\n')) {
+    if (!condition.insertion.toString().contains('\n') && removed) {
       modifiedOps.add(Operation.insert('\n'));
     }
   }
