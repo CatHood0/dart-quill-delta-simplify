@@ -680,7 +680,7 @@ void main() {
       final Delta expected = Delta()
         ..insert('Experimental version of the Delta\n');
       delta.simpleReplace(
-          insertion: 'version of the', range: null, target: 'version');
+          replace: 'version of the', range: null, target: 'version');
       expect(delta, expected);
     });
     test('format', () {
