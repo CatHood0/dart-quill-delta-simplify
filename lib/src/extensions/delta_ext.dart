@@ -43,9 +43,10 @@ extension DeltaToPlainText on Delta {
   String toPlainBuilder(String Function(Operation op) opToPlainBuilder) {
     StringBuffer buffer = StringBuffer();
     for (Operation op in operations) {
-      if (!op.isInsert)
+      if (!op.isInsert) {
         throw IllegalOperationPassedException(
             illegal: op, expected: op.clone(''));
+      }
       buffer.write(opToPlainBuilder(op));
     }
     return buffer.toString();
@@ -80,20 +81,37 @@ extension EasyDelta on Delta {
         onlyOnce: onlyOnce,
       );
 
+  /// Finds first embed in Delta
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#embeds-matching)
+  DeltaRangeResult? getFirstEmbed({bool Function(Operation)? ignoreWhen}) {
+    return toQuery.getFirstEmbed(ignoreWhen: ignoreWhen);
+  }
+
+  /// Finds all embeds in Delta
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#embeds-matching)
+  List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {
+    return toQuery.getAllEmbeds(ignoreWhen: ignoreWhen);
+  }
+
   /// Finds the first match of the given [pattern] or [rawObject] in the [Delta] operations list.
   ///
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
   DeltaRangeResult? firstMatch(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
+    bool Function(Operation)? predicate,
   }) =>
       toQuery.firstMatch(
         pattern,
         rawObject,
         operationIndex: operationIndex,
+        predicate: predicate,
       );
 
   /// Finds all matches of the given [pattern] or [rawObject] in the [Delta] operations list.
@@ -102,15 +120,18 @@ extension EasyDelta on Delta {
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
   /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
   List<DeltaRangeResult> allMatches(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
+    bool Function(Operation)? predicate,
   }) =>
       toQuery.allMatches(
         pattern,
         rawObject,
         operationIndex: operationIndex,
+        predicate: predicate,
       );
 
   void check() {
@@ -176,13 +197,16 @@ extension EasyDelta on Delta {
     final Delta delta = QueryDelta(delta: this)
         .insert(
           insert: insert,
-          startPoint: startPoint,
+          startPoint: insertAtLastOperation ? null : startPoint,
           caseSensitive: caseSensitive,
-          target: target,
+          target: insertAtLastOperation ? null : target,
           left: left,
           onlyOnce: startPoint != null ? true : onlyOnce,
           asDifferentOp: asDifferentOp,
-          insertAtLastOperation: insertAtLastOperation,
+          insertAtLastOperation:
+              target == null && (startPoint == null || startPoint < 0)
+                  ? true
+                  : insertAtLastOperation,
         )
         .build()
         .delta;
@@ -197,6 +221,9 @@ extension EasyDelta on Delta {
   /// * [target]: The target object for the replacement.
   /// * [onlyOnce]: Whether to replace only once.
   void simpleReplace({
+    @Deprecated(
+        'insertion has no sense with the target of the method. Use "replace" instead')
+    Object? insertion,
     required Object replace,
     required DeltaRange? range,
     required Object? target,

@@ -19,7 +19,7 @@ extension ObjectToOperation on Object {
   ///   {'color': 'red'}, // inline attributes
   ///   {'align': 'center'} // block attributes
   /// );
-  /// print(operationWithAttributes); // {"insert": "Hello"}
+  /// print(operation); // [{"insert": "Hello"}]
   /// print(operationWithAttributes); // [{"insert": "Hello", "attributes": {"color": "red"}, {"insert": "⏎", "attributes": {"align": "center"}}}]
   /// ```
   Object toOperation(

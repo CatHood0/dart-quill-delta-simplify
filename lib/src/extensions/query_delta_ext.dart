@@ -45,17 +45,45 @@ extension EssentialsQueryExt on QueryDelta {
     );
   }
 
+  /// Finds first embed in Delta
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#embeds-matching)
+  DeltaRangeResult? getFirstEmbed({bool Function(Operation)? ignoreWhen}) {
+    return _matches(
+      pattern: null,
+      rawObject: null,
+      operationOffset: 0,
+      predicate: (Operation operation) => operation.isEmbed,
+      onlyOnce: true,
+    ).firstOrNull;
+  }
+
+  /// Finds all embeds in Delta
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#embeds-matching)
+  List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {
+    return _matches(
+      pattern: null,
+      rawObject: null,
+      operationOffset: 0,
+      predicate: (Operation operation) => operation.isEmbed,
+      onlyOnce: false,
+    );
+  }
+
   /// Finds the first match of the given [pattern] or [rawObject] in the [Delta] operations list.
   ///
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
   ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#first-match)
   DeltaRangeResult? firstMatch(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
+    bool Function(Operation)? predicate,
   }) {
     // check if the index of the operation passed, is illegal
     if (operationIndex != null && (operationIndex < 0 || operationIndex >= getDelta().length)) {
@@ -68,6 +96,7 @@ extension EssentialsQueryExt on QueryDelta {
       pattern: pattern,
       rawObject: rawObject,
       operationOffset: operationIndex,
+      predicate: predicate,
       onlyOnce: true,
     ).firstOrNull;
   }
@@ -78,17 +107,20 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
   /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
   ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#multiple-occurrence-matches)
   List<DeltaRangeResult> allMatches(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
+    bool Function(Operation)? predicate,
   }) {
     return _matches(
       pattern: pattern,
       rawObject: rawObject,
       operationOffset: operationIndex,
+      predicate: predicate,
       onlyOnce: false,
     );
   }
@@ -228,10 +260,14 @@ extension EssentialsQueryExt on QueryDelta {
   /// * [operationOffset]: The starting offset in the operations to begin the search.
   /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive.
   /// * [onlyOnce]: Whether to stop after the first match is found.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
+  /// * [ignoreWhen]: If a Operation satifies the function, then the Operation will be ignored (only when predicate is active).
   List<DeltaRangeResult> _matches({
     RegExp? pattern,
     Object? rawObject,
     int? operationOffset,
+    bool Function(Operation)? predicate,
+    bool Function(Operation)? ignoreWhen,
     bool onlyOnce = false,
   }) {
     final Delta inputClone = getDelta().denormalize();
@@ -244,6 +280,24 @@ extension EssentialsQueryExt on QueryDelta {
       final op = inputClone.elementAt(offset);
       if (parts.isNotEmpty && onlyOnce) {
         return [...parts];
+      }
+      if ((predicate?.call(op)) ?? false) {
+        if (ignoreWhen != null && ignoreWhen(op)) {
+          globalOffset += op.getEffectiveLength;
+          continue;
+        }
+        parts.add(
+          DeltaRangeResult(
+            delta: Delta.fromOperations([op]),
+            startOffset: globalOffset + 1,
+            endOffset: globalOffset + 1,
+          ),
+        );
+        globalOffset += op.getEffectiveLength;
+        if (onlyOnce) {
+          return <DeltaRangeResult>[...parts];
+        }
+        continue;
       }
       if (pattern != null && op.data is String) {
         assert(

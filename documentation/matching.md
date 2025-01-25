@@ -13,6 +13,7 @@ DeltaRangeResult firstMatch(
    RegExp? pattern, // The string pattern to search for
    Object? rawObject, { // The object to search for within the operations 
    int? operationIndex, // The index of the operation
+   bool Function(Operation op)? predicate, 
 })
 ```
 
@@ -30,7 +31,6 @@ final Delta delta = Delta()
 final DeltaRangeResult result = QueryDelta(delta: delta).firstMatch(
     RegExp('paragraph', caseSensitive: false),
     null, // raw pattern
-    operationIndex: 0, // where will start
 );
 print(result); // DeltaRangeResult(delta: [{"insert": "paragraph"}], Offset: [47, 56]) 
 ```
@@ -41,6 +41,7 @@ List<DeltaRangeResult> allMatches(
    RegExp? pattern, // The string pattern to search for
    Object? rawObject, { // The object to search for within the operations 
    int? operationIndex, // The index of the operation
+   bool Function(Operation op)? predicate, 
 })
 ```
 
@@ -57,7 +58,6 @@ final Delta delta = Delta()
 final List<DeltaRangeResult> result = QueryDelta(delta: delta).allMatches(
     RegExp('paragraph', caseSensitive: false),
     null, // raw pattern
-    operationIndex: 0, // where will start
 );
 print(result); 
 // [
@@ -102,5 +102,35 @@ print(result);
 //  DeltaRangeResult(delta: [{"insert": "This is a bold text.", "attributes": {"bold": true}}], Offset: [0, 20]),
 //  DeltaRangeResult(delta: [{"insert": "Header 1"}, {"insert": "⏎", "attributes": {"header": 1}}], Offset: [21, 30]),
 //  DeltaRangeResult(delta: [{"insert": "Header 2"}, {"insert": "⏎", "attributes": {"header": 2}}], Offset: [58, 67]),
+// ] 
+```
+
+## Embeds Matching
+
+```dart
+// all
+List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {}
+// first
+DeltaRangeResult? getFirstEmbed({bool Function(Operation)? ignoreWhen}) {}
+```
+
+### Example
+
+```dart
+final Delta delta = Delta()
+    ..insert('This is a bold text.\n', {'bold': true})
+    ..insert({'image': 'https://www.google.com/my/image-link'})
+    ..insert('Header 1')
+    ..insert('\n', {'header': 1})
+    ..insert('This is a normal paragraph.\n')
+    ..insert('Header 2')
+    ..insert('\n', {'header': 2})
+    ..insert({'video': 'https://www.google.com/my/video-link'})
+    ..insert('Another common paragraph.\n');
+final List<DeltaRangeResult> result = QueryDelta(delta: delta).getAllEmbeds(); // or getFirstEmbed()
+print(result); 
+// [
+//  DeltaRangeResult(delta: [{"insert": {"image": "https://www.google.com/my/image-link"}}], Offset: [21, 21]),
+//  DeltaRangeResult(delta: [{"insert": {"video": "https://www.google.com/my/video-link"}}], Offset: [68, 68]),
 // ] 
 ```

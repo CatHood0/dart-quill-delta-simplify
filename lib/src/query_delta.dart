@@ -27,9 +27,9 @@ class QueryDelta {
 
   QueryDelta({
     required Delta delta,
-  })  : assert(delta.isNotEmpty, 'cannot be passed an empty Delta'),
-        assert(
-            delta.last.isNewLineOrBlockInsertion ||
+  }) : assert(
+            delta.isEmpty ||
+                delta.last.isNewLineOrBlockInsertion ||
                 delta.last.containsNewLine(),
             'last operation must contain a new line') {
     _input = Delta.fromOperations(delta.operations);

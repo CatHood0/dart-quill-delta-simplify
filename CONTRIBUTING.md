@@ -19,51 +19,33 @@ Make sure you have the [Requirement](#-development-prerequisites) installed and 
 
 To test your changes:
 
-1. run the tests using your IDE or `flutter run`
-2. Make sure to read the [Development Notes](#development-notes) if you made certain changes
-   or [Translations Page](./doc/translation.md) if you made changes to the translations of the package
+1. Run the tests using your IDE or `flutter test`
 
 ## Guidelines 📝
 
-1. **Code Style and Formatting**:
-
-   Adhere to the Dart Coding Conventions (https://dart.dev/effective-dart).
-   Use consistent naming conventions for variables, functions, classes, etc.
-   Follow a consistent code formatting style throughout the project.
-
-   We use [Dart lints](https://dart.dev/tools/linter-rules) to make the process easier.
-
-2. **Documentation**:
+1. **Documentation**:
 
    Document public APIs using Dart comments (https://dart.dev/effective-dart/documentation).
    Provide comprehensive documentation for any complex algorithms, data structures, or significant functionality.
    Write clear and concise commit messages and pull request descriptions.
 
-3. **Performance**:
+2. **Performance**:
 
    Write efficient code and avoid unnecessary overhead.
 
-5. **Code Review**:
+3. **Code Review**:
 
    Encourage code reviews for all changes to maintain code quality and catch potential issues early.
    Use pull requests and code reviews to discuss proposed changes and improvements.
 
-6. **Versioning and Releases**:
-
-   Follow semantic versioning for releases (https://semver.org/).
-   Clearly document release notes and changes for each version.
-
-   For now, we might introduce breaking changes in a non-major version but will always provide a migration
-   guide in each release info.
-
-7. **Consistency**:
+4. **Consistency**:
 
    Adhere to a consistent coding style throughout the project for improvement readability and maintainability
 
-8. **Meaningful Names**:
+5. **Meaningful Names**:
 
    Use descriptive variable, class, and function names that clearly convey their purpose.
 
-9. **Testing**:
+6. **Testing**:
 
    Try to write tests when possible
