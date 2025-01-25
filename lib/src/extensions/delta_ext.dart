@@ -203,7 +203,10 @@ extension EasyDelta on Delta {
           left: left,
           onlyOnce: startPoint != null ? true : onlyOnce,
           asDifferentOp: asDifferentOp,
-          insertAtLastOperation: insertAtLastOperation,
+          insertAtLastOperation:
+              target == null && (startPoint == null || startPoint < 0)
+                  ? true
+                  : insertAtLastOperation,
         )
         .build()
         .delta;
