@@ -1,3 +1,12 @@
+## 10.8.5
+
+* Fix: missing `predicate` param on match methods for `DeltaExt`
+* Fix: is we insert a list of operations at last, them are not inserted as expected
+* Fix: bad url to documentation 
+* Chore(doc): update outdated documentation 
+* Chore(doc): fix contributing guide
+* Chore: added an alternative checking to avoid unexpected behavior in `simpleInsert`
+
 ## 10.8.4
 
 * Fix(test): renamed `insertion` param to `replace`
