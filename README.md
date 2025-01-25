@@ -20,7 +20,7 @@ For detailed usage of the `QueryDelta` API, you can see:
 [Delete.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/delete.md)
 [Diff.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/diff.md)
 [Matching.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md)
-[Matching.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/extras.md)
+[Extras.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/extras.md)
 
 ## 🔎 Introduction to QueryDelta
 
