@@ -13,6 +13,7 @@ DeltaRangeResult firstMatch(
    RegExp? pattern, // The string pattern to search for
    Object? rawObject, { // The object to search for within the operations 
    int? operationIndex, // The index of the operation
+   bool Function(Operation op)? predicate, 
 })
 ```
 
@@ -30,7 +31,6 @@ final Delta delta = Delta()
 final DeltaRangeResult result = QueryDelta(delta: delta).firstMatch(
     RegExp('paragraph', caseSensitive: false),
     null, // raw pattern
-    operationIndex: 0, // where will start
 );
 print(result); // DeltaRangeResult(delta: [{"insert": "paragraph"}], Offset: [47, 56]) 
 ```
@@ -41,6 +41,7 @@ List<DeltaRangeResult> allMatches(
    RegExp? pattern, // The string pattern to search for
    Object? rawObject, { // The object to search for within the operations 
    int? operationIndex, // The index of the operation
+   bool Function(Operation op)? predicate, 
 })
 ```
 
@@ -57,7 +58,6 @@ final Delta delta = Delta()
 final List<DeltaRangeResult> result = QueryDelta(delta: delta).allMatches(
     RegExp('paragraph', caseSensitive: false),
     null, // raw pattern
-    operationIndex: 0, // where will start
 );
 print(result); 
 // [
@@ -108,7 +108,10 @@ print(result);
 ## Embeds Matching
 
 ```dart
+// all
 List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {}
+// first
+DeltaRangeResult? getFirstEmbed({bool Function(Operation)? ignoreWhen}) {}
 ```
 
 ### Example
