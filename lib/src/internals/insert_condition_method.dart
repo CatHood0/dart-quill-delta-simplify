@@ -332,13 +332,8 @@ void _insertAtLast({
     }
   } else if (isListOperation) {
     final List<Operation> mainOp = condition.insertion as List<Operation>;
-    if (lastOp.isNewLine && !lastOp.isBlockLevelInsertion) {
-      modifiedOps.removeLast();
-      removed = true;
-    }
     modifiedOps.addAll(<Operation>[...mainOp]);
-    if (!(modifiedOps.lastOrNull?.isNewLineOrBlockInsertion ?? false) ||
-        removed) {
+    if (!mainOp.last.isNewLineOrBlockInsertion) {
       modifiedOps.add(Operation.insert('\n'));
     }
   } else {
