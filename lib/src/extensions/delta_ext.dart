@@ -100,15 +100,18 @@ extension EasyDelta on Delta {
   /// * [pattern]: The string pattern to search for.
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
   DeltaRangeResult? firstMatch(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
+    bool Function(Operation)? predicate,
   }) =>
       toQuery.firstMatch(
         pattern,
         rawObject,
         operationIndex: operationIndex,
+        predicate: predicate,
       );
 
   /// Finds all matches of the given [pattern] or [rawObject] in the [Delta] operations list.
@@ -117,15 +120,18 @@ extension EasyDelta on Delta {
   /// * [rawObject]: The object to search for within the operations.
   /// * [operationIndex]: The index of the operation.
   /// * [caseSensitivePatterns]: Whether the pattern matching should be case-sensitive. Defaults to `false`.
+  /// * [predicate]: If a Operation satifies the function, then the Operation will be added to the parts.
   List<DeltaRangeResult> allMatches(
     RegExp? pattern,
     Object? rawObject, {
     int? operationIndex,
+    bool Function(Operation)? predicate,
   }) =>
       toQuery.allMatches(
         pattern,
         rawObject,
         operationIndex: operationIndex,
+        predicate: predicate,
       );
 
   void check() {
