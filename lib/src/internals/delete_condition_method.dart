@@ -31,7 +31,7 @@ List<Operation> deleteCondition(
     // if len of deletion is major than the entire Delta
     // then just return a empty list of operations
     if (range.endOffset > operations.getEffectiveLength) {
-      return [];
+      return [...operations];
     }
   }
   // mutable len deletions
@@ -91,7 +91,7 @@ List<Operation> deleteCondition(
         globalOffset += opLength;
         continue;
       }
-      final bool isIntoRange = !isOutOfRange;
+      final bool isIntoRange = isOutOfRange == false;
       if (isIntoRange) {
         final (len, specialOp, specialIndex) = _range(
           op: op,
