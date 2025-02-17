@@ -605,7 +605,7 @@ extension DiffDelta on QueryDelta {
     for (final op in diffResult.operations) {
       if (op.isRetain) {
         final next = iterator.next(op.length!);
-        // if the attributes are null, then means that this part was formatted
+        // if the attributes are not null, it means this part just was formatted
         if (op.attributes != null) {
           diffs.add(
             DeltaDiffPart.format(
