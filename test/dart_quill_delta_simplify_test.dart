@@ -651,10 +651,8 @@ void main() {
       expect(delta, expected);
     });
     test('replace', () {
-      final Delta expected = Delta()
-        ..insert('Experimental version of the Delta\n');
-      delta.simpleReplace(
-          replace: 'version of the', range: null, target: 'version');
+      final Delta expected = Delta()..insert('Experimental version of the Delta\n');
+      delta.simpleReplace(replace: 'version of the', range: null, target: 'version');
       expect(delta, expected);
     });
     test('format', () {
@@ -664,30 +662,5 @@ void main() {
       delta.simpleFormat(offset: 0, len: 12, attribute: Attribute.bold);
       expect(delta, expected);
     });
-  });
-
-  test('sa', () {
-    final Delta delta = Delta()..insert('Experimental version Delta\n');
-    final QueryDelta query = QueryDelta(delta: delta)
-      ..insert(
-        insert: ' New data',
-        target: 'Delta',
-        startPoint: null,
-        left: false,
-      )
-      ..delete(
-        target: null,
-        startPoint: 14,
-        lengthOfDeletion: 2,
-      )
-      ..format(
-        offset: 0,
-        len: 12,
-        attribute: Attribute.bold,
-      )
-      ..build();
-    print(query.toDelta());
-    final DeltaCompareDiffResult result = query.compareDiff();
-    print(result);
   });
 }

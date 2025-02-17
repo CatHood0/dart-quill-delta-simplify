@@ -6,7 +6,6 @@ import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
-import '../util/diff/lcs_diff.dart';
 import '../util/op_offset_to_char_offset.dart';
 
 extension EssentialsQueryExt on QueryDelta {
@@ -558,22 +557,64 @@ extension DiffDelta on QueryDelta {
     final Delta newDelta = getDelta();
     originalDelta.check();
     newDelta.check();
-    if (listEquals(newDelta.operations, originalDelta.operations)) return DeltaCompareDiffResult(diffParts: []);
 
-    final String newVersion = newDelta.toPlainBuilder(
-      (op) => op.toPlain(
-        embedBuilder: (Object e) => String.fromCharCode(0),
-      ),
-    );
-    final String oldVersion = originalDelta.toPlainBuilder(
-      (op) => op.toPlain(
-        embedBuilder: (Object e) => String.fromCharCode(0),
-      ),
-    );
-
-    final List<DeltaDiffPart> diffParts = diff(oldVersion, newVersion);
+    final Delta diffDelta = originalDelta.diff(newDelta);
+    final List<DeltaDiffPart> diffParts = _diff(originalDelta, diffDelta);
 
     return DeltaCompareDiffResult(diffParts: diffParts);
   }
 
+  List<DeltaDiffPart> _diff(Delta delta, Delta diffResult) {
+    final List<DeltaDiffPart> diffs = <DeltaDiffPart>[];
+    final iterator = DeltaIterator(delta);
+    int offset = 0;
+
+    for (final op in diffResult.operations) {
+      if (op.isRetain) {
+        final next = iterator.next(op.length!);
+        // if the attributes are null, then means that this part was formatted
+        if (op.attributes != null) {
+          diffs.add(
+            DeltaDiffPart.format(
+              '${next.data}',
+              offset,
+              offset + (op.length ?? 0),
+              op.attributes!,
+            ),
+          );
+        } else {
+          diffs.add(
+            DeltaDiffPart.equals(
+              '${next.data}',
+              offset,
+              offset + (op.length ?? 0),
+            ),
+          );
+        }
+      }
+      if (op.isInsert) {
+        diffs.add(
+          DeltaDiffPart.insert(
+            '',
+            op.data,
+            offset,
+            offset + (op.length ?? 0),
+            op.attributes,
+          ),
+        );
+      }
+      if (op.isDelete) {
+        final removedPart = iterator.next(op.length!);
+        diffs.add(
+          DeltaDiffPart.delete(
+            '${removedPart.data}',
+            offset,
+            offset + (op.length ?? 0),
+          ),
+        );
+      }
+      offset += op.length!;
+    }
+    return List.unmodifiable(diffs);
+  }
 }

@@ -1,5 +1,3 @@
-import '../util/collections.dart';
-
 /// A class that represents a part of the difference between two Deltas.
 ///
 /// Example usage:
@@ -34,6 +32,7 @@ class DeltaDiffPart {
 
   /// The type of the diff, it can be "equals", "delete", "insert", "format"
   final String type;
+  final Map<String, dynamic>? attributes;
 
   DeltaDiffPart({
     required this.before,
@@ -41,8 +40,20 @@ class DeltaDiffPart {
     required this.start,
     required this.end,
     required this.type,
+    this.attributes,
     this.args,
   });
+
+  factory DeltaDiffPart.format(Object? content, int start, int end, Map<String, dynamic> attributes) {
+    return DeltaDiffPart(
+      before: content,
+      after: content,
+      start: start,
+      end: end,
+      type: 'format',
+      attributes: attributes,
+    );
+  }
 
   factory DeltaDiffPart.equals(Object? content, int start, int end) {
     return DeltaDiffPart(
@@ -54,23 +65,25 @@ class DeltaDiffPart {
     );
   }
 
-  factory DeltaDiffPart.delete(Object? content, Object? part, int start, int end) {
+  factory DeltaDiffPart.delete(Object? part, int start, int end) {
     return DeltaDiffPart(
-      before: content,
-      after: part,
+      before: part,
+      after: null,
       start: start,
       end: end,
       type: 'delete',
     );
   }
 
-  factory DeltaDiffPart.insert(Object? before, Object? insert, int start, int end) {
+  factory DeltaDiffPart.insert(Object? before, Object? insert, int start, int end,
+      [Map<String, dynamic>? attributes]) {
     return DeltaDiffPart(
       before: before,
       after: insert,
       start: start,
       end: end,
       type: 'insert',
+      attributes: attributes,
     );
   }
 
@@ -88,6 +101,7 @@ class DeltaDiffPart {
     return 'DeltaDiffPart(before: "${before == null ? "" : before.toString().replaceAll('\n', '\\n')}", '
         'after: "${after == null ? "" : after.toString().replaceAll('\n', '\\n')}", '
         'start: $start, end: $end, '
-        'type: $type)';
+        'type: $type'
+        '${attributes != null ? ', attributes: $attributes)' : ')'}';
   }
 }
