@@ -13,26 +13,30 @@ final QueryDelta query = QueryDelta(delta: delta)
         startPoint: null,
         left: false,
     )
-    ..format(offset: 0, len: 12, attribute: Attribute.bold)
+    ..delete(
+        target: null,
+        startPoint: 14,
+        lengthOfDeletion: 2,
+    )
+    ..format(
+        offset: 0, 
+        len: 12, 
+        attribute: Attribute.bold,
+    )
     ..build();
 final DeltaCompareDiffResult result = query.compareDiff();
-print(result);
+debugPrint(result);
 ```
 
 ## Output in console
 
 ```console
-DeltaCompareDiffResult: [
-    DeltaDiffPart(before: 'Experimental', after: 'Experimental', start: 0, end: 12, args: {
-        'diff_attributes': {
-            'new': {'bold': true},
-            'old': null
-        },
-        'isUpdatedPart': true,
-    }),
-    DeltaDiffPart(
-        before: ' version Delta', after: ' version Delta', start: 12, end: 26, args: {'isEquals': true}),
-    DeltaDiffPart(before: null, after: ' New data', start: 26, end: 35, args: {'isAddedPart': true}),
-    DeltaDiffPart(before: '\n', after: '\n', start: 35, end: 36, args: {'isEquals': true}),
-]
+DeltaCompareDiffResult(
+  parts: [
+    DeltaDiffPart(before: 'Experimental', after: 'Experimental', start: 0, end: 12, type: format, attributes: {bold: true}),
+    DeltaDiffPart(before: ' v', after: ' v', start: 12, end: 14, type: equals),
+    DeltaDiffPart(before: 'er', after: '', start: 14, end: 16, type: delete),
+    DeltaDiffPart(before: 'sion Delta', after: 'sion Delta', start: 16, end: 26, type: equals),
+    DeltaDiffPart(before: '', after: ' New data', start: 26, end: 35, type: insert),
+  ]
 ```

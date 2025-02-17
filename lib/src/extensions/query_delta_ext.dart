@@ -3,11 +3,9 @@ import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/check_op_attrs.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
-import 'package:diff_match_patch/diff_match_patch.dart' as dmp;
-import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
-import '../util/collections.dart';
 import '../util/op_offset_to_char_offset.dart';
 
 extension EssentialsQueryExt on QueryDelta {
@@ -587,99 +585,69 @@ extension DiffDelta on QueryDelta {
   /// and the original version passed before run the build method
   ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/diff.md#usage-examples)
-  ///
-  /// _This method is inspired on the original diff method from Delta class [Here](https://github.com/FlutterQuill/dart-quill-delta/blob/141f86aff1a65c14a25a6b59d76a4a23781c5d91/lib/src/delta/delta.dart#L310-L323)_
   DeltaCompareDiffResult compareDiff({bool cleanupSemantic = true}) {
     final Delta originalDelta = params.originalDelta;
     final Delta newDelta = getDelta();
     originalDelta.check();
     newDelta.check();
-    if (listEquals(newDelta.operations, originalDelta.operations))
-      return DeltaCompareDiffResult(diffParts: []);
 
-    final String stringThis = newDelta.toPlainBuilder(
-      (op) => op.toPlain(
-        embedBuilder: (Object e) => String.fromCharCode(0),
-      ),
-    );
-    final String stringOther = originalDelta.toPlainBuilder(
-      (op) => op.toPlain(
-        embedBuilder: (Object e) => String.fromCharCode(0),
-      ),
-    );
+    final Delta diffDelta = originalDelta.diff(newDelta);
+    final List<DeltaDiffPart> diffParts = _diff(originalDelta, diffDelta);
 
-    // we need to know the diff between the original and the modified Deltas
-    final List<dmp.Diff> diffResult = dmp.diff(stringOther, stringThis);
-    // removes duplicated ops
-    if (cleanupSemantic) dmp.DiffMatchPatch().diffCleanupSemantic(diffResult);
-
-    final DeltaIterator thisIter = DeltaIterator(newDelta);
-    final DeltaIterator otherIter = DeltaIterator(originalDelta);
-
-    final List<DeltaDiffPart> diffParts = [];
-    int globalOffset = 0;
-
-    for (final dmp.Diff component in diffResult) {
-      int compTextLength = component.text.length;
-      while (compTextLength > 0) {
-        int opLength = 0;
-        Object? before = null;
-        Object? after = null;
-        Map<String, dynamic> args = {};
-
-        switch (component.operation) {
-          case dmp.DIFF_INSERT:
-            opLength = math.min(thisIter.peekLength(), compTextLength);
-            after = thisIter.next(opLength).data;
-            args = {'isAddedPart': true};
-            break;
-          case dmp.DIFF_DELETE:
-            opLength = math.min(compTextLength, otherIter.peekLength());
-            before = otherIter.next(opLength).data;
-            args = {'isRemovedPart': true};
-            break;
-          case dmp.DIFF_EQUAL:
-            opLength = math.min(
-                math.min(otherIter.peekLength(), thisIter.peekLength()),
-                compTextLength);
-            final Operation thisOp = thisIter.next(opLength);
-            final Operation otherOp = otherIter.next(opLength);
-            if (!thisOp.hasSameAttributes(otherOp)) {
-              args['diff_attributes'] = {
-                'new': thisOp.attributes,
-                'old': otherOp.attributes,
-              };
-              args['isUpdatedPart'] = true;
-            }
-            if (thisOp.data != otherOp.data) {
-              before = thisOp.data;
-              after = otherOp.data;
-              args['isUpdatedPart'] = true;
-            } else {
-              if (!args.containsKey('diff_attributes')) args['isEquals'] = true;
-              diffParts.add(DeltaDiffPart(
-                before: thisOp.data,
-                after: otherOp.data,
-                start: globalOffset,
-                end: globalOffset + opLength,
-                args: args.isEmpty ? null : args,
-              ));
-            }
-            break;
-        }
-        if (before != null || after != null) {
-          diffParts.add(DeltaDiffPart(
-            before: before,
-            after: after,
-            start: globalOffset,
-            end: globalOffset + opLength,
-            args: args..removeWhere((k, v) => k == 'diff_attributes'),
-          ));
-        }
-        globalOffset += opLength;
-        compTextLength -= opLength;
-      }
-    }
     return DeltaCompareDiffResult(diffParts: diffParts);
+  }
+
+  List<DeltaDiffPart> _diff(Delta delta, Delta diffResult) {
+    final List<DeltaDiffPart> diffs = <DeltaDiffPart>[];
+    final iterator = DeltaIterator(delta);
+    int offset = 0;
+
+    for (final op in diffResult.operations) {
+      if (op.isRetain) {
+        final next = iterator.next(op.length!);
+        // if the attributes are not null, it means this part just was formatted
+        if (op.attributes != null) {
+          diffs.add(
+            DeltaDiffPart.format(
+              '${next.data}',
+              offset,
+              offset + (op.length ?? 0),
+              op.attributes!,
+            ),
+          );
+        } else {
+          diffs.add(
+            DeltaDiffPart.equals(
+              '${next.data}',
+              offset,
+              offset + (op.length ?? 0),
+            ),
+          );
+        }
+      }
+      if (op.isInsert) {
+        diffs.add(
+          DeltaDiffPart.insert(
+            '',
+            op.data,
+            offset,
+            offset + (op.length ?? 0),
+            op.attributes,
+          ),
+        );
+      }
+      if (op.isDelete) {
+        final removedPart = iterator.next(op.length!);
+        diffs.add(
+          DeltaDiffPart.delete(
+            '${removedPart.data}',
+            offset,
+            offset + (op.length ?? 0),
+          ),
+        );
+      }
+      offset += op.length!;
+    }
+    return List.unmodifiable(diffs);
   }
 }

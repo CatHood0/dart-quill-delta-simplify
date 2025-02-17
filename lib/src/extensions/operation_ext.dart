@@ -1,7 +1,6 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/illegal_operation_passed_exception.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
-import 'package:dart_quill_delta_simplify/src/util/combine_two_numbers.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:meta/meta.dart';
 
@@ -32,9 +31,8 @@ extension OffsetOperationLength on Operation {
 /// It accumulates the length of each operation in the list to return the total length.
 extension ListOperationLength on Iterable<Operation> {
   /// Gets the total effective length of the list of operations.
-  int get getEffectiveLength => map((e) => e.getEffectiveLength).reduce(
-        combineTwoNumbers,
-      );
+  int get getEffectiveLength =>
+      fold(0, (value, op) => value + op.getEffectiveLength);
 }
 
 /// Extension that converts an [Operation] to its plain text representation.
