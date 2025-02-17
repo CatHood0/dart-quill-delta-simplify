@@ -1,3 +1,9 @@
+## 10.8.6
+* Fix: diff matching by @CatHood0 in https://github.com/CatHood0/dart-quill-delta-simplify/pull/1
+
+## New Contributors
+* @CatHood0 made their first contribution in https://github.com/CatHood0/dart-quill-delta-simplify/pull/1
+
 ## 10.8.5
 
 * Fix: missing `predicate` param on match methods for `DeltaExt`

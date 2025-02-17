@@ -14,13 +14,13 @@ For detailed usage and API references, refer to the official [Dart Quill Delta](
 
 For detailed usage of the `QueryDelta` API, you can see:
 
-[Insert.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/insert.md)
-[Replace.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/replace.md)
-[Format.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/format.md)
-[Delete.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/delete.md)
-[Diff.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/diff.md)
-[Matching.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md)
-[Extras.md](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/extras.md)
+[Insert.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/insert.md)
+[Replace.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/replace.md)
+[Format.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/format.md)
+[Delete.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/delete.md)
+[Diff.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/diff.md)
+[Matching.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/matching.md)
+[Extras.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/extras.md)
 
 ## 🔎 Introduction to QueryDelta
 
@@ -298,4 +298,4 @@ We greatly appreciate your time and effort.
 
 To keep the project consistent and maintainable, we have a few guidelines that we ask all contributors to follow. These guidelines help ensure that everyone can understand and work with the code easier.
 
-See [Contributing](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/CONTRIBUTING.md) for more details.
+See [Contributing](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/CONTRIBUTING.md) for more details.
