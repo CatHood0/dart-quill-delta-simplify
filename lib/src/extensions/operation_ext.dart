@@ -31,7 +31,8 @@ extension OffsetOperationLength on Operation {
 /// It accumulates the length of each operation in the list to return the total length.
 extension ListOperationLength on Iterable<Operation> {
   /// Gets the total effective length of the list of operations.
-  int get getEffectiveLength => fold(0, (value, op) => value + op.getEffectiveLength);
+  int get getEffectiveLength =>
+      fold(0, (value, op) => value + op.getEffectiveLength);
 }
 
 /// Extension that converts an [Operation] to its plain text representation.
@@ -41,7 +42,9 @@ extension OperationToPlain on Operation {
   /// Converts the operation to its plain text representation.
   String toPlain({String Function(Object embedData)? embedBuilder}) {
     if (isRetain || isDelete || isEmpty || data == null) return '';
-    return data is String ? '$data' : embedBuilder?.call(data!) ?? _kObjectReplacementCharacter;
+    return data is String
+        ? '$data'
+        : embedBuilder?.call(data!) ?? _kObjectReplacementCharacter;
   }
 
   /// Checks if the operation's data is empty.
@@ -57,10 +60,13 @@ extension OperationToPlain on Operation {
 extension CheckOperation on Operation {
   /// Checks if the operation represents a block-level insertion (e.g., a newline with attributes).
   bool get isBlockLevelInsertion =>
-      data is String && ('$data'.hasOnlyNewLines || '$data' == '\n') && attributes != null;
+      data is String &&
+      ('$data'.hasOnlyNewLines || '$data' == '\n') &&
+      attributes != null;
 
   /// Checks if the operation represents a new line.
-  bool get isNewLine => data is String && ('$data'.hasOnlyNewLines || '$data' == '\n');
+  bool get isNewLine =>
+      data is String && ('$data'.hasOnlyNewLines || '$data' == '\n');
 
   /// Checks if the operation contains embedded data.
   bool get isEmbed => data is Map;

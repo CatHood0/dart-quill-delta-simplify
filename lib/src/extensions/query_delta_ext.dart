@@ -27,12 +27,20 @@ extension EssentialsQueryExt on QueryDelta {
     bool strictKeysCheck = true,
     bool onlyOnce = false,
   }) {
-    assert(blockAttrs == null || blockAttrs.isNotEmpty, 'No empty block attributes');
-    assert(inlineAttrs == null || inlineAttrs.isNotEmpty, 'No empty inline attributes');
-    assert(blockAttrKeys == null || blockAttrKeys.isNotEmpty, 'No empty block attribute keys');
-    assert(inlineAttrKeys == null || inlineAttrKeys.isNotEmpty, 'No empty inline attribute keys');
-    if (inlineAttrs == null && blockAttrs == null && blockAttrKeys == null && inlineAttrKeys == null) {
-      throw IllegalParamsValuesException(illegal: null, expected: [Attributes, List<String>]);
+    assert(blockAttrs == null || blockAttrs.isNotEmpty,
+        'No empty block attributes');
+    assert(inlineAttrs == null || inlineAttrs.isNotEmpty,
+        'No empty inline attributes');
+    assert(blockAttrKeys == null || blockAttrKeys.isNotEmpty,
+        'No empty block attribute keys');
+    assert(inlineAttrKeys == null || inlineAttrKeys.isNotEmpty,
+        'No empty inline attribute keys');
+    if (inlineAttrs == null &&
+        blockAttrs == null &&
+        blockAttrKeys == null &&
+        inlineAttrKeys == null) {
+      throw IllegalParamsValuesException(
+          illegal: null, expected: [Attributes, List<String>]);
     }
     return _attrMatches(
       inlineAttrs: inlineAttrs,
@@ -85,7 +93,8 @@ extension EssentialsQueryExt on QueryDelta {
     bool Function(Operation)? predicate,
   }) {
     // check if the index of the operation passed, is illegal
-    if (operationIndex != null && (operationIndex < 0 || operationIndex >= getDelta().length)) {
+    if (operationIndex != null &&
+        (operationIndex < 0 || operationIndex >= getDelta().length)) {
       throw IllegalParamsValuesException(
         illegal: operationIndex,
         expected: {'start': 0, 'end': getDelta().length},
@@ -181,7 +190,10 @@ extension EssentialsQueryExt on QueryDelta {
               }
               startOffset -= beforeOp.getEffectiveLength;
             }
-            operationsWithAttrsApplied = <Operation>[...operationsWithAttrsApplied, op];
+            operationsWithAttrsApplied = <Operation>[
+              ...operationsWithAttrsApplied,
+              op
+            ];
             parts.add(
               DeltaRangeResult(
                 delta: Delta.fromOperations(operationsWithAttrsApplied),
@@ -216,7 +228,9 @@ extension EssentialsQueryExt on QueryDelta {
         }
       }
       if (blockAttrs != null) {
-        if (opData is String && opData.hasOnlyNewLines && op.attributes != null) {
+        if (opData is String &&
+            opData.hasOnlyNewLines &&
+            op.attributes != null) {
           if (mapEquals(blockAttrs, op.attributes)) {
             int startOffset = globalOffset;
             int endOffset = globalOffset + opLength;
@@ -231,7 +245,10 @@ extension EssentialsQueryExt on QueryDelta {
               }
               startOffset -= beforeOp.getEffectiveLength;
             }
-            operationsWithAttrsApplied = <Operation>[...operationsWithAttrsApplied, op];
+            operationsWithAttrsApplied = <Operation>[
+              ...operationsWithAttrsApplied,
+              op
+            ];
             parts.add(
               DeltaRangeResult(
                 delta: Delta.fromOperations(operationsWithAttrsApplied),
@@ -270,12 +287,17 @@ extension EssentialsQueryExt on QueryDelta {
     bool onlyOnce = false,
   }) {
     final Delta inputClone = getDelta().denormalize();
-    if (operationOffset != null && (operationOffset < 0 || operationOffset >= inputClone.length)) {
-      throw StateError('Invalid offset operation passed [$operationOffset] | available [${inputClone.length}]');
+    if (operationOffset != null &&
+        (operationOffset < 0 || operationOffset >= inputClone.length)) {
+      throw StateError(
+          'Invalid offset operation passed [$operationOffset] | available [${inputClone.length}]');
     }
     List<DeltaRangeResult> parts = <DeltaRangeResult>[];
-    int globalOffset = globalOpIndexToGlobalCharIndex(operationOffset ?? 0, inputClone.operations);
-    for (int offset = operationOffset ?? 0; offset < inputClone.length; offset++) {
+    int globalOffset = globalOpIndexToGlobalCharIndex(
+        operationOffset ?? 0, inputClone.operations);
+    for (int offset = operationOffset ?? 0;
+        offset < inputClone.length;
+        offset++) {
       final op = inputClone.elementAt(offset);
       if (parts.isNotEmpty && onlyOnce) {
         return [...parts];
@@ -305,7 +327,8 @@ extension EssentialsQueryExt on QueryDelta {
         );
         final RegExp expression = pattern;
         if (expression.hasMatch(op.data.toString())) {
-          final Iterable<RegExpMatch> matches = expression.allMatches(op.data.toString());
+          final Iterable<RegExpMatch> matches =
+              expression.allMatches(op.data.toString());
           for (RegExpMatch match in matches) {
             final Delta delta = Delta();
             parts.add(DeltaRangeResult(
@@ -330,7 +353,9 @@ extension EssentialsQueryExt on QueryDelta {
           if (mapEquals(op.data! as Map, rawObject)) {
             final Delta delta = Delta();
             final startOffset = globalOffset;
-            final endOffset = op.data is String ? globalOffset + op.data.toString().length : globalOffset + 1;
+            final endOffset = op.data is String
+                ? globalOffset + op.data.toString().length
+                : globalOffset + 1;
             parts.add(DeltaRangeResult(
               delta: delta
                 ..insert(
@@ -348,12 +373,14 @@ extension EssentialsQueryExt on QueryDelta {
           }
         } else {
           assert(
-            rawObject.toString().trim().isNotEmpty && !rawObject.toString().contains('\n'),
+            rawObject.toString().trim().isNotEmpty &&
+                !rawObject.toString().contains('\n'),
             'rawObject passed cannot be empty or contain new lines',
           );
           final RegExp expression = RegExp(rawObject.toString());
           if (expression.hasMatch(op.data.toString())) {
-            final Iterable<RegExpMatch> matches = expression.allMatches(op.data.toString());
+            final Iterable<RegExpMatch> matches =
+                expression.allMatches(op.data.toString());
             for (RegExpMatch match in matches) {
               final Delta delta = Delta();
               parts.add(DeltaRangeResult(
@@ -458,11 +485,16 @@ extension EssentialsQueryExt on QueryDelta {
     return push(
       InsertCondition(
         target: offset != null ? null : target,
-        insertion: asDifferentOp || insert is Map ? insert.toOperation() : insert,
-        range: insertAtLastOperation || offset == null ? null : DeltaRange.onlyStartPoint(startOffset: offset),
+        insertion:
+            asDifferentOp || insert is Map ? insert.toOperation() : insert,
+        range: insertAtLastOperation || offset == null
+            ? null
+            : DeltaRange.onlyStartPoint(startOffset: offset),
         left: startPoint != null ? true : left,
         onlyOnce: startPoint != null ? true : onlyOnce,
-        insertAtLastOperation: startPoint != null || target != null ? false : insertAtLastOperation,
+        insertAtLastOperation: startPoint != null || target != null
+            ? false
+            : insertAtLastOperation,
         caseSensitive: caseSensitive,
       ),
     );
@@ -533,7 +565,8 @@ extension EssentialsQueryExt on QueryDelta {
     bool caseSensitive = false,
   }) {
     if (target == null && range == null) {
-      throw Exception('target and range are null or invalid to use. Them cannot be null');
+      throw Exception(
+          'target and range are null or invalid to use. Them cannot be null');
     }
     return push(
       ReplaceCondition(

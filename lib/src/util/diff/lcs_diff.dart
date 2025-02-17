@@ -47,7 +47,8 @@ List<List<int>> _buildLCSMatrix(String oldText, String newText) {
   // when comparing with an empty string.
   List<List<int>> lcsMatrix = List.generate(
     m + 1,
-    (_) => List<int>.filled(n + 1, 0, growable: false), // Fill each row with zeros.
+    (_) => List<int>.filled(n + 1, 0,
+        growable: false), // Fill each row with zeros.
     growable: false, // The matrix itself is not growable.
   );
 
@@ -77,7 +78,8 @@ List<List<int>> _buildLCSMatrix(String oldText, String newText) {
 ///
 /// The process is based on analyzing how the LCS was built, comparing the `oldText` and `newText`
 /// character by character while moving backward through the LCS matrix.
-List<DeltaDiffPart> _findChanges(String oldText, String newText, List<List<int>> lcsMatrix) {
+List<DeltaDiffPart> _findChanges(
+    String oldText, String newText, List<List<int>> lcsMatrix) {
   // 1. Start from the bottom-right corner of the LCS matrix.
   int i = oldText.length; // Pointer for `oldText` (row index).
   int j = newText.length; // Pointer for `newText` (column index).
@@ -114,8 +116,10 @@ List<DeltaDiffPart> _findChanges(String oldText, String newText, List<List<int>>
         j--;
       }
       changes.add(DeltaDiffPart.insert(
-        oldText.substringOrNull(j, start + 1), // Substring from oldText (may be empty).
-        newText.substring(j, start + 1), // Substring from newText (inserted text).
+        oldText.substringOrNull(
+            j, start + 1), // Substring from oldText (may be empty).
+        newText.substring(
+            j, start + 1), // Substring from newText (inserted text).
         j,
         start,
       ));
@@ -152,7 +156,8 @@ List<DeltaDiffPart> _findChanges(String oldText, String newText, List<List<int>>
       final newEnd = (start - j).nonNegativeInt;
 
       changes.add(DeltaDiffPart.delete(
-        oldText.substringOrNull(wordStart, wordEnd), // Substring from oldText (removed text).
+        oldText.substringOrNull(
+            wordStart, wordEnd), // Substring from oldText (removed text).
         joinStrings(
           newText.substringOrNull(
             wordStart,

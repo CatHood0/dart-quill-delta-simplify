@@ -44,7 +44,8 @@ class DeltaDiffPart {
     this.args,
   });
 
-  factory DeltaDiffPart.format(Object? content, int start, int end, Map<String, dynamic> attributes) {
+  factory DeltaDiffPart.format(
+      Object? content, int start, int end, Map<String, dynamic> attributes) {
     return DeltaDiffPart(
       before: content,
       after: content,
@@ -75,7 +76,8 @@ class DeltaDiffPart {
     );
   }
 
-  factory DeltaDiffPart.insert(Object? before, Object? insert, int start, int end,
+  factory DeltaDiffPart.insert(
+      Object? before, Object? insert, int start, int end,
       [Map<String, dynamic>? attributes]) {
     return DeltaDiffPart(
       before: before,
@@ -90,11 +92,15 @@ class DeltaDiffPart {
   @override
   bool operator ==(covariant DeltaDiffPart other) {
     if (identical(this, other)) return true;
-    return before == other.before && after == other.after && start == other.start && end == other.end;
+    return before == other.before &&
+        after == other.after &&
+        start == other.start &&
+        end == other.end;
   }
 
   @override
-  int get hashCode => before.hashCode ^ after.hashCode ^ start.hashCode ^ end.hashCode;
+  int get hashCode =>
+      before.hashCode ^ after.hashCode ^ start.hashCode ^ end.hashCode;
 
   @override
   String toString() {

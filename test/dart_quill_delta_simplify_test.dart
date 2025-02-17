@@ -9,7 +9,8 @@ void main() {
     delta = Delta()..insert('Experimental version Delta\n');
   });
 
-  test('should fail when build method is used without create some conditions', () {
+  test('should fail when build method is used without create some conditions',
+      () {
     expect(
       () => QueryDelta(delta: delta).build(),
       throwsA(const NoConditionsCreatedWhileBuildExecutionException()),
@@ -19,7 +20,8 @@ void main() {
   // insert
   group('insert', () {
     test('should insert into defined range', () {
-      final Delta expected = Delta()..insert('Experimental version Delta New data\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta New data\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..insert(
           insert: ' New data',
@@ -31,7 +33,8 @@ void main() {
       expect(query.toDelta(), expected);
     });
     test('should insert into matched part', () {
-      final Delta expected = Delta()..insert('Experimental version Delta New data\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta New data\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..insert(
           insert: ' New data',
@@ -43,7 +46,8 @@ void main() {
       expect(query.toDelta(), expected);
     });
     test('should insert into at left', () {
-      final Delta expected = Delta()..insert('Experimental version New data Delta\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version New data Delta\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..insert(
           insert: 'New data ',
@@ -99,7 +103,8 @@ void main() {
       expect(query.toDelta(), expected);
     });
     test('should replace with normal string into matched part', () {
-      final Delta expected = Delta()..insert('Non experimental version Delta\n');
+      final Delta expected = Delta()
+        ..insert('Non experimental version Delta\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..replace(
           replace: 'Non experimental ',
@@ -149,7 +154,8 @@ void main() {
     // embed image
     test('should replace with image into defined range', () {
       final image = {
-        'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s',
+        'image':
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s',
       };
       final Delta expected = Delta()
         ..insert(image)
@@ -167,7 +173,8 @@ void main() {
     });
     test('should replace with image into matched part', () {
       final image = {
-        'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s',
+        'image':
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s',
       };
       final Delta expected = Delta()
         ..insert(image)
@@ -280,7 +287,8 @@ void main() {
         ..insert('And we can also match some parts\n');
       final Delta expected = Delta()
         ..insert('Experimental version Delta\n')
-        ..insert('Where we can test our different Non experimental type changes\n')
+        ..insert(
+            'Where we can test our different Non experimental type changes\n')
         ..insert('And we can also match some parts\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..ignorePart(0, len: 50)
@@ -344,7 +352,8 @@ void main() {
         ..insert('And we can also match some parts\n');
       final Delta expected = Delta()
         ..insert('Experimental version Delta\n')
-        ..insert('Where we can test our different Non experimental type changes\n')
+        ..insert(
+            'Where we can test our different Non experimental type changes\n')
         ..insert('And we can also match some parts\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..ignorePart(0, len: 50)
@@ -411,7 +420,8 @@ void main() {
         ..insert('And we can also match some parts\n');
       final Delta expected = Delta()
         ..insert('Experimental version Delta\n')
-        ..insert('Where we can test our different Non experimental type changes\n')
+        ..insert(
+            'Where we can test our different Non experimental type changes\n')
         ..insert('And we can also match some parts\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..ignorePart(0, len: 50)
@@ -479,7 +489,8 @@ void main() {
         ..insert('And we can also match some parts\n');
       final Delta expected = Delta()
         ..insert('Experimental version Delta\n')
-        ..insert('Where we can test our different Non experimental type changes\n')
+        ..insert(
+            'Where we can test our different Non experimental type changes\n')
         ..insert('And we can also match some parts\n');
       final QueryDelta query = QueryDelta(delta: delta)
         ..ignorePart(0, len: 50)
@@ -555,7 +566,10 @@ void main() {
       );
       expect(
         result,
-        DeltaRangeResult(delta: Delta()..insert('Experimental'), startOffset: 0, endOffset: 12),
+        DeltaRangeResult(
+            delta: Delta()..insert('Experimental'),
+            startOffset: 0,
+            endOffset: 12),
       );
     });
     test('should get portion of the Delta with a raw object matching', () {
@@ -567,7 +581,10 @@ void main() {
       expect(
         result,
         [
-          DeltaRangeResult(delta: Delta()..insert('version'), startOffset: 13, endOffset: 20),
+          DeltaRangeResult(
+              delta: Delta()..insert('version'),
+              startOffset: 13,
+              endOffset: 20),
         ],
       );
     });
@@ -641,18 +658,29 @@ void main() {
   // using delta only
   group('delta_ext', () {
     test('insert', () {
-      final Delta expected = Delta()..insert('Experimental version Delta changed\n');
-      delta.simpleInsert(insert: ' changed', target: 'Delta', caseSensitive: true, startPoint: null);
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta changed\n');
+      delta.simpleInsert(
+          insert: ' changed',
+          target: 'Delta',
+          caseSensitive: true,
+          startPoint: null);
       expect(delta, expected);
     });
     test('delete', () {
       final Delta expected = Delta()..insert('Experimental version \n');
-      delta.simpleDelete(target: 'Delta', caseSensitive: true, len: null, startPointOffset: null);
+      delta.simpleDelete(
+          target: 'Delta',
+          caseSensitive: true,
+          len: null,
+          startPointOffset: null);
       expect(delta, expected);
     });
     test('replace', () {
-      final Delta expected = Delta()..insert('Experimental version of the Delta\n');
-      delta.simpleReplace(replace: 'version of the', range: null, target: 'version');
+      final Delta expected = Delta()
+        ..insert('Experimental version of the Delta\n');
+      delta.simpleReplace(
+          replace: 'version of the', range: null, target: 'version');
       expect(delta, expected);
     });
     test('format', () {
