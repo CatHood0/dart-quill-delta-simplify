@@ -1,7 +1,6 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 
 /// Provides an extension on [Delta] to convert it into a [QueryDelta].
 extension DeltaToQuery on Delta {

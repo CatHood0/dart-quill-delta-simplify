@@ -1,11 +1,8 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/internals/format_condition_method.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
-import 'package:flutter_quill/flutter_quill.dart' show Attribute;
-
-import '../../conditions.dart';
-import '../range/delta_range.dart';
 
 /// A condition that applies formatting attributes to a [Delta].
 ///
@@ -65,18 +62,13 @@ class FormatCondition extends Condition<List<Operation>> {
         );
 
   @override
-  List<Operation> build(
-    Delta delta, [
-    List<DeltaRange> partsToIgnore = const [],
-    OnCatchCallback? onCatch,
-  ]) {
-    return formatCondition(
-      delta.toList(),
-      this,
-      partsToIgnore,
-      onCatch,
-    );
-  }
+  int get hashCode =>
+      target.hashCode ^
+      key.hashCode ^
+      caseSensitive.hashCode ^
+      len.hashCode ^
+      attribute.hashCode ^
+      offset.hashCode;
 
   @override
   bool operator ==(covariant FormatCondition other) {
@@ -90,13 +82,18 @@ class FormatCondition extends Condition<List<Operation>> {
   }
 
   @override
-  int get hashCode =>
-      target.hashCode ^
-      key.hashCode ^
-      caseSensitive.hashCode ^
-      len.hashCode ^
-      attribute.hashCode ^
-      offset.hashCode;
+  List<Operation> build(
+    Delta delta, [
+    List<DeltaRange> partsToIgnore = const [],
+    OnCatchCallback? onCatch,
+  ]) {
+    return formatCondition(
+      delta.toList(),
+      this,
+      partsToIgnore,
+      onCatch,
+    );
+  }
 
   @override
   String toString() {

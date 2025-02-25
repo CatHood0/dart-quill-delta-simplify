@@ -1,8 +1,8 @@
+import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
-import 'package:flutter_quill/quill_delta.dart';
 import 'package:meta/meta.dart';
 
 import '../util/collections.dart';

@@ -1,10 +1,10 @@
+import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/query_delta_exceptions.dart';
 import 'package:dart_quill_delta_simplify/src/conditions/delete.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
-import 'package:flutter_quill/quill_delta.dart';
 import 'package:meta/meta.dart';
 
 import '../../delta_ranges.dart';

@@ -3,35 +3,11 @@ analyzer:
   language:
     strict-casts: true 
     strict-inference: false 
-    strict-raw-types: true 
-  errors:
-    avoid_init_to_null: ignore
-    avoid_print: ignore
-    constant_identifier_names: ignore
-    curly_braces_in_flow_control_structures: ignore
-    depend_on_referenced_packages: ignore
-    included_file_warning: ignore
-    non_constant_identifier_names: ignore
-    use_build_context_synchronously: ignore
-    void_checks: ignore
+    strict-raw-types: false 
 
 linter:
   rules:
-    implementation_imports: false 
-    prefer_double_quotes: false
-    unnecessary_final: false 
-    prefer_expression_function_bodies: false
-    always_put_required_named_parameters_first: false
-    avoid_catches_without_on_clauses: false 
-    lines_longer_than_80_chars: false
-    avoid_annotating_with_dynamic: false 
-    always_use_package_imports: false
-    no_default_cases: false
     prefer_asserts_with_message: true 
-    avoid_types_on_closure_parameters: false
-    diagnostic_describe_all_properties: false
-    avoid_positional_boolean_parameters: false
-    prefer_const_constructors_in_immutables: false
     cascade_invocations: true
     hash_and_equals: true
     implicit_reopen: true
@@ -41,14 +17,10 @@ linter:
     avoid_type_to_string: true
     avoid_relative_lib_imports: false 
     avoid_empty_else: true
-    avoid_dynamic_calls: false 
     unnecessary_statements: true
-    use_key_in_widget_constructors: true
-    prefer_conditional_assignment: true
     prefer_const_declarations: true
     use_string_buffers: false 
     valid_regexps: true
     control_flow_in_finally: true
-    always_specify_types:  false 
-    # avoid_bool_literals_in_conditional_expressions: true
+    always_specify_types: false 
 

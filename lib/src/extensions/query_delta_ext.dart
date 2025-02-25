@@ -1,10 +1,9 @@
+import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/check_op_attrs.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
-import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/quill_delta.dart';
 import '../util/collections.dart';
 import '../util/op_offset_to_char_offset.dart';
 
@@ -419,9 +418,6 @@ extension EssentialsQueryExt on QueryDelta {
   ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/format.md#usage-examples)
   QueryDelta format({
-    // we can't specify the generic type by default
-    // because this Attribute can be a custom one created by the dev
-    // ignore: strict_raw_type
     required Attribute attribute,
     required int? offset,
     required int? len,

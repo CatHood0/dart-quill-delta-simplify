@@ -1,7 +1,6 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:meta/meta.dart';
 import 'string_tokenizer.dart';
 

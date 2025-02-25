@@ -1,3 +1,7 @@
+## 10.8.7
+
+* Fix: removed flutter_quill dependency for conflicts with major versions
+
 ## 10.8.6
 * Fix: diff matching by @CatHood0 in https://github.com/CatHood0/dart-quill-delta-simplify/pull/1
 

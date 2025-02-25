@@ -1,7 +1,7 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/src/exceptions/illegal_operation_passed_exception.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
-import 'package:flutter_quill/flutter_quill.dart';
+import 'package:dart_quill_delta_simplify/src/flutter_quill/attribute.dart';
 import 'package:meta/meta.dart';
 
 /// Extension that adds a getter to the [Operation] class to retrieve the effective length

@@ -17,7 +17,6 @@ environment:
 dependencies:
 
   dart_quill_delta: ^10.8.3 
-  flutter_quill: ^10.8.5
   meta: ^1.15.0
   collection: ^1.18.0
   uuid: ^4.5.1
