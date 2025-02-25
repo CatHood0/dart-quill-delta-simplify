@@ -5,6 +5,8 @@ The following **Dart** code demonstrates how to perform a more precise `Delta` c
 ## Usage Examples
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('Experimental version Delta\n');
 final QueryDelta query = QueryDelta(delta: delta)
     ..insert(
@@ -25,7 +27,7 @@ final QueryDelta query = QueryDelta(delta: delta)
     )
     ..build();
 final DeltaCompareDiffResult result = query.compareDiff();
-debugPrint(result);
+debugPrint(result.toString());
 ```
 
 ## Output in console

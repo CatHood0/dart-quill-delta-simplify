@@ -20,6 +20,8 @@ DeltaRangeResult firstMatch(
 ### Example
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()
     ..insert('This is a bold text.\n', {'bold': true})
     ..insert('Header 1')
@@ -32,7 +34,8 @@ final DeltaRangeResult result = QueryDelta(delta: delta).firstMatch(
     RegExp('paragraph', caseSensitive: false),
     null, // raw pattern
 );
-print(result); // DeltaRangeResult(delta: [{"insert": "paragraph"}], Offset: [47, 56]) 
+debugPrint(result.toString());
+// DeltaRangeResult(delta: [{"insert": "paragraph"}], Offset: [47, 56]) 
 ```
 ## Multiple occurrence matches 
 
@@ -47,6 +50,8 @@ List<DeltaRangeResult> allMatches(
 
 ### Example
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()
     ..insert('This is a bold text.\n', {'bold': true})
     ..insert('Header 1')
@@ -59,7 +64,7 @@ final List<DeltaRangeResult> result = QueryDelta(delta: delta).allMatches(
     RegExp('paragraph', caseSensitive: false),
     null, // raw pattern
 );
-print(result); 
+debugPrint(result.toString()); 
 // [
 //   DeltaRangeResult(delta: [{"insert": "paragraph"}], Offset: [47, 56]),
 //   DeltaRangeResult(delta: [{"insert": "paragraph"}], Offset: [82, 91]),
@@ -83,6 +88,8 @@ List<DeltaRangeResult> matchAttributes({
 ### Example
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()
     ..insert('This is a bold text.\n', {'bold': true})
     ..insert('Header 1')
@@ -97,7 +104,7 @@ final List<DeltaRangeResult> result = QueryDelta(delta: delta).matchAttributes(
   blockAttrs: null,
   inlineAttrKeys: null,
 );
-print(result); 
+debugPrint(result.toString()); 
 // [
 //  DeltaRangeResult(delta: [{"insert": "This is a bold text.", "attributes": {"bold": true}}], Offset: [0, 20]),
 //  DeltaRangeResult(delta: [{"insert": "Header 1"}, {"insert": "⏎", "attributes": {"header": 1}}], Offset: [21, 30]),
@@ -108,15 +115,15 @@ print(result);
 ## Embeds Matching
 
 ```dart
-// all
 List<DeltaRangeResult> getAllEmbeds({bool Function(Operation)? ignoreWhen}) {}
-// first
 DeltaRangeResult? getFirstEmbed({bool Function(Operation)? ignoreWhen}) {}
 ```
 
 ### Example
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()
     ..insert('This is a bold text.\n', {'bold': true})
     ..insert({'image': 'https://www.google.com/my/image-link'})
@@ -128,7 +135,7 @@ final Delta delta = Delta()
     ..insert({'video': 'https://www.google.com/my/video-link'})
     ..insert('Another common paragraph.\n');
 final List<DeltaRangeResult> result = QueryDelta(delta: delta).getAllEmbeds(); // or getFirstEmbed()
-print(result); 
+debugPrint(result.toString()); 
 // [
 //  DeltaRangeResult(delta: [{"insert": {"image": "https://www.google.com/my/image-link"}}], Offset: [21, 21]),
 //  DeltaRangeResult(delta: [{"insert": {"video": "https://www.google.com/my/video-link"}}], Offset: [68, 68]),

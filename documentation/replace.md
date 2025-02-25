@@ -19,14 +19,24 @@ QueryDelta replace({
 ### Simple Text Replacement
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert("Hello world!\n");
-final BuildResult result = QueryDelta(delta: delta).replace(target: "world", replace: "Dart", range: null).build();
-print(result.delta); // [{"insert": "Hello Dart!⏎"}]
+final BuildResult result = QueryDelta(delta: delta)
+    .replace(
+        target: "world", 
+        replace: "Dart", 
+        range: null,
+    )
+    .build();
+debugPrint(result.delta.toString()); // [{"insert": "Hello Dart!⏎"}]
 ```
 
 ### Case-Insensitive Replacement
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 Delta delta = Delta()..insert("Hello World!\n");
 final BuildResult result = QueryDelta(delta: delta)
     .replace(
@@ -36,12 +46,14 @@ final BuildResult result = QueryDelta(delta: delta)
       caseSensitive: false,
     )
     .build();
-print(result.delta); // [{"insert": "Hello Dart!⏎"}] 
+debugPrint(result.delta.toString()); // [{"insert": "Hello Dart!⏎"}] 
 ```
 
 ### Replace in a Specific Range
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert("Hello beautiful world!\n");
 final BuildResult result = QueryDelta(delta: delta)
     .replace(
@@ -50,12 +62,14 @@ final BuildResult result = QueryDelta(delta: delta)
       range: const DeltaRange(startOffset: 6, endOffset: 20),
     )
     .build();
-print(result.delta); // [{"insert": "Hello Dart!⏎"}] 
+debugPrint(result.delta.toString()); // [{"insert": "Hello Dart!⏎"}] 
 ```
 
 ### Replace Only Once
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert("Hello world! and Hello world 2!\n");
 final BuildResult result = QueryDelta(delta: delta)
     .replace(

@@ -6,11 +6,17 @@ The `format` method in the `QueryDelta` class allows you to apply an `Attribute`
 
 ```dart
 QueryDelta format({
-  required int? offset, // The starting position where the formatting will begin in the Delta. 
-  required Attribute attribute, // The formatting Attribute to be applied
-  int? len, // The number of characters over which the formatting will be applied
-  Object? target, // Specifies a specific target within the Delta for applying the format. The target can be a String or a Map
-  bool caseSensitive = false, // A flag indicating whether the search for the target should be case-sensitive
+  // The starting position where the formatting will begin in the Delta
+  required int? offset, 
+  // The formatting Attribute to be applied
+  required Attribute attribute,
+  // The number of characters over which the formatting will be applied
+  int? len,
+  // Specifies a specific target within the Delta for applying the format. 
+  // The target can be a String or a Map
+  Object? target,
+  // A flag indicating whether the search for the target should be case-sensitive
+  bool caseSensitive = false,
 })
 ```
 
@@ -27,6 +33,8 @@ QueryDelta format({
 ### Applying **Bold** to a Specific Range
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('Hello, world!\n');
 final BuildResult result = QueryDelta(delta: delta)
    .format(
@@ -34,12 +42,18 @@ final BuildResult result = QueryDelta(delta: delta)
      offset: 0,
      len: 5,
    ).build();
-print(result.delta)// [{'insert': 'Hello', 'attributes': {'bold': true}}, {'insert': ', world!⏎'}]
+debugPrint(result.delta.toString());
+// [
+//  {'insert': 'Hello', 'attributes': {'bold': true}}, 
+//  {'insert': ', world!⏎'}
+// ]
 ```
 
 ### Formatting a **Targeted** Text Segment
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('The quick brown fox jumps over the lazy dog.\n');
 final BuildResult result = QueryDelta(delta: delta)
     .format(
@@ -49,12 +63,18 @@ final BuildResult result = QueryDelta(delta: delta)
        len: null,
     )
     .build();
-print(result.delta); // [{'insert': 'The quick '}, {'insert': 'brown fox', 'attributes': {'italic': true}}, {'insert': ' jumps over the lazy dog.⏎'}]
+debugPrint(result.delta.toString()); 
+// [
+//   {'insert': 'The quick '}, 
+//   {'insert': 'brown fox', 'attributes': {'italic': true}}, 
+//   {'insert': ' jumps over the lazy dog.⏎'}
+// ]
 ```
 
 ### Applying a Block Attribute
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 final Delta delta = Delta()..insert('A paragraph\n');
 final BuildResult result = QueryDelta(delta: delta)
     .format(
@@ -63,12 +83,18 @@ final BuildResult result = QueryDelta(delta: delta)
        len: null,
     )
     .build();
-print(result.delta); // [{'insert': 'A paragraph'}, {'insert': '⏎', 'attributes': {'blockquote': true}}]
+debugPrint(result.delta.toString()); 
+// [
+//   {'insert': 'A paragraph'}, 
+//   {'insert': '⏎', 'attributes': {'blockquote': true}}
+// ]
 ```
 
 ### Case-Sensitive Formatting
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('Example text with Example repeated.\n');
 final BuildResult result = QueryDelta(delta: delta)
     .format(
@@ -79,7 +105,7 @@ final BuildResult result = QueryDelta(delta: delta)
        caseSensitive: true,
     )
     .build();
-print(result.delta); 
+debugPrint(result.delta.toString()); 
 // [
 //   {'insert': 'Example', 'attributes': {'bold': true}}, 
 //   {'insert': ' text with '}, 

@@ -12,6 +12,8 @@ Object toOperation([Attributes? inlineAttributes, Attributes? blockAttributes]) 
 ### Example:
   
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final operation = 'Hello, world'.toOperation();
 final operationWithAttributes = 'Hello'.toOperation(
      {'color': 'red'}, // inline attributes
@@ -89,16 +91,15 @@ final Delta delta = Delta()
   ..insert('This is my example delta\nUsing ')
   ..insert('toPlain', {'code': true})
   ..insert(' method, we can build a plain text without too much code\n');
-final plainText = delta.toPlain();
-final plainTextBuilded = delta.toPlainBuilder((Operation op) => op.data.toString());
+final deltaPlainText = delta.toPlain();
+final deltaPlainTextBuilded = delta.toPlainBuilder((Operation op) => op.data.toString());
 // using Operation
 final Operation op = Operation.insert('This is an op example\n');
 // ensure that you op is insert, because toPlain can throw IllegalOperationPassedException
 final opPlainText = op.toPlain();
 // will have the same string result
-print(plainText);
-print(plainTextBuilded);
-// but this will be different by a obvious reason
+print(deltaPlainText);
+print(deltaPlainTextBuilded);
 print(opPlainText); // "This is an op example\n"
 ```
 
@@ -124,20 +125,25 @@ bool get nonIsBlockLevelInsertion {}
 If we don't want create a instance of `QueryDelta` manually, we can use `toQuery()` method:
 
 ```dart
+// this comes from an extension of Delta class
 QueryDelta get toQuery => QueryDelta(delta: <delta>);
 ```
 
 ### Example
 
 ```dart
-final Delta delta = Delta()..insert('This is an example\n');
-final BuildResult result = delta.toQuery
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
+Delta delta = Delta()..insert('This is an example\n');
+delta = delta.toQuery
     .insert(
        insert: ' data',
        target: null,
        startPoint: 4,
        left: false,
     )
-    .build();
-print(result.delta); // [{"insert": "This data is an example⏎"}]
+    .build()
+    .delta;
+print(delta.toString()); 
+// [{"insert": "This data is an example⏎"}]
 ```

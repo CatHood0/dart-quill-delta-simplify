@@ -6,14 +6,32 @@ The `insert` method in `QueryDelta` is designed to add a new object into the exi
 
 ```dart
 QueryDelta insert({
-  required Object insert, // The object to insert into the Delta. It can be a String, Map, Operation, or a list of Operations
-  required Object? target, // An optional object used to match a part of the Operation. This can be a String or a Map<String, dynamic>
-  int? startPoint, //An optional parameter indicating the exact offset where the insertion should start. If provided, it overrides target and related parameters 
-  bool left = false, // A boolean indicating whether to insert to the left or right of the target. Ignored if startPoint is provided
-  bool onlyOnce = false, // A boolean specifying if the insertion should happen only once. Ignored if startPoint is provided
-  bool asDifferentOp = false, // A boolean indicating whether the inserted object should be part of its own Operation or merged with the matched target
-  bool insertAtLastOperation = false, // A boolean indicating whether the insertion should happen at the end of the last Operation if no target or startPoint is provided
-  bool caseSensitive = false, // A boolean determining if the matching of the target should be case-sensitive
+  // The object to insert into the Delta. It can be a 
+  // String, Map, Operation, or a list of Operations
+  required Object insert,
+  // An optional object used to match a part of the Operation. 
+  // This can be a String or a Map<String, dynamic>
+  required Object? target,
+  // An optional parameter indicating the exact offset where 
+  // the insertion should start. 
+  //
+  // If it's provided, overrides target and related parameters
+  int? startPoint,  
+  // A boolean indicating whether to insert to the left or right of the target. 
+  //
+  // It's ignored if startPoint is provided
+  bool left = false,
+  // A boolean specifying if the insertion should happen only once. 
+  //
+  // It's ignored if startPoint is provided
+  bool onlyOnce = false,
+  // A boolean indicating whether the inserted object should be part of its own 
+  // Operation or merged with the matched target
+  bool asDifferentOp = false,
+  // A boolean indicating whether the insertion will be added at last Operation
+  bool insertAtLastOperation = false, 
+  // A boolean determining if the matching of the target should be case-sensitive
+  bool caseSensitive = false,
 }) 
 ```
 
@@ -21,37 +39,68 @@ QueryDelta insert({
 
 * Providing both `startPoint` and `target` will prioritize `startPoint`, ignoring `target`, `left`, and `onlyOnce`.
 
-* `insert` accepts various types of objects, and each type's behavior is governed by the logic defined in the method and conditions applied during the `build()` phase.
+* `insert` accepts various types of objects, and each type's behavior is governed by the logic defined in the method and conditions applied during the `build()` phase into `InsertCondition` class.
 
 ## Usage Examples
 
 ### `Inserting` a `String` at a Specific Offset
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('Hello\n');
-final BuildResult result = QueryDelta(delta: delta).insert(insert: ', world!', startPoint: 5, target: null).build();
-print(result.delta); // should print: [{"insert": "Hello, world!⏎"}]
+final BuildResult result = QueryDelta(delta: delta)
+    .insert(
+        insert: ', world!', 
+        startPoint: 5, 
+        target: null,
+    )
+    .build();
+debugPrint(result.delta.toString()); // should print: [{"insert": "Hello, world!⏎"}]
 ```
 
 ### `Inserting` a `Map` Relative to a `Target`
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('Hello, world!\n');
-final BuildResult result = QueryDelta(delta: delta).insert(insert: {'insert': ' and hello again'}, target: 'world!', left: false, target: null).build();
-print(result.delta); // should print: [{"insert": "Hello, world! and hello again⏎"}]
+final BuildResult result = QueryDelta(delta: delta)
+    .insert(
+        insert: {'insert': ' and hello again'}, 
+        target: 'world!',
+        left: false, 
+    )
+    .build();
+debugPrint(result.delta.toString()); // should print: [{"insert": "Hello, world! and hello again⏎"}]
 ```
 
 ### `Inserting` an `Operation` at the End
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('Hello, world! \n');
 final Operation operation = Operation.insert('New content', {'bold': true});
-final BuildResult result = QueryDelta(delta: delta).insert(insert: operation, insertAtLastOperation: true, target: null).build();
-print(result.delta); // should print: [{"insert": "Hello, world! "}, {"insert": "New content⏎", "attributes": {"bold": true}}]
+final BuildResult result = QueryDelta(delta: delta)
+    .insert(
+        insert: operation, 
+        insertAtLastOperation: true, 
+        target: null,
+    )
+    .build();
+debugPrint(result.delta.toString()); 
+// should print something like: 
+// [
+//    {"insert": "Hello, world! "}, 
+//    {"insert": "New content⏎", "attributes": {"bold": true}}
+// ]
 ```
 
 ### `Inserting` Multiple Times with a `Target`
 
 ```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
 final Delta delta = Delta()..insert('marker content Marker');
 final BuildResult result = QueryDelta(delta: delta)
     .insert(
@@ -61,7 +110,7 @@ final BuildResult result = QueryDelta(delta: delta)
        left: false, 
        caseSensitive: false, // if caseSensitive is true, the last "Marker" word wont be matched 
     ).build();
-print(result.delta); // should print: [{"insert": "marker Repeated content Marker Repeated⏎"}]
+debugPrint(result.delta.toString()); // should print: [{"insert": "marker Repeated content Marker Repeated⏎"}]
 ```
 
 ### Case-Sensitive `Insertion`
