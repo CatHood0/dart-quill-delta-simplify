@@ -1,6 +1,6 @@
 name: dart_quill_delta_simplify 
 description: "A Dart package designed to streamline the manipulation of Quill Delta, making complex operations straightforward"
-version: 10.8.6
+version: 10.8.7
 homepage: https://github.com/CatHood0/dart-quill-delta-simplify
 documentation: https://github.com/CatHood0/dart-quill-delta-simplify/tree/master/documentation
 issue_tracker: https://github.com/CatHood0/dart-quill-delta-simplify/issues
