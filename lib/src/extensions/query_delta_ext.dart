@@ -1,6 +1,7 @@
 import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
+import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/check_op_attrs.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
@@ -401,6 +402,54 @@ extension EssentialsQueryExt on QueryDelta {
       globalOffset += op.getEffectiveLength;
     }
     return <DeltaRangeResult>[...parts];
+  }
+
+  /// Get all the operations into the DeltaRange passed
+  DeltaRangeResult getRange({required DeltaRange range}) {
+    final Delta inputClone = getDelta().denormalize();
+    final int maxLen = inputClone.getTextLength;
+    final int start = range.startOffset;
+    if (DeltaRange.isOffsetInvalid(offset: start)) {
+      throw DeltaRangeError.range(
+        start,
+        0,
+        maxLen,
+      );
+    }
+    final int end =
+        range.isEndOffsetInvalid(maxEnd: maxLen) ? maxLen : range.endOffset;
+    if (range.hasSameOffset) {
+      return DeltaRangeResult(
+        delta: Delta(),
+        startOffset: start,
+        endOffset: end,
+      );
+    }
+    final Delta result = Delta();
+    int globalOffset = 0;
+    for (int index = 0; index < inputClone.length; index++) {
+      final Operation op = inputClone.elementAt(index);
+      final Object? opData = op.data;
+      final int opLength = op.getEffectiveLength;
+      final int curOffset = globalOffset + opLength;
+      if (curOffset >= start) {
+        if (opData is Map) {
+          result.insert(opData, op.attributes);
+          globalOffset += opLength;
+          continue;
+        }
+        final String data = opData as String;
+        int localStartOffset = (start - globalOffset).nonNegativeInt;
+        int localEndOffset = (end - globalOffset).nonNegativeInt;
+        final bool useOpLength = localEndOffset > opLength;
+        final Operation rightOp = op.clone(data.substring(
+            localStartOffset, useOpLength ? null : localEndOffset));
+        result.insert(rightOp.data, op.attributes);
+      }
+      globalOffset += opLength;
+    }
+
+    return DeltaRangeResult(delta: result, startOffset: start, endOffset: end);
   }
 
   /// Apply any type of Attribute in any part of you text

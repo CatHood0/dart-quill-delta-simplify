@@ -94,6 +94,13 @@ extension EasyDelta on Delta {
     return toQuery.getAllEmbeds(ignoreWhen: ignoreWhen);
   }
 
+  /// Get the operations into the DeltaRange passed
+  ///
+  /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/matching.md#operations-at-range)
+  DeltaRangeResult getRange({required DeltaRange range}) {
+    return toQuery.getRange(range: range);
+  }
+
   /// Finds the first match of the given [pattern] or [rawObject] in the [Delta] operations list.
   ///
   /// * [pattern]: The string pattern to search for.

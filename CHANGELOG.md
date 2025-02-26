@@ -1,7 +1,8 @@
 ## 10.8.7
 
-* Fix: removed flutter_quill dependency for conflicts with major versions
-* Chore(doc): updated some parts of code examples 
+* Fix: removed `flutter_quill` dependency for conflicts with major versions.
+* Chore(doc): updated some parts of code examples.
+* Feat: support for get operations into a specified range using `getRange()`.
 
 ## 10.8.6
 * Fix: diff matching by @CatHood0 in https://github.com/CatHood0/dart-quill-delta-simplify/pull/1

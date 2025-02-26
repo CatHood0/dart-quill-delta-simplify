@@ -11,9 +11,11 @@ class DeltaRange {
   /// A value of `-1` indicates an undefined end.
   final int endOffset;
 
+  static const int _maxEndOffset = 1073741824;
+
   const DeltaRange({
     required this.startOffset,
-    required this.endOffset,
+    this.endOffset = -1,
   }) : assert(
           endOffset == -1 || endOffset >= startOffset,
           'endOffset must be equal to or greater than startOffset',
@@ -41,6 +43,15 @@ class DeltaRange {
   ///
   /// Returns `true` if [startOffset] equals [endOffset], indicating an empty range.
   bool get hasSameOffset => startOffset == endOffset;
+
+  /// Checks if the offset passed has a valid range.
+  static bool isOffsetInvalid(
+          {required int offset, int maxEnd = _maxEndOffset}) =>
+      offset == -1 || offset < 0 || offset > maxEnd;
+
+  /// Checks if the end offset has a valid range.
+  bool isEndOffsetInvalid({int maxEnd = _maxEndOffset}) =>
+      endOffset == -1 || endOffset < 0 || endOffset > maxEnd;
 
   /// Checks if there is any overlap with another [DeltaRange].
   ///

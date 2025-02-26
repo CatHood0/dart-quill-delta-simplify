@@ -141,3 +141,37 @@ debugPrint(result.toString());
 //  DeltaRangeResult(delta: [{"insert": {"video": "https://www.google.com/my/video-link"}}], Offset: [68, 68]),
 // ] 
 ```
+
+## Operations at Range 
+
+```dart
+// it can be used into Delta class and QueryDelta
+DeltaRangeResult getRange({required DeltaRange range});
+```
+
+### Example
+
+```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
+final Delta delta = Delta()
+  ..insert('Experimental version Delta\n')
+  ..insert('With this test', {'bold': true})
+  ..insert(' we can make possible get parts of a Delta without limits', {'underline': true})
+  ..insert('\n');
+final DeltaRangeResult result = delta.getRange(
+  range: DeltaRange(
+    startOffset: 13,
+    endOffset: 75,
+  ),
+);
+debugPrint(result.toString());
+//  DeltaRangeResult(
+//    delta: [
+//      {"insert": "version Delta\n"},
+//      {"insert": "With this test", "attributes": {'bold': true}},
+//      {"insert": " we can make possible get parts of", "attributes": {'underline': true}},
+//    ], 
+//    Offset: [13, 75],
+//  ),
+```

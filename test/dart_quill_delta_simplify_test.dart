@@ -654,6 +654,79 @@ void main() {
     });
   });
 
+  group('ranges', () {
+    test('basic range in same operation', () {
+      final DeltaRangeResult resultExpected = DeltaRangeResult(
+        delta: Delta()..insert('Experimental ve'),
+        startOffset: 0,
+        endOffset: 15,
+      );
+      expect(
+        delta.toQuery.getRange(
+          range: DeltaRange(
+            startOffset: 0,
+            endOffset: 15,
+          ),
+        ),
+        resultExpected,
+      );
+    });
+    test('range in different operations', () {
+      delta
+        ..insert('With this test', {'bold': true})
+        ..insert(' we can make possible get parts of a Delta without limits',
+            {'underline': true})
+        ..insert('\n');
+      final DeltaRangeResult resultExpected = DeltaRangeResult(
+        delta: Delta()
+          ..insert('version Delta\n')
+          ..insert('With this test', {'bold': true})
+          ..insert(
+            ' we can make possible get parts of',
+            {'underline': true},
+          ),
+        startOffset: 13,
+        endOffset: 75,
+      );
+      expect(
+        QueryDelta(delta: delta).getRange(
+          range: DeltaRange(
+            startOffset: 13,
+            endOffset: 75,
+          ),
+        ),
+        resultExpected,
+      );
+    });
+    test('range in different operations', () {
+      delta
+        ..insert('With this test', {'bold': true})
+        ..insert(' we can make possible get parts of a Delta without limits',
+            {'underline': true})
+        ..insert('\n');
+      final DeltaRangeResult resultExpected = DeltaRangeResult(
+        delta: Delta()
+          ..insert('version Delta\n')
+          ..insert('With this test', {'bold': true})
+          ..insert(
+            ' we can make possible get parts of',
+            {'underline': true},
+          ),
+        startOffset: 13,
+        endOffset: 75,
+      );
+      expect(
+        delta.getRange(
+          range: DeltaRange(
+            startOffset: 13,
+            endOffset: 75,
+          ),
+        ),
+        resultExpected,
+      );
+    });
+  });
+
   // using delta only
   group('delta_ext', () {
     test('insert', () {
