@@ -16,6 +16,7 @@ QueryDelta replace({
 
 ## Usage Examples
 
+
 ### Simple Text Replacement
 
 ```dart
@@ -80,4 +81,56 @@ final BuildResult result = QueryDelta(delta: delta)
     )
     .build();
 print(result.delta); // [{"insert": "Hello Dart! and Hello world 2⏎"}] 
+```
+
+## Dynamic replace method
+
+```dart 
+/// It's very similar to [replaceAllMapped] from String class
+QueryDelta replaceAllMapped({
+  required OperationBuilder replace, 
+  required String target, 
+  bool caseSensitive = false,
+})
+```
+
+## Usage Example for `replaceAllMapped`
+
+```dart
+final Delta delta = Delta()
+  ..insert('Experimental version Delta\n')
+  ..insert('![](https:'
+    '//encrypted-tbn0.gstatic.com'
+    '/images?q=tbn:'
+    'ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s)'
+    '\n');
+// basic markdown image pattern (just created for example purposes)
+final RegExp pattern = RegExp(r'!\[\]\((.+?)\)');
+final BuildResult result = QueryDelta(delta: delta)
+ .replaceAllMapped(
+   replaceBuilder: (
+     String data,
+     Map<String, dynamic>? currentOperationAttributes,
+     DeltaRange currentRange,
+     DeltaRange matchRange,
+   ) {
+     if (pattern.hasMatch(data)) {
+       final rMatch = pattern.firstMatch(data)!;
+       final String image = rMatch.group(1)!;
+       return <Operation>[Operation.insert(<String, dynamic>{'image': image})];
+     }
+     return <Operation>[];
+   },
+   target: pattern.pattern,
+   caseSensitive: false,
+ )
+ .build();
+debugPrint(result.delta.toString());
+/*
+[
+ {'insert': 'Experimental version Delta\n'},
+ {'insert': {'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s'}},
+ {'insert': '\n'},
+]
+*/
 ```
