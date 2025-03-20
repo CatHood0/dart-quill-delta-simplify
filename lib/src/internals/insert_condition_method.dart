@@ -321,7 +321,7 @@ void _complexMergeInsertsInSameOperation({
       op.clone(
         ofData.substring(
           0,
-          partToMerge.pointByDirection(!isRight),
+          partToMerge.point,
         ),
       ),
     );
@@ -329,7 +329,10 @@ void _complexMergeInsertsInSameOperation({
 
   // adds the match part at the left if the insertion
   // need to be do it at the right part
-  if (isRight) {
+  //
+  // we need to check that we are not at the start index
+  // to avoid create duplicate content parts
+  if (isRight && !isStart) {
     dividedOps.add(
       op.clone(ofData.substring(
         partToMerge.startOffset,
@@ -344,7 +347,9 @@ void _complexMergeInsertsInSameOperation({
   } else if (isOperation) {
     dividedOps.add(insertion);
   }
-  if (!isRight) {
+  // we need to check that we are not at the start index
+  // to avoid create duplicate content parts
+  if (!isRight && !isStart) {
     dividedOps.add(
       op.clone(ofData.substring(
         partToMerge.startOffset,
