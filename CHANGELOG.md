@@ -1,12 +1,19 @@
-## Unreleased
+# Changelog
 
-### Added
+All notable changes to this project will be documented in this file.
 
-* `replaceAllMapped` to allow create operations dynamically based on the matched `Operation` [#3](https://github.com/CatHood0/dart-quill-delta-simplify/pull/3).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Fixed 
+> [!NOTE]
+> The [previous `CHANGELOG.md`](https://github.com/singerdmx/flutter-quill/blob/master/doc/OLD_CHANGELOG.md) has been archived.
 
-* bad behavior of `insert()` method [#2](https://github.com/CatHood0/dart-quill-delta-simplify/pull/2).
+## [Unreleased]
+
+## [10.8.8]
+
+* Feat: `replaceAllMapped` to allow create operations dynamically based on the matched `Operation` [#3](https://github.com/CatHood0/dart-quill-delta-simplify/pull/3).
+* Fix: bad behavior of `insert()` method [#2](https://github.com/CatHood0/dart-quill-delta-simplify/pull/2).
 
 ## 10.8.7
 
