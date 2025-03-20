@@ -14,16 +14,10 @@ QueryDelta insert({
   required Object? target,
   // An optional parameter indicating the exact offset where 
   // the insertion should start. 
-  //
-  // If it's provided, overrides target and related parameters
   int? startPoint,  
   // A boolean indicating whether to insert to the left or right of the target. 
-  //
-  // It's ignored if startPoint is provided
   bool left = false,
   // A boolean specifying if the insertion should happen only once. 
-  //
-  // It's ignored if startPoint is provided
   bool onlyOnce = false,
   // A boolean indicating whether the inserted object should be part of its own 
   // Operation or merged with the matched target
@@ -34,12 +28,6 @@ QueryDelta insert({
   bool caseSensitive = false,
 }) 
 ```
-
-## Notes
-
-* Providing both `startPoint` and `target` will prioritize `startPoint`, ignoring `target`, `left`, and `onlyOnce`.
-
-* `insert` accepts various types of objects, and each type's behavior is governed by the logic defined in the method and conditions applied during the `build()` phase into `InsertCondition` class.
 
 ## Usage Examples
 
@@ -85,6 +73,7 @@ final BuildResult result = QueryDelta(delta: delta)
     .insert(
         insert: operation, 
         insertAtLastOperation: true, 
+        startPoint: null,
         target: null,
     )
     .build();
