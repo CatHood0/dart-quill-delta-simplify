@@ -189,6 +189,47 @@ void main() {
         ..build();
       expect(query.toDelta(), expected);
     });
+
+    test('should replace markdown image with a valid embed operation', () {
+      final image = {
+        'image': 'https:'
+            '//encrypted-tbn0.gstatic.com'
+            '/images?q=tbn:'
+            'ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s',
+      };
+      delta.insert('![](https:'
+          '//encrypted-tbn0.gstatic.com'
+          '/images?q=tbn:'
+          'ANd9GcT_G1EXGbaNjBcx_u14jkW7NCQmJibMOr-EwQ&s)'
+          '\n');
+      final RegExp pattern = RegExp(r'!\[\]\((.+?)\)');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta\n')
+        ..insert(image)
+        ..insert('\n');
+      final QueryDelta query = QueryDelta(delta: delta)
+        ..replaceAllMapped(
+          replaceBuilder: (
+            String data,
+            Map<String, dynamic>? currentOperationAttributes,
+            DeltaRange currentRange,
+            DeltaRange matchRange,
+          ) {
+            if (pattern.hasMatch(data)) {
+              final rMatch = pattern.firstMatch(data)!;
+              final String image = rMatch.group(1)!;
+              return <Operation>[
+                Operation.insert(<String, dynamic>{'image': image})
+              ];
+            }
+            return <Operation>[];
+          },
+          target: pattern.pattern,
+          caseSensitive: false,
+        )
+        ..build();
+      expect(query.toDelta(), expected);
+    });
   });
   // format
   group('format', () {

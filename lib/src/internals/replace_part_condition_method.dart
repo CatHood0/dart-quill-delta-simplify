@@ -35,6 +35,7 @@ List<Operation> replaceCondition(
   final bool isListOperation = replace is Iterable<Operation>;
   final bool isOperation = replace is Operation;
   final bool isEmbed = replace is Map && !isOperation && !isListOperation;
+  final bool isOperationBuilder = replace is OperationBuilder;
   for (int index = 0; index < operations.length; index++) {
     final Operation op = operations.elementAt(index);
     final Object? data = op.data;
@@ -143,15 +144,26 @@ List<Operation> replaceCondition(
           final String rightPart = data is! String
               ? ''
               : data.substring(endOffset > opLength ? opLength : endOffset);
-          final Operation mainOp = Operation.insert(
-            '$leftPart$replace$rightPart',
-            data is Map ? null : op.attributes,
-          );
-          if (mainOp.ignoreIfEmpty) {
+          final Iterable<Operation> mainOp = isOperationBuilder
+              ? replace(
+                  data.toString().substring(startOffset, endOffset),
+                  op.attributes,
+                  DeltaRange(
+                      startOffset: globalOffset,
+                      endOffset: globalOffset + opLength),
+                  DeltaRange(startOffset: startOffset, endOffset: endOffset),
+                )
+              : <Operation>[
+                  Operation.insert(
+                    '$leftPart$replace$rightPart',
+                    data is Map ? null : op.attributes,
+                  )
+                ];
+          if (mainOp.isEmpty) {
             globalOffset += opLength;
             continue;
           }
-          modifiedOps.add(mainOp);
+          modifiedOps.addAll(mainOp);
         }
       }
       addRestOfOps = true;
@@ -167,7 +179,7 @@ List<Operation> replaceCondition(
           globalOffset += opLength;
           continue;
         }
-        Object? mainOp = null;
+        Object? mainOp;
         if (isEmbed || replace is String) {
           mainOp = op.clone(replace, null, false, isEmbed);
           modifiedOps.add(mainOp as Operation);
@@ -177,6 +189,12 @@ List<Operation> replaceCondition(
         } else if (isListOperation) {
           mainOp = replace;
           modifiedOps.addAll(mainOp as Iterable<Operation>);
+        } else if (isOperationBuilder) {
+          assert(() {
+            print(
+                'Couldn\'t be added the replace data, since, the matched part is a Map and the replace is a Function');
+            return true;
+          }(), '');
         }
         if (condition.onlyOnce) addRestOfOps = true;
         globalOffset += opLength;
@@ -206,8 +224,8 @@ List<Operation> replaceCondition(
         globalOffset += opLength;
         continue;
       }
-      StringBuffer buffer = StringBuffer();
-      List<Operation> dividedOps = <Operation>[];
+      final StringBuffer buffer = StringBuffer();
+      final List<Operation> dividedOps = <Operation>[];
 
       for (int i = 0; i < deltaPartsToMerge.length; i++) {
         final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
@@ -240,8 +258,20 @@ List<Operation> replaceCondition(
             dividedOps.add(Operation.insert(replace));
           } else if (isListOperation) {
             dividedOps.addAll(replace);
-          } else {
-            dividedOps.add(replace as Operation);
+          } else if (isOperation) {
+            dividedOps.add(replace);
+          } else if (isOperationBuilder) {
+            final Iterable<Operation> opBuilded = replace(
+              data.substring(partToMerge.startOffset, partToMerge.endOffset),
+              op.clone(null).attributes,
+              DeltaRange(
+                  startOffset: globalOffset,
+                  endOffset: globalOffset + opLength),
+              partToMerge,
+            );
+            if (opBuilded.isNotEmpty) {
+              dividedOps.addAll(opBuilded);
+            }
           }
           dividedOps.add(
             Operation.insert(
@@ -257,12 +287,28 @@ List<Operation> replaceCondition(
             dividedOps.add(Operation.insert(replace));
           } else if (isListOperation) {
             dividedOps.addAll(replace);
-          } else {
-            dividedOps.add(replace as Operation);
+          } else if (isOperation) {
+            dividedOps.add(replace);
+          } else if (isOperationBuilder) {
+            final Iterable<Operation> opBuilded = replace(
+              data.substring(partToMerge.startOffset, partToMerge.endOffset),
+              op.clone(null).attributes,
+              DeltaRange(
+                  startOffset: globalOffset,
+                  endOffset: globalOffset + opLength),
+              partToMerge,
+            );
+            if (opBuilded.isNotEmpty) {
+              dividedOps.addAll(opBuilded);
+            }
           }
           dividedOps.add(
-            op.clone(data.substring(
-                partToMerge.endOffset, nextPartToMerge?.startOffset)),
+            op.clone(
+              data.substring(
+                partToMerge.endOffset,
+                nextPartToMerge?.startOffset,
+              ),
+            ),
           );
         }
         //end of match loop

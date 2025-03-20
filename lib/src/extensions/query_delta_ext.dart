@@ -5,6 +5,7 @@ import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/string_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/check_op_attrs.dart';
 import 'package:dart_quill_delta_simplify/src/util/delta/denormalizer_ext.dart';
+import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
 import '../util/collections.dart';
 import '../util/op_offset_to_char_offset.dart';
 
@@ -607,12 +608,34 @@ extension EssentialsQueryExt on QueryDelta {
       throw Exception(
           'target and range are null or invalid to use. Them cannot be null');
     }
+    assert(replace is! Function, 'replace cannot be a function');
     return push(
       ReplaceCondition(
         target: target,
         replace: replace,
         range: range,
         onlyOnce: range != null ? true : onlyOnce,
+        caseSensitive: caseSensitive,
+      ),
+    );
+  }
+
+  /// Replaces a portion of text with a callback that return a dynamic operations based
+  /// on the values passed during build (similar to `replaceAllMapped` of String class).
+  QueryDelta replaceAllMapped({
+    required OperationBuilder replaceBuilder,
+    required String target,
+    bool caseSensitive = false,
+  }) {
+    if (target.isEmpty) {
+      throw Exception('target cannot be empty');
+    }
+    return push(
+      ReplaceCondition(
+        target: target,
+        replace: replaceBuilder,
+        range: null,
+        onlyOnce: false,
         caseSensitive: caseSensitive,
       ),
     );

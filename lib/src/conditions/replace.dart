@@ -39,7 +39,8 @@ class ReplaceCondition extends Condition<List<Operation>> {
             replace is Operation ||
                 replace is Iterable<Operation> ||
                 replace is String ||
-                replace is Map,
+                replace is Map ||
+                replace is OperationBuilder,
             'replace of type ${replace.runtimeType}, only can be String or Map');
 
   @override

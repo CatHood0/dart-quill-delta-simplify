@@ -1,5 +1,9 @@
 ## Unreleased
 
+### Added
+
+* `replaceAllMapped` to allow create operations dynamically based on the matched `Operation` [#3](https://github.com/CatHood0/dart-quill-delta-simplify/pull/3).
+
 ### Fixed 
 
 * bad behavior of `insert()` method [#2](https://github.com/CatHood0/dart-quill-delta-simplify/pull/2).
