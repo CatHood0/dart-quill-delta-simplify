@@ -5,7 +5,7 @@
 * When `startPoint` is passed on `insert()` method of `QueryDelta`, `left` value passed is ignored.
 * When set `target` param in `insert()` method of `QueryDelta`, sometimes the target is replaced unexpectedly.
 * When set `startPoint` is passed, sometimes is ignored and will jump to the part that we want to change.
-* wrong behavior and unexpected `Delta` results after `build()` when using complex inserts.
+* Wrong behavior and unexpected `Delta` results after `build()` when using complex inserts.
 
 ## 10.8.7
 
