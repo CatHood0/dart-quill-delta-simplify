@@ -1,3 +1,5 @@
+import 'package:dart_quill_delta_simplify/src/extensions/num_ext.dart';
+
 /// Represents a range of character positions within a [Delta] operation.
 ///
 /// This class defines a range using global offsets and provides
@@ -21,6 +23,10 @@ class DeltaRange {
           'endOffset must be equal to or greater than startOffset',
         );
 
+  const DeltaRange.zero()
+      : startOffset = 0,
+        endOffset = 0;
+
   /// Creates a `DeltaRange` with only a starting offset, setting the end offset to `-1`.
   ///
   /// This is useful when the end of the range is not yet defined.
@@ -29,6 +35,15 @@ class DeltaRange {
   }) {
     return DeltaRange(startOffset: startOffset, endOffset: -1);
   }
+
+  /// Return the exact point where ends this DeltaRange
+  int get point => endOffset.nonNegativeInt == 0 ? startOffset : endOffset;
+
+  /// Return the exact point based on the direction passed
+  ///
+  /// If left is true, return startOffset
+  /// If left is false, return endOffset
+  int pointByDirection(bool left) => left ? startOffset : endOffset;
 
   /// Creates a `DeltaRange` from given start and end offsets, or returns `null`
   /// if the inputs are invalid.

@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed 
+
+* bad behavior of `insert()` method [#2](https://github.com/CatHood0/dart-quill-delta-simplify/pull/2).
+
 ## 10.8.7
 
 * Fix: removed `flutter_quill` dependency for conflicts with major versions.

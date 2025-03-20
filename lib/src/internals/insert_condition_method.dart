@@ -4,7 +4,6 @@ import 'package:dart_quill_delta_simplify/src/extensions/list_ext.dart';
 import 'package:dart_quill_delta_simplify/src/extensions/operation_ext.dart';
 import 'package:dart_quill_delta_simplify/src/util/typedef.dart';
 import 'package:meta/meta.dart';
-
 import '../util/collections.dart';
 
 @internal
@@ -18,17 +17,21 @@ List<Operation> insertCondition(
   final List<Operation> modifiedOps = <Operation>[];
   final Object insertion = condition.insertion;
   final Object? target = condition.target;
+  final bool shouldAddRangeToIgnorePart =
+      range != null && target != null && range.point > 0;
   final bool isEmbed = insertion is Map;
   final bool isOperation = insertion is Operation && insertion.isInsert;
   final bool isListOperation = insertion is List<Operation>;
+  if (shouldAddRangeToIgnorePart) {
+    partsToIgnore.add(DeltaRange(startOffset: 0, endOffset: range.point));
+  }
   if (insertion is Operation && !insertion.isInsert) return operations;
-  final RegExp? pattern = range != null ||
-          target == null ||
+  final RegExp? pattern = target == null ||
           (target is String && target.isEmpty) ||
-          target is Map<String, dynamic>
+          target is! String
       ? null
       : RegExp(
-          target as String,
+          target,
           caseSensitive: condition.caseSensitive,
         );
   int globalOffset = 0;
@@ -43,6 +46,9 @@ List<Operation> insertCondition(
       isOperation: isOperation,
       isListOperation: isListOperation,
     );
+    if (shouldAddRangeToIgnorePart) {
+      partsToIgnore.removeLast();
+    }
     return modifiedOps.isEmpty ? operations : modifiedOps;
   }
   // main loop
@@ -76,8 +82,8 @@ List<Operation> insertCondition(
         continue;
       }
     }
-    // range
-    if (range != null) {
+    // the range works as expected only when target is null
+    if (range != null && target == null) {
       final int nextGlocalOffset = globalOffset + (opLength);
       final int startOffset = range.startOffset - globalOffset;
       if (nextGlocalOffset > range.startOffset && !onlyAddRest) {
@@ -204,83 +210,79 @@ List<Operation> insertCondition(
         for (RegExpMatch match in matches) {
           final int startOffset = match.start;
           final int endOffset = match.end;
-          // avoid make a change in a part that need to be ignored
-          if (partsToIgnore.ignoreOverlap(DeltaRange(
-              startOffset: startOffset + globalOffset,
-              endOffset: endOffset + globalOffset))) {
-            continue;
-          }
           // ensure to take a correct start offset for insertions when the insertion will be
           // do it at the right of the word
-          final int effectiveOffsetToWord =
-              condition.left ? startOffset : endOffset;
-          deltaPartsToMerge.add(DeltaRange(
-              startOffset: effectiveOffsetToWord, endOffset: endOffset));
+          deltaPartsToMerge.add(
+            DeltaRange(
+              startOffset: startOffset,
+              endOffset: endOffset,
+            ),
+          );
         }
         if (deltaPartsToMerge.isEmpty) {
           modifiedOps.add(op);
           globalOffset += opLength;
           continue;
         }
-        StringBuffer buffer = StringBuffer();
-        List<Operation> dividedOps = <Operation>[];
+        final StringBuffer buffer = StringBuffer();
+        final List<Operation> dividedOps = <Operation>[];
+        final bool isRight = !condition.left;
 
         for (int i = 0; i < deltaPartsToMerge.length; i++) {
           final DeltaRange partToMerge = deltaPartsToMerge.elementAt(i);
           final DeltaRange? nextPartToMerge =
               deltaPartsToMerge.elementAtOrNull(i + 1);
+          final bool shouldIgnorePart = partsToIgnore.ignoreOverlap(
+            DeltaRange(
+                startOffset: partToMerge.startOffset + globalOffset,
+                endOffset: partToMerge.point + globalOffset),
+          );
           if (insertion is String) {
-            if (i == 0) {
+            if (shouldIgnorePart) {
               buffer
-                ..write(ofData.substring(0, partToMerge.startOffset))
+                ..write(
+                    ofData.substring(0, partToMerge.pointByDirection(!isRight)))
                 ..write(insertion)
                 ..write(
                   ofData.substring(
-                    partToMerge.endOffset,
-                    nextPartToMerge?.startOffset,
+                    partToMerge.pointByDirection(!isRight),
+                    nextPartToMerge?.startOffset ?? partToMerge.endOffset,
                   ),
                 );
-            } else {
-              buffer
-                ..write(insertion)
-                ..write(
-                  ofData.substring(
-                    partToMerge.endOffset,
-                    nextPartToMerge?.startOffset,
-                  ),
-                );
+              continue;
             }
-          } else if (i == 0) {
-            dividedOps
-                .add(op.clone(ofData.substring(0, partToMerge.startOffset)));
-            if (isEmbed) {
-              dividedOps.add(Operation.insert(insertion));
-            } else if (isListOperation) {
-              dividedOps.addAll(insertion);
-            } else {
-              dividedOps.add(insertion as Operation);
-            }
-            dividedOps.add(
-              op.clone(ofData.substring(
-                partToMerge.endOffset,
-                nextPartToMerge?.startOffset,
-              )),
+            _mergeInsertsStringsAtSameOperation(
+              buffer: buffer,
+              insertion: insertion,
+              ofData: ofData,
+              partToMerge: partToMerge,
+              nextPartToMerge: nextPartToMerge,
+              condition: condition,
+              index: index,
             );
-          } else {
-            if (isEmbed) {
-              dividedOps.add(Operation.insert(insertion));
-            } else if (isListOperation) {
-              dividedOps.addAll(insertion);
-            } else {
-              dividedOps.add(insertion as Operation);
-            }
+            continue;
+          }
+          if (shouldIgnorePart) {
             dividedOps.add(
               op.clone(
                 ofData.substring(
-                    partToMerge.endOffset, nextPartToMerge?.startOffset),
+                  0,
+                  nextPartToMerge?.startOffset ?? partToMerge.endOffset,
+                ),
               ),
             );
+            continue;
           }
+          _complexMergeInsertsInSameOperation(
+            dividedOps: dividedOps,
+            op: op,
+            ofData: ofData,
+            condition: condition,
+            partToMerge: partToMerge,
+            nextPartToMerge: nextPartToMerge,
+            insertion: insertion,
+            isStart: i == 0,
+          );
         }
         if (buffer.isNotEmpty) modifiedOps.add(op.clone('$buffer'));
         modifiedOps.addAll(dividedOps);
@@ -293,8 +295,107 @@ List<Operation> insertCondition(
     modifiedOps.add(op);
     continue;
   }
+  if (shouldAddRangeToIgnorePart) {
+    partsToIgnore.removeLast();
+  }
   if (modifiedOps.isEmpty) return operations;
   return modifiedOps;
+}
+
+void _complexMergeInsertsInSameOperation({
+  required List<Operation> dividedOps,
+  required Operation op,
+  required String ofData,
+  required InsertCondition condition,
+  required DeltaRange partToMerge,
+  required DeltaRange? nextPartToMerge,
+  required Object insertion,
+  required bool isStart,
+}) {
+  final bool isEmbed = insertion is Map;
+  final bool isOperation = insertion is Operation && insertion.isInsert;
+  final bool isListOperation = insertion is List<Operation>;
+  final bool isRight = !condition.left;
+  if (isStart) {
+    dividedOps.add(
+      op.clone(
+        ofData.substring(
+          0,
+          partToMerge.point,
+        ),
+      ),
+    );
+  }
+
+  // adds the match part at the left if the insertion
+  // need to be do it at the right part
+  //
+  // we need to check that we are not at the start index
+  // to avoid create duplicate content parts
+  if (isRight && !isStart) {
+    dividedOps.add(
+      op.clone(ofData.substring(
+        partToMerge.startOffset,
+        partToMerge.endOffset,
+      )),
+    );
+  }
+  if (isEmbed) {
+    dividedOps.add(Operation.insert(insertion));
+  } else if (isListOperation) {
+    dividedOps.addAll(insertion);
+  } else if (isOperation) {
+    dividedOps.add(insertion);
+  }
+  // we need to check that we are not at the start index
+  // to avoid create duplicate content parts
+  if (!isRight && !isStart) {
+    dividedOps.add(
+      op.clone(ofData.substring(
+        partToMerge.startOffset,
+        partToMerge.endOffset,
+      )),
+    );
+  }
+  dividedOps.add(
+    op.clone(
+      ofData.substring(
+        partToMerge.endOffset,
+        nextPartToMerge?.startOffset,
+      ),
+    ),
+  );
+}
+
+void _mergeInsertsStringsAtSameOperation({
+  required StringBuffer buffer,
+  required Object insertion,
+  required String ofData,
+  required DeltaRange partToMerge,
+  required DeltaRange? nextPartToMerge,
+  required InsertCondition condition,
+  required int index,
+}) {
+  if (index == 0) {
+    buffer
+      ..write(ofData.substring(0, partToMerge.pointByDirection(condition.left)))
+      ..write(insertion)
+      ..write(
+        ofData.substring(
+          partToMerge.pointByDirection(condition.left),
+          nextPartToMerge?.endOffset,
+        ),
+      );
+  } else {
+    buffer
+      ..write(insertion)
+      ..write(
+        ofData.substring(
+          partToMerge.endOffset,
+          nextPartToMerge?.endOffset,
+        ),
+      );
+  }
 }
 
 void _insertAtLast({

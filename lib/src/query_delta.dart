@@ -120,8 +120,9 @@ class QueryDelta {
       final bool wasUsedAlready = params.usedConditions.contains(condition.key);
       if (preventReuseConditions && wasUsedAlready) continue;
       if (condition is IgnoreCondition) {
-        if (!wasUsedAlready && !maintainIgnoresConditions)
+        if (!wasUsedAlready && !maintainIgnoresConditions) {
           params.usedConditions.add(condition.key);
+        }
         final len = condition.len ?? -1;
         partsToIgnore.add(
           DeltaRange(
@@ -132,7 +133,9 @@ class QueryDelta {
         continue;
       }
       if (condition is ReplaceCondition &&
-          partsToIgnore.ignoreOverlap(condition.range)) continue;
+          partsToIgnore.ignoreOverlap(condition.range)) {
+        continue;
+      }
       final Object? result =
           condition.build(inputClone, partsToIgnore, onCatch);
       if (!wasUsedAlready) params.usedConditions.add(condition.key);

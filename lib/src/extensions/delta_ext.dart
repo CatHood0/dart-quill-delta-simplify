@@ -207,7 +207,7 @@ extension EasyDelta on Delta {
           caseSensitive: caseSensitive,
           target: insertAtLastOperation ? null : target,
           left: left,
-          onlyOnce: startPoint != null ? true : onlyOnce,
+          onlyOnce: onlyOnce,
           asDifferentOp: asDifferentOp,
           insertAtLastOperation:
               target == null && (startPoint == null || startPoint < 0)
