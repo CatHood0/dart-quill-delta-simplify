@@ -358,7 +358,7 @@ void main() {
         ..ignorePart(0, len: 50)
         ..insert(
           insert: 'Non ',
-          target: 0,
+          target: null,
           startPoint: 59,
           left: true,
         )
@@ -371,7 +371,7 @@ void main() {
         ..ignorePart(60, len: 20)
         ..insert(
           insert: 's',
-          target: 0,
+          target: null,
           startPoint: 74,
           left: true,
         )
@@ -730,15 +730,48 @@ void main() {
   // using delta only
   group('delta_ext', () {
     test('insert', () {
+      delta
+        ..insert('But, using this experimental test.\n')
+        ..insert('We can test if the experimental changes works as expected\n');
       final Delta expected = Delta()
-        ..insert('Experimental version Delta changed\n');
+        ..insert('Experimental Delta version Delta\n')
+        ..insert('But, using this experimental Delta test.\n')
+        ..insert(
+            'We can test if the experimental Delta changes works as expected\n');
       delta.simpleInsert(
-          insert: ' changed',
-          target: 'Delta',
-          caseSensitive: true,
-          startPoint: null);
+        insert: ' Delta',
+        target: 'Experimental',
+        startPoint: null,
+        left: false,
+        onlyOnce: false,
+      );
       expect(delta, expected);
     });
+
+    test('complex insert', () {
+      delta
+        ..insert('But, using this experimental Delta test.\n')
+        ..insert(
+            'We can test if the experimental Delta changes works as expected\n');
+      final Delta expected = Delta()
+        ..insert('Experimental version Delta')
+        ..insert({'img': 'my/image/path/to/file.png'})
+        ..insert('\nBut, using this experimental Delta')
+        ..insert({'img': 'my/image/path/to/file.png'})
+        ..insert(' test.\n')
+        ..insert('We can test if the experimental Delta')
+        ..insert({'img': 'my/image/path/to/file.png'})
+        ..insert(' changes works as expected\n');
+      delta.simpleInsert(
+        insert: {'img': 'my/image/path/to/file.png'},
+        target: 'Delta',
+        startPoint: null,
+        left: false,
+        onlyOnce: false,
+      );
+      expect(delta, expected);
+    });
+
     test('delete', () {
       final Delta expected = Delta()..insert('Experimental version \n');
       delta.simpleDelete(

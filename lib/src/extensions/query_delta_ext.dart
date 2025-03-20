@@ -510,10 +510,6 @@ extension EssentialsQueryExt on QueryDelta {
   ///   * [Map<String, dynamic>]
   ///   * [String]
   ///
-  /// # Note
-  /// if [startPoint] is not null, then the object will be inserted at that point
-  /// and [possibleTarget], [left], and [onlyOnce] params will be ignored
-  ///
   /// You can see examples [here](https://github.com/FlutterQuill/dart-quill-delta-simplify/blob/master/documentation/insert.md#usage-examples)
   QueryDelta insert({
     required Object insert,
@@ -529,17 +525,15 @@ extension EssentialsQueryExt on QueryDelta {
     if (target == null && startPoint == null) offset = 0;
     return push(
       InsertCondition(
-        target: offset != null ? null : target,
+        target: target,
         insertion:
             asDifferentOp || insert is Map ? insert.toOperation() : insert,
         range: insertAtLastOperation || offset == null
             ? null
             : DeltaRange.onlyStartPoint(startOffset: offset),
-        left: startPoint != null ? true : left,
-        onlyOnce: startPoint != null ? true : onlyOnce,
-        insertAtLastOperation: startPoint != null || target != null
-            ? false
-            : insertAtLastOperation,
+        left: left,
+        onlyOnce: onlyOnce,
+        insertAtLastOperation: insertAtLastOperation,
         caseSensitive: caseSensitive,
       ),
     );
