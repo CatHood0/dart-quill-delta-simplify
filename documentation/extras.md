@@ -1,5 +1,24 @@
 # Another features of this package
 
+## Checking if exist a part of text or an Embed into the Delta
+
+```dart
+/// Only support: `Pattern`, `Map`
+Object toOperation({required Object target, int startIndex = 0, bool usePlainText = false}) {}
+```
+
+### Usage Example:
+  
+```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
+final Delta delta = Delta()
+  ..insert('This is my example delta\nUsing ')
+  ..insert('toPlain', {'code': true})
+  ..insert(' method, we can build a plain text without too much code\n');
+print(delta.contains(target: 'This')); // true
+```
+
 ## Converting any Object to a Operation 
 
 We can use `toOperation()` method to converts the current object into an `Operation` or a `List<Operation>` instances.

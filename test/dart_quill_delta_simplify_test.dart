@@ -16,6 +16,65 @@ void main() {
     );
   });
 
+  group('contains', () {
+    test('should contains simple characters part', () {
+      final QueryDelta query = QueryDelta(delta: delta);
+      expect(query.contains(target: 'Delta'), isTrue);
+    });
+
+    test('should contains pattern part', () {
+      final QueryDelta query = QueryDelta(delta: delta);
+      expect(
+        query.contains(target: RegExp(r'^Experimental', caseSensitive: true)),
+        isTrue,
+      );
+    });
+
+    test('should contains pattern part that is divided by operations', () {
+      delta = Delta()
+        ..insert('Exper', {'bold': true})
+        ..insert('imental\n');
+      final QueryDelta query = QueryDelta(delta: delta);
+      expect(
+        query.contains(
+            target: RegExp(r'^Experimental', caseSensitive: true),
+            usePlainText: true),
+        isTrue,
+      );
+    });
+
+    test('should not match by pattern part when found divided operations', () {
+      delta = Delta()
+        ..insert('Exper', {'bold': true})
+        ..insert('imental\n');
+      final QueryDelta query = QueryDelta(delta: delta);
+      expect(
+        query.contains(
+            target: RegExp(r'^Experimental', caseSensitive: true),
+            usePlainText: false),
+        isFalse,
+      );
+    });
+
+    test('should not contain part by wrong index', () {
+      final QueryDelta query = QueryDelta(delta: delta);
+      // will start the verificion here ("|" is the index position):
+      //
+      // "Experimental version Del|ta"
+      expect(query.contains(target: 'Delta', startIndex: 24), isFalse);
+    });
+
+    test('should throw RangeError by bad index', () {
+      expect(
+        () =>
+            QueryDelta(delta: delta).contains(target: 'Delta', startIndex: 700),
+        throwsA(
+          isA<RangeError>(),
+        ),
+      );
+    });
+  });
+
   // insert
   group('insert', () {
     test('should insert into defined range', () {
