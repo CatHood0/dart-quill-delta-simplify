@@ -13,9 +13,10 @@ Object toOperation({required Object target, int startIndex = 0, bool usePlainTex
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
 
 final Delta delta = Delta()
-  ..insert('This is my example delta\nUsing ')
-  ..insert('toPlain', {'code': true})
-  ..insert(' method, we can build a plain text without too much code\n');
+   ..insert('This is my example delta\nUsing ')
+   ..insert('contains', {'code': true})
+   ..insert(' method, we can check if exit a portion of text')
+   ..insert(' without too much code\n'));
 print(delta.contains(target: 'This')); // true
 ```
 
