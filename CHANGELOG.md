@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Added
+
+* Added `contains` method to check if a part of text or an embed exist [#4](https://github.com/CatHood0/dart-quill-delta-simplify/pull/3).
+
 ## 10.8.8
 
 * Feat: `replaceAllMapped` to allow create operations dynamically based on the matched `Operation` [#3](https://github.com/CatHood0/dart-quill-delta-simplify/pull/3).

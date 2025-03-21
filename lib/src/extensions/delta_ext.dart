@@ -10,6 +10,52 @@ extension DeltaToQuery on Delta {
   QueryDelta get toQuery => QueryDelta(delta: this);
 }
 
+extension CheckDeltaData on Delta {
+  /// Whether this string contains a match of [other]
+  /// (very similar to contains method from String class).
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// const delta = Delta()..insert('Dart strings\n');
+  /// final containsD = .contains('D'); // true
+  /// final containsUpperCase = delta.contains(RegExp(r'[A-Z]')); // true
+  /// ```
+  ///
+  /// If [usePlainText] is provided, this method will transform the delta to
+  /// plain text, and will make a general match (useful when a text parts can be
+  /// divided in different operations)
+  ///
+  /// ```dart
+  /// const delta = Delta()
+  ///     ..insert('Dart', {'bold': true})
+  ///     ..insert(' strings\n');
+  /// final containsD = delta.contains(RegExp('^Dart strings'), usePlainText: true); // true
+  /// ```
+  ///
+  /// If [startIndex] is provided, this method matches only at or after that
+  /// index:
+  ///
+  /// ```dart
+  /// const delta = Delta()..insert('Dart strings\n');
+  /// final containsD = delta.contains(RegExp('D'), startIndex: 0); // true
+  /// final caseSensitive = delta.contains(RegExp(r'[A-Z]'), startIndex: 1); // false
+  /// ```
+  ///
+  /// The [startIndex] must not be negative or greater than [length].
+  bool contains({
+    required Object target,
+    int startIndex = 0,
+    bool usePlainText = false,
+  }) {
+    return toQuery.contains(
+      target: target,
+      startIndex: startIndex,
+      usePlainText: usePlainText,
+    );
+  }
+}
+
 /// Provides an extension on [Delta] to compare differences with another [Delta].
 extension DeltaDiff on Delta {
   /// Compares the current [Delta] instance with another [Delta] to find differences.

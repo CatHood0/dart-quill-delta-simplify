@@ -642,6 +642,100 @@ extension EssentialsQueryExt on QueryDelta {
   }
 }
 
+extension CheckQDeltaData on QueryDelta {
+  /// Whether this string contains a match of [other]
+  /// (very similar to contains method from String class).
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// const delta = QueryDelta(delta: Delta()..insert('Dart strings\n'));
+  /// final containsD = .contains('D'); // true
+  /// final containsUpperCase = delta.contains(RegExp(r'[A-Z]')); // true
+  /// ```
+  ///
+  /// If [usePlainText] is provided, this method will transform the delta to
+  /// plain text, and will make a general match (useful when a text parts can be
+  /// divided in different operations)
+  ///
+  /// ```dart
+  /// const delta = QueryDelta(delta: Delta()..insert('Dart', {'bold': true})..insert(' strings\n'));
+  /// final containsD = delta.contains(RegExp('^Dart strings'), usePlainText: true); // true
+  /// ```
+  ///
+  /// If [startIndex] is provided, this method matches only at or after that
+  /// index:
+  ///
+  /// ```dart
+  /// const delta = QueryDelta(delta: Delta()..insert('Dart strings\n'));
+  /// final containsD = delta.contains(RegExp('D'), startIndex: 0); // true
+  /// final caseSensitive = delta.contains(RegExp(r'[A-Z]'), startIndex: 1); // false
+  /// ```
+  ///
+  /// The [startIndex] must not be negative or greater than [length].
+  bool contains({
+    required Object target,
+    int startIndex = 0,
+    bool usePlainText = false,
+  }) {
+    assert(
+      target is Map || target is Pattern,
+      'the target types supported '
+      'are only: [String, RegExp and Map]',
+    );
+    int globalOffset = 0;
+    if (target is Map) {
+      for (final op in getDelta().operations) {
+        if (startIndex <= globalOffset) {
+          if (op.data == target) {
+            return true;
+          }
+        }
+        globalOffset += op.getEffectiveLength;
+        startIndex -= op.getEffectiveLength;
+      }
+    } else if (target is Pattern) {
+      final RegExp pattern =
+          target is String ? RegExp(target) : target as RegExp;
+      if (usePlainText) {
+        final String plainText = getDelta().toPlain();
+        return plainText.contains(pattern, startIndex);
+      }
+      for (final Operation op in getDelta().operations) {
+        final int opLength = op.getEffectiveLength;
+        // we don't need to check unnecessary non string operations
+        if (op.data is! String) {
+          globalOffset += opLength;
+          startIndex -= opLength;
+        } else if (startIndex > globalOffset &&
+            (startIndex - opLength <= globalOffset)) {
+          // if the [startIndex] if in some part of the operation
+          // we need to check after the index
+          final String right = '${op.data}'.substring(startIndex);
+          if (pattern.hasMatch(right)) {
+            return true;
+          }
+        } else if (startIndex <= globalOffset &&
+            pattern.hasMatch(op.data as String)) {
+          return true;
+        }
+        globalOffset += opLength;
+        startIndex -= opLength;
+      }
+    }
+    if (startIndex > 0) {
+      throw RangeError.index(
+        startIndex,
+        getDelta(),
+        'startIndex',
+        null,
+        getDelta().getTextLength,
+      );
+    }
+    return false;
+  }
+}
+
 extension DiffDelta on QueryDelta {
   /// Get the diff between the changes applied to the Delta
   /// and the original version passed before run the build method
