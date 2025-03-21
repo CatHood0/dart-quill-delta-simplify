@@ -6,13 +6,13 @@ This is a package designed to facilitate the manipulation of documents in the **
 
 Manipulating content in a `Delta` format can be complex, especially when dealing with advanced operations such as searching, modifying, or filtering text based on specific attributes or patterns. **Dart Quill Delta Simplify** addresses this complexity by providing a user-friendly and powerful API that allows developers to perform these operations with ease and precision.
 
-## 📚 Documentation
+## 📚 Quill Delta Documentation
 
-For detailed usage and API references, refer to the official [Dart Quill Delta](https://github.com/FlutterQuill/dart-quill-delta?tab=readme-ov-file#-dart-quill-delta) documentation.
+For detailed API usage information, refer to the official  [Dart Quill Delta](https://github.com/FlutterQuill/dart-quill-delta?tab=readme-ov-file#-dart-quill-delta) docs.
 
-### 📎 Resources
+## 📎 QueryDelta Documentation 
 
-For detailed usage of the `QueryDelta` API, you can see:
+For detailed usage and more complete examples of the API, you can see:
 
 [Insert.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/insert.md)
 [Replace.md](https://github.com/CatHood0/dart-quill-delta-simplify/blob/master/documentation/replace.md)
@@ -32,14 +32,6 @@ QueryDelta({
 })
 ```
 
-### 🔨 Pushing conditions 
-
-The `push` method is used to add a single `Condition` to the `QueryDelta`. Each condition added to the `QueryDelta` defines a rule or requirement for modifying the `Delta`. These conditions are applied in order, so the order in which you add them is important for the final result.
-
-```dart
-QueryDelta push(Condition condition);
-```
-
 ### 🛠️ Building the final Delta
 
 This is the key to finalizing the changes made to the `QueryDelta`. It applies all the conditions that were added to the query and generates the final `Delta`. This method is essential, as no modifications will be applied to the `Delta` until `build()` is run.
@@ -57,9 +49,38 @@ BuildResult build({
 });
 ```
 
+### 🔨 Pushing conditions 
+
+The `push` method is used to add a single `Condition` to the `QueryDelta`. Each condition added to the `QueryDelta` defines a rule or requirement for modifying the `Delta`. These conditions are applied in order, so the order in which you add them is important for the final result.
+
+```dart
+QueryDelta push(Condition condition);
+```
+
 ## 📖 Some examples (using regular operations)
 
-### 1. Inserting Text at a Specific Position
+### 1. Checking if exist a part of text or an Embed into the Delta
+
+```dart
+import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
+
+final QueryDelta query = QueryDelta(
+  delta: Delta()
+    ..insert('This is my example delta\nUsing ')
+    ..insert('contains', {'code': true})
+    ..insert(' method, we can check if exit a portion of text')
+    ..insert(' without too much code\n'));
+
+/* 
+* You can use too contains method with Delta class:
+* delta.contains(target: ' This');
+*/
+
+print(query.contains(target: 'This')); // true
+print(query.contains(target: 'is  ')); // false 
+```
+
+### 2. Inserting Text at a Specific Position
 
 ```dart
 import 'package:quill_delta/quill_delta.dart';
@@ -79,7 +100,7 @@ void main() {
     .build();
 
   /* 
-  * You can use too:
+  * You can use too with Delta class:
   * delta.simpleInsert(
   *   insert: ' World',
   *   target: 'Hello',
@@ -91,7 +112,7 @@ void main() {
 }
 ```
 
-### 2. Replacing Text Based on a Condition
+### 3. Replacing Text Based on a Condition
 
 ```dart
 import 'package:quill_delta/quill_delta.dart';
@@ -123,7 +144,7 @@ void main() {
 }
 ```
 
-### 3. Formatting a Text Segment
+### 4. Formatting a Text Segment
 
 ```dart
 import 'package:dart_quill_delta_simplify/dart_quill_delta_simplify.dart';
@@ -144,7 +165,7 @@ void main() {
     .build();
 
   /*
-  * You can use too:
+  * You can use too with Delta class:
   * delta.simpleFormat(
   *  attribute: Attribute.italic,
   *  offset: 6,
@@ -157,7 +178,7 @@ void main() {
 }
 ```
 
-### 4. Deleting a Specific Text Segment
+### 5. Deleting a Specific Text Segment
 
 ```dart
 import 'package:quill_delta/quill_delta.dart';
@@ -176,7 +197,7 @@ void main() {
       )
       .build();
   /*
-  * You can use too:
+  * You can use too with Delta class:
   * delta.simpleDelete(
   *  target: 'World',
   *  startPointOffset: 6,
@@ -188,7 +209,7 @@ void main() {
 }
 ```
 
-### 5. Ignoring a Part of the Delta
+### 6. Ignoring a Part of the Delta
 
 ```dart
 import 'package:quill_delta/quill_delta.dart';
@@ -212,7 +233,7 @@ void main() {
 }
 ```
 
-### 6. Search for Specific Text in a Delta
+### 7. Search for Specific Text in a Delta
 
 ```dart
 import 'package:quill_delta/quill_delta.dart';
@@ -237,7 +258,7 @@ void main() {
   *    null,
   *  );
   *
-  * You can use too:
+  * You can use too with Delta class:
   * final DeltaRangeResult? match2 = delta.firstMatch(
   *   RegExp('World'),
   *   null,
@@ -257,7 +278,7 @@ void main() {
 }
 ```
 
-### 7. Filter Segments of Text with a Specific Attribute
+### 8. Filter Segments of Text with a Specific Attribute
 
 ```dart
 import 'package:quill_delta/quill_delta.dart';
@@ -279,7 +300,7 @@ void main() {
   );
 
   /*
-  * You can use too:
+  * You can use too with Delta class:
   * final List<DeltaRangeResult> matches = delta.matchAttributes(
   *   inlineAttrs: {'bold': true},
   *   blockAttrs: null,
